@@ -219,8 +219,6 @@ async function fetchWorkers() {
       _isDeleted: false,
     }));
 
-    console.log('WORKERS: ' + JSON.stringify(workers.value));
-
     apiStatus.value = { isLoading: false, isSuccess: true, isError: false };
   } catch (error: unknown) {
     apiStatus.value = {
