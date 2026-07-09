@@ -1,6 +1,9 @@
 <template>
   <div class="card">
-    <div class="card-header" />
+    <div class="card-header">
+      <span class="card__icon">👥</span>
+      <h3>Workers</h3>
+    </div>
 
     <div class="card-body">
       <div class="workers-section">
@@ -236,5 +239,8 @@ onMounted(fetchWorkers);
 <style scoped lang="scss">
 .workers-section {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 </style>
