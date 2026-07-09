@@ -1,0 +1,454 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  color: #1f2937;
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+}
+
+//************************************************************************************************************** SCROLL
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+
+  &:hover {
+    background: #94a3b8;
+  }
+}
+
+//*************************************************************************************************************** CARDS
+
+.card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2px;
+  display: flex;
+}
+
+.card-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.card-body-description {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.card-tabs {
+  display: flex;
+  width: 100%;
+  background: 135deg;
+  border-radius: 8px 8px 0 0;
+  padding: 0px 0px 0;
+  box-shadow: 0 2px 0px rgba(0, 0, 0, 0.08);
+  margin-bottom: 0;
+  overflow-x: auto;
+
+  .card-tab-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    background: transparent;
+    color: #6b7280;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    border-bottom: 3px solid transparent;
+
+    &:hover:not(.active) {
+      background: #f3f4f6;
+      color: #6b7280;
+    }
+
+    &.active {
+      background: #667eea;
+      color: white;
+      border-bottom-color: transparent;
+    }
+  }
+}
+
+//**************************************************************************************************************** FORM
+
+.card-form {
+  padding: 10px 0px 0px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+  width: 100%;
+}
+
+.fields-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 0px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.field-label {
+  font-size: 14px;
+}
+
+.field-input {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1f2937;
+  outline: none;
+
+  &:focus {
+    border-color: #667eea;
+  }
+}
+
+.field-file-input {
+  display: none;
+}
+
+.file-btn {
+  display: inline-block;
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #374151;
+}
+
+.file-btn.selected {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  color: #374151;
+}
+
+.field-tip {
+  margin: 0;
+  font-size: 9px;
+  color: #9ca3af;
+  font-family: ui-monospace, monospace;
+}
+
+.field-error {
+  border-color: #ef4444 !important;
+  background-color: #fff5f5;
+}
+
+.field-error:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+.info-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.info-btn:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+//************************************************************************************************************* ACTIONS
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  margin-bottom: 10px;
+  justify-content: space-between;
+}
+
+.btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &:not(:disabled):hover {
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+
+  &:not(:disabled):active {
+    transform: scale(0.98);
+  }
+}
+
+.btn-outline {
+  background: white;
+  border: 1.5px solid #667eea;
+  color: #667eea;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+
+  &:hover {
+    background: #667eea;
+    color: white;
+  }
+}
+
+//************************************************************************************************************** TABLES
+
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th {
+    background: #f9fafb;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f3f4f6;
+    color: #4b5563;
+
+    &:nth-child(2) {
+      max-width: 240px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: #f9fafb;
+  }
+
+  tr.deleted {
+    opacity: 0.5;
+  }
+
+  tr.deleted input,
+  tr.deleted select {
+    text-decoration: line-through;
+  }
+
+  .negative {
+    color: #dc2626;
+    font-weight: 500;
+  }
+
+  .positive {
+    color: #16a34a;
+    font-weight: 500;
+  }
+
+  .required {
+    border-color: #ef4444 !important;
+    background-color: #fff5f5 !important;
+  }
+}
+
+.cell-select {
+  width: 100%;
+  min-width: 120px;
+  padding: 4px 6px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #374151;
+  background: white;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: #764ba2;
+    box-shadow: 0 0 0 2px rgba(118, 75, 162, 0.2);
+  }
+
+  &:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+    border-color: #e5e7eb;
+    cursor: not-allowed;
+  }
+}
+
+.cell-input {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #374151;
+  background: white;
+
+  &:focus {
+    outline: none;
+    border-color: #764ba2;
+    box-shadow: 0 0 0 2px rgba(118, 75, 162, 0.2);
+  }
+
+  &:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+    border-color: #e5e7eb;
+    cursor: not-allowed;
+  }
+}
+
+.col-action {
+  width: 32px;
+  padding: 4px 6px;
+}
+
+.col-action-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid #c4b5fd;
+  border-radius: 4px;
+  background: #f5f7ff;
+  color: #667eea;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+  }
+}
+
+//************************************************************************************************************** ALERTS
+
+.alert {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.alert-error {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.alert-success {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+//************************************************************************************************************ SPINNERS
+
+.spinner {
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

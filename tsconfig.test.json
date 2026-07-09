@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "lib": ["ESNext", "DOM"],
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "noImplicitAny": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "useDefineForClassFields": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "paths": {
+      "@pages/*": ["./tests/pages/*"],
+      "@fixtures": ["./tests/fixtures.ts"],
+      "@mocks/*": ["./tests/mocks/*"],
+      "@data-models/*": ["./tests/data-models/*"],
+      "@apis/*": ["./tests/apis/*"]
+    }
+  }
+}
