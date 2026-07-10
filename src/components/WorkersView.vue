@@ -31,7 +31,7 @@
                 <th></th>
               </tr>
             </thead>
-            <tbody>
+            <tbody ref="tableBody">
               <tr v-for="row in workers" :key="row._key" :class="{ deleted: row._isDeleted }">
                 <!-- NAME -->
                 <td>
@@ -155,9 +155,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed, nextTick } from 'vue';
 import api from '@/services/api';
-import { computed } from 'vue';
 import { Worker } from '@/types/worker';
 import { ApiResponseStatus } from '@/types/api-response-status';
 import { User, Pencil, Trash2, Check, Undo2, Plus } from 'lucide-vue-next';
@@ -166,6 +165,8 @@ import Toast from '@/composables/Toast.vue';
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
 const isEditing = computed(() => workers.value.some((row) => row._isNew || row._isEdited));
+
+const tableBody = ref<HTMLTableSectionElement | null>(null);
 
 function editWorker(row: WorkerRow) {
   row._isEdited = true;
@@ -222,7 +223,7 @@ function handleMoneyInput(event: Event, row: WorkerRow, field: keyof Pick<Worker
   input.value = value.toFixed(2);
 }
 
-function addWorker(): void {
+async function addWorker(): Promise<void> {
   workers.value.push({
     worker: {
       id: '',
@@ -237,6 +238,16 @@ function addWorker(): void {
     _isEdited: false,
     _isDeleted: false,
   });
+
+  await nextTick();
+
+  const lastRow = tableBody.value?.querySelector('tr:last-child');
+  lastRow?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'nearest',
+  });
+
+  (lastRow?.querySelector('input') as HTMLInputElement)?.focus();
 }
 
 async function saveWorker(row: WorkerRow): Promise<void> {

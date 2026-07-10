@@ -25,7 +25,7 @@
 .app {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
   background: var(--color-background);
   color: var(--color-text);
 }
@@ -58,11 +58,16 @@
 .main {
   flex: 1;
   padding: 32px 20px;
+  overflow: hidden;
+  min-height: 0;
 }
 
 .container {
   max-width: 2000px;
   margin: 0 auto;
+
+  height: 100%;
+  min-height: 0;
 }
 
 .footer {
