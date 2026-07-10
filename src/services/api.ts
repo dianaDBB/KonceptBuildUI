@@ -52,14 +52,10 @@ class KoncepBuildApiService {
     return response.data;
   }
 
-  async addWorkers(workers: Worker[]): Promise<void> {
-    for (let index = 0; index < workers.length; index++) {
-      const worker = workers[index];
-
-      await this.client.post('/worker/', worker, {
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      });
-    }
+  async addWorker(worker: Worker): Promise<void> {
+    await this.client.post('/worker/', worker, {
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    });
   }
 }
 

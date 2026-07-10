@@ -1,75 +1,76 @@
 <template>
   <div class="app">
-    <header class="app-header">
+    <header class="header">
       <div class="header-content">
         <h1>KonceptBuild</h1>
         <p>Building the future together</p>
       </div>
     </header>
 
-    <main class="app-main">
+    <main class="main">
       <div class="container">
-        <section v-if="activeView === 'home'" class="home-page">
-          <div class="section-heading">
-            <h2>Human Resources</h2>
-
-            <div class="menu-grid">
-              <button v-for="item in menuItems" :key="item.id" class="menu-card" @click="openSection(item.id)">
-                <div class="menu-card__header">
-                  <span class="menu-card__icon">{{ item.icon }}</span>
-                  <h3>{{ item.label }}</h3>
-                </div>
-
-                <p>{{ item.description }}</p>
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <section v-else class="content-page">
-          <div class="page-nav">
-            <button class="back-btn" @click="activeView = 'home'">⬅ Back to home</button>
-          </div>
-
-          <section v-if="activeView === 'workers'" class="tab-body">
-            <WorkersView />
-          </section>
-        </section>
+        <RouterView />
       </div>
     </main>
 
-    <footer class="app-footer">
+    <footer class="footer">
       <p>&copy; 2026 KonceptBuild</p>
     </footer>
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue';
-import WorkersView from '@/components/WorkersView.vue';
+<script setup lang="ts"></script>
 
-type View = 'home' | 'workers';
-
-const menuItems = [
-  {
-    id: 'workers' as const,
-    label: 'Workers',
-    description: 'Manage worker details, rates, and salary information.',
-    icon: '👥',
-  },
-  {
-    id: 'example' as const,
-    label: 'Example',
-    description: 'This is another menu.',
-    icon: '👥',
-  },
-];
-
-const activeView = ref<View>('home');
-
-function openSection(view: Exclude<View, 'home'>): void {
-  activeView.value = view;
+<style>
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--color-background);
+  color: var(--color-text);
 }
-</script>
 
-<style scoped lang="scss"></style>
+.header {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border-light);
+  padding: 28px 20px;
+  text-align: center;
+}
+
+.header-content {
+  max-width: 1600px;
+  margin: 0 auto;
+
+  h1 {
+    margin: 0 0 6px;
+    font-size: 50px;
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  p {
+    margin: 0;
+    font-size: 15px;
+    color: var(--color-text-muted);
+  }
+}
+
+.main {
+  flex: 1;
+  padding: 32px 20px;
+}
+
+.container {
+  max-width: 2000px;
+  margin: 0 auto;
+}
+
+.footer {
+  padding: 18px;
+  text-align: center;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border-light);
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+</style>

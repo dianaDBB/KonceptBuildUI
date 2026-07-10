@@ -1,14 +1,18 @@
 <template>
-  <div class="card">
-    <div class="card-header">
-      <span class="card__icon">👥</span>
-      <h3>Workers</h3>
+  <div class="main-section">
+    <div class="section-header">
+      <span><User :size="24" /></span>
+      <h3>Colaboradores</h3>
+
+      <div class="page-nav">
+        <RouterLink to="/" class="link">Página Inicial</RouterLink>
+      </div>
     </div>
 
-    <div class="card-body">
-      <div class="workers-section">
-        <div class="table-wrapper">
-          <table class="table">
+    <div class="section">
+      <div class="section-body">
+        <div class="table">
+          <table>
             <colgroup>
               <col style="width: 38%" />
               <col style="width: 15%" />
@@ -19,11 +23,11 @@
             </colgroup>
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Hour Cost</th>
-                <th>Mohtly Salary</th>
-                <th>Hour Rate</th>
+                <th>Nome</th>
+                <th>Tipo</th>
+                <th>Custo Hora</th>
+                <th>Salário Mensal</th>
+                <th>Rate Hora</th>
                 <th></th>
               </tr>
             </thead>
@@ -31,74 +35,105 @@
               <tr v-for="row in workers" :key="row._key" :class="{ deleted: row._isDeleted }">
                 <!-- NAME -->
                 <td>
-                  <input
-                    v-model="row.name"
-                    :disabled="row._isDeleted"
-                    type="text"
-                    class="cell-input"
-                    :class="{ required: !row.name }"
-                    @change="row._isEdited = true"
-                  />
+                  <template v-if="rowHasChanges(row)">
+                    <input
+                      v-model="row.worker.name"
+                      type="text"
+                      :class="{ required: !row.worker.name }"
+                      @change="row._isEdited = true"
+                    />
+                  </template>
+                  <template v-else>
+                    {{ row.worker.name }}
+                  </template>
                 </td>
 
                 <!-- WORKER TYPE -->
                 <td>
-                  <select
-                    v-model="row.workerType"
-                    :disabled="row._isDeleted"
-                    class="cell-select"
-                    :class="{ required: !row.workerType }"
-                    @change="row._isEdited = true"
-                  >
-                    <option v-for="type in ['CONTRACTOR', 'INTERNAL']" :key="type" :value="type">
-                      {{ type }}
-                    </option>
-                  </select>
+                  <template v-if="rowHasChanges(row)">
+                    <select
+                      v-model="row.worker.workerType"
+                      :class="{ required: !row.worker.workerType }"
+                      @change="row._isEdited = true"
+                    >
+                      <option v-for="type in ['CONTRACTOR', 'INTERNAL']" :key="type" :value="type">
+                        {{ type }}
+                      </option>
+                    </select>
+                  </template>
+                  <template v-else>
+                    {{ row.worker.workerType }}
+                  </template>
                 </td>
 
                 <!-- HOUR COST -->
                 <td>
-                  <input
-                    :value="row.hourCost?.toFixed(2)"
-                    :disabled="true"
-                    type="text"
-                    inputmode="decimal"
-                    class="cell-input"
-                    :class="{ required: false }"
-                  />
+                  <template v-if="rowHasChanges(row)">
+                    <input
+                      :value="row.worker.hourCost?.toFixed(2)"
+                      :disabled="true"
+                      type="text"
+                      inputmode="decimal"
+                      :class="{ required: false }"
+                    />
+                  </template>
+                  <template v-else> {{ row.worker.hourCost?.toFixed(2) }} € </template>
                 </td>
 
                 <!-- MONTLHY SALARY -->
                 <td>
-                  <input
-                    :value="row.monthlySalary?.toFixed(2)"
-                    :disabled="row._isDeleted || row.workerType?.trim() == '' || row.workerType == 'CONTRACTOR'"
-                    type="text"
-                    inputmode="decimal"
-                    class="cell-input"
-                    :class="{ required: row.workerType == 'INTERNAL' && !row.monthlySalary }"
-                    @input="handleMoneyInput($event, row, 'monthlySalary')"
-                    @change="row._isEdited = true"
-                  />
+                  <template v-if="rowHasChanges(row)">
+                    <input
+                      :value="row.worker.monthlySalary?.toFixed(2)"
+                      :disabled="row.worker.workerType?.trim() == '' || row.worker.workerType == 'CONTRACTOR'"
+                      type="text"
+                      inputmode="decimal"
+                      :class="{ required: row.worker.workerType == 'INTERNAL' && !row.worker.monthlySalary }"
+                      @input="handleMoneyInput($event, row, 'monthlySalary')"
+                      @change="row._isEdited = true"
+                    />
+                  </template>
+                  <template v-else>
+                    {{ row.worker.monthlySalary ? `${row.worker.monthlySalary.toFixed(2)} €` : '-' }}
+                  </template>
                 </td>
 
                 <!-- HOUR RATE -->
                 <td>
-                  <input
-                    :value="row.hourRate?.toFixed(2)"
-                    :disabled="row._isDeleted || row.workerType?.trim() == '' || row.workerType == 'INTERNAL'"
-                    type="text"
-                    inputmode="decimal"
-                    class="cell-input"
-                    :class="{ required: row.workerType == 'CONTRACTOR' && !row.hourRate }"
-                    @input="handleMoneyInput($event, row, 'hourRate')"
-                    @change="row._isEdited = true"
-                  />
+                  <template v-if="rowHasChanges(row)">
+                    <input
+                      :value="row.worker.hourRate?.toFixed(2)"
+                      :disabled="
+                        !rowHasChanges(row) ||
+                        row.worker.workerType?.trim() == '' ||
+                        row.worker.workerType == 'INTERNAL'
+                      "
+                      type="text"
+                      inputmode="decimal"
+                      :class="{ required: row.worker.workerType == 'CONTRACTOR' && !row.worker.hourRate }"
+                      @input="handleMoneyInput($event, row, 'hourRate')"
+                      @change="row._isEdited = true"
+                    />
+                  </template>
+                  <template v-else>
+                    {{ row.worker.hourRate ? `${row.worker.hourRate.toFixed(2)} €` : '-' }}
+                  </template>
                 </td>
 
-                <!-- REMOVE BTN -->
-                <td class="col-action">
-                  <button class="col-action-btn" @click="toggleDelete(row)">{{ row._isDeleted ? '↺' : '✕' }}</button>
+                <!-- ACTIONS -->
+                <td>
+                  <div v-if="!rowHasChanges(row)" class="action-buttons">
+                    <button :disabled="isEditing"><Trash2 :size="16" /></button>
+                    <button :disabled="isEditing" @click="editWorker(row)">
+                      <Pencil :size="16" />
+                    </button>
+                  </div>
+                  <div v-if="rowHasChanges(row)" class="action-buttons editing">
+                    <button @click="discardRow(row)"><Undo2 :size="16" /></button>
+                    <button :disabled="!isRowValid(row)" @click="saveWorker(row)">
+                      <Check :size="16" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -106,27 +141,14 @@
         </div>
 
         <div class="actions">
-          <button class="btn btn-outline" @click="addWorker">+ Add Worker</button>
-
-          <button
-            class="btn"
-            :disabled="apiStatus.isLoading || !hasChanges || (hasChanges && !isFormValid)"
-            @click="saveWorkers"
-          >
-            <span v-if="apiStatus.isLoading" class="spinner">⚙️</span>
-            <span v-else>Save Workers</span>
-          </button>
+          <button :disabled="isEditing" @click="addWorker"><Plus :size="18" /> Add Worker</button>
         </div>
 
-        <div v-if="apiStatus.isError" class="alert alert-error">
-          <span class="alert-icon">⚠️</span>
-          {{ apiStatus.message }}
-        </div>
-
-        <div v-if="apiStatus.isSuccess && apiStatus.message" class="alert alert-success">
-          <span class="alert-icon">✓</span>
-          {{ apiStatus.message }}
-        </div>
+        <Toast
+          v-if="apiStatus.message"
+          :message="apiStatus.message"
+          :type="apiStatus.isSuccess ? 'success' : 'error'"
+        />
       </div>
     </div>
   </div>
@@ -138,14 +160,41 @@ import api from '@/services/api';
 import { computed } from 'vue';
 import { Worker } from '@/types/worker';
 import { ApiResponseStatus } from '@/types/api-response-status';
+import { User, Pencil, Trash2, Check, Undo2, Plus } from 'lucide-vue-next';
+import Toast from '@/composables/Toast.vue';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
-interface WorkerRow extends Worker {
+const isEditing = computed(() => workers.value.some((row) => row._isNew || row._isEdited));
+
+function editWorker(row: WorkerRow) {
+  row._isEdited = true;
+
+  row._original = structuredClone({ ...row.worker });
+}
+
+function discardRow(row: WorkerRow) {
+  if (row._isNew) {
+    workers.value = workers.value.filter((w) => w._key !== row._key);
+  } else {
+    row.worker = row._original!;
+    row._isNew = false;
+    row._isEdited = false;
+    row._isDeleted = false;
+  }
+}
+
+function rowHasChanges(row: WorkerRow) {
+  return row._isNew || row._isEdited || row._isDeleted;
+}
+
+interface WorkerRow {
+  worker: Worker;
   _key: string;
   _isNew: boolean;
   _isEdited: boolean;
   _isDeleted: boolean;
+  _original?: Worker;
 }
 
 const workers = ref<WorkerRow[]>([]);
@@ -155,61 +204,46 @@ function nextKey(): string {
   return `row-${++_keyCounter}`;
 }
 
-const hasChanges = computed(() => {
-  return workers.value.some((r) => r._isNew || r._isEdited || r._isDeleted);
-});
+function isRowValid(row: WorkerRow) {
+  return (
+    row.worker.name?.trim() &&
+    row.worker.workerType?.trim() &&
+    ((row.worker.workerType === 'CONTRACTOR' && row.worker.hourRate != null && row.worker.hourRate > 0) ||
+      (row.worker.workerType === 'INTERNAL' && row.worker.monthlySalary != null && row.worker.monthlySalary > 0))
+  );
+}
 
-const isFormValid = computed(() =>
-  workers.value.every(
-    (row) =>
-      row.name?.trim() &&
-      row.workerType?.trim() &&
-      ((row.workerType === 'CONTRACTOR' && row.hourRate != null) ||
-        (row.workerType === 'INTERNAL' && row.monthlySalary != null)),
-  ),
-);
-
-function handleMoneyInput(event: Event, row: WorkerRow, field: keyof Pick<WorkerRow, 'monthlySalary' | 'hourRate'>) {
+function handleMoneyInput(event: Event, row: WorkerRow, field: keyof Pick<Worker, 'monthlySalary' | 'hourRate'>) {
   const input = event.target as HTMLInputElement;
   const digits = input.value.replace(/\D/g, '');
   const value = Number(digits) / 100;
 
-  row[field] = value;
+  row.worker[field] = value;
   input.value = value.toFixed(2);
 }
 
 function addWorker(): void {
   workers.value.push({
-    id: '',
-    name: '',
-    workerType: '',
-    hourRate: undefined,
-    monthlySalary: undefined,
-    hourCost: undefined,
+    worker: {
+      id: '',
+      name: '',
+      workerType: '',
+      hourRate: undefined,
+      monthlySalary: undefined,
+      hourCost: undefined,
+    },
     _key: nextKey(),
     _isNew: true,
-    _isEdited: true,
+    _isEdited: false,
     _isDeleted: false,
   });
 }
 
-function toggleDelete(row: WorkerRow): void {
-  row._isDeleted = !row._isDeleted;
-}
-
-async function saveWorkers(): Promise<void> {
+async function saveWorker(row: WorkerRow): Promise<void> {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
-  try {
-    const newWorker: Worker[] = workers.value
-      .filter((worker) => worker._isNew)
-      .map((worker) => ({
-        name: worker.name,
-        workerType: worker.workerType,
-        hourRate: worker.hourRate,
-        monthlySalary: worker.monthlySalary,
-      }));
 
-    await api.addWorkers(newWorker);
+  try {
+    await api.addWorker(row.worker);
     await fetchWorkers();
 
     apiStatus.value = {
@@ -235,10 +269,12 @@ async function fetchWorkers() {
     const gotWorkers = await api.getAllWorkers();
 
     workers.value = gotWorkers.map((worker) => ({
-      ...worker,
-      hourCost: worker.hourCost ? parseFloat(worker.hourCost.toFixed(2)) : undefined,
-      monthlySalary: worker.monthlySalary ? parseFloat(worker.monthlySalary.toFixed(2)) : undefined,
-      hourRate: worker.hourRate ? parseFloat(worker.hourRate.toFixed(2)) : undefined,
+      worker: {
+        ...worker,
+        hourCost: worker.hourCost ? parseFloat(worker.hourCost.toFixed(2)) : undefined,
+        monthlySalary: worker.monthlySalary ? parseFloat(worker.monthlySalary.toFixed(2)) : undefined,
+        hourRate: worker.hourRate ? parseFloat(worker.hourRate.toFixed(2)) : undefined,
+      },
       _key: worker.id ?? nextKey(),
       _isNew: false,
       _isEdited: false,
@@ -259,11 +295,4 @@ async function fetchWorkers() {
 onMounted(fetchWorkers);
 </script>
 
-<style scoped lang="scss">
-.workers-section {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-</style>
+<style scoped lang="scss"></style>
