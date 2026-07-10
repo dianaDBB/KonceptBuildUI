@@ -101,7 +101,7 @@ const visibleItems = computed(() => selectedCategory.value.items);
 /************************************************************************************************************ MODULES */
 
 .modules {
-  background: var(--color-surface);
+  background: var(--color-background);
   border: 1px solid var(--color-border-light);
   border-radius: 12px;
   padding: 24px;
@@ -162,7 +162,7 @@ const visibleItems = computed(() => selectedCategory.value.items);
   flex-direction: column;
   gap: 14px;
   padding: 24px;
-  background: var(--color-surface);
+  background: var(--color-background);
   border: 1px solid var(--color-border-light);
   border-radius: 12px;
   cursor: pointer;

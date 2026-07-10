@@ -31,7 +31,7 @@
 }
 
 .header {
-  background: var(--color-surface);
+  background: var(--color-main-background);
   border-bottom: 1px solid var(--color-border-light);
   padding: 28px 20px;
   text-align: center;
@@ -68,7 +68,7 @@
 .footer {
   padding: 18px;
   text-align: center;
-  background: var(--color-surface);
+  background: var(--color-main-background);
   border-top: 1px solid var(--color-border-light);
   color: var(--color-text-muted);
   font-size: 12px;
