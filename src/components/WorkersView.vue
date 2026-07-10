@@ -72,13 +72,13 @@
                 <td>
                   <input
                     :value="row.monthlySalary?.toFixed(2)"
-                    :disabled="row._isDeleted || row.workerType == 'CONTRACTOR'"
+                    :disabled="row._isDeleted || row.workerType?.trim() == '' || row.workerType == 'CONTRACTOR'"
                     type="text"
                     inputmode="decimal"
                     class="cell-input"
                     :class="{ required: row.workerType == 'INTERNAL' && !row.monthlySalary }"
+                    @input="handleMoneyInput($event, row, 'monthlySalary')"
                     @change="row._isEdited = true"
-                    @blur="(e) => { const raw = (e.target as HTMLInputElement).value.replace(',', '.'); const v = parseFloat(raw); row.monthlySalary = isNaN(v) ? row.monthlySalary : parseFloat(v.toFixed(2)); (e.target as HTMLInputElement).value = row.monthlySalary!.toFixed(2); }"
                   />
                 </td>
 
@@ -86,13 +86,13 @@
                 <td>
                   <input
                     :value="row.hourRate?.toFixed(2)"
-                    :disabled="row._isDeleted || row.workerType == 'INTERNAL'"
+                    :disabled="row._isDeleted || row.workerType?.trim() == '' || row.workerType == 'INTERNAL'"
                     type="text"
                     inputmode="decimal"
                     class="cell-input"
                     :class="{ required: row.workerType == 'CONTRACTOR' && !row.hourRate }"
+                    @input="handleMoneyInput($event, row, 'hourRate')"
                     @change="row._isEdited = true"
-                    @blur="(e) => { const raw = (e.target as HTMLInputElement).value.replace(',', '.'); const v = parseFloat(raw); row.hourRate = isNaN(v) ? row.hourRate : parseFloat(v.toFixed(2)); (e.target as HTMLInputElement).value = row.hourRate!.toFixed(2); }"
                   />
                 </td>
 
@@ -108,7 +108,11 @@
         <div class="actions">
           <button class="btn btn-outline" @click="addWorker">+ Add Worker</button>
 
-          <button class="btn" :disabled="apiStatus.isLoading || !hasChanges" @click="saveWorkers">
+          <button
+            class="btn"
+            :disabled="apiStatus.isLoading || !hasChanges || (hasChanges && !isFormValid)"
+            @click="saveWorkers"
+          >
             <span v-if="apiStatus.isLoading" class="spinner">⚙️</span>
             <span v-else>Save Workers</span>
           </button>
@@ -154,6 +158,25 @@ function nextKey(): string {
 const hasChanges = computed(() => {
   return workers.value.some((r) => r._isNew || r._isEdited || r._isDeleted);
 });
+
+const isFormValid = computed(() =>
+  workers.value.every(
+    (row) =>
+      row.name?.trim() &&
+      row.workerType?.trim() &&
+      ((row.workerType === 'CONTRACTOR' && row.hourRate != null) ||
+        (row.workerType === 'INTERNAL' && row.monthlySalary != null)),
+  ),
+);
+
+function handleMoneyInput(event: Event, row: WorkerRow, field: keyof Pick<WorkerRow, 'monthlySalary' | 'hourRate'>) {
+  const input = event.target as HTMLInputElement;
+  const digits = input.value.replace(/\D/g, '');
+  const value = Number(digits) / 100;
+
+  row[field] = value;
+  input.value = value.toFixed(2);
+}
 
 function addWorker(): void {
   workers.value.push({
