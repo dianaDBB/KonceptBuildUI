@@ -14,150 +14,102 @@
         <div class="table">
           <table>
             <colgroup>
-              <col style="width: 38%" />
+              <col style="width: 34%" />
               <col style="width: 15%" />
               <col style="width: 15%" />
               <col style="width: 15%" />
               <col style="width: 15%" />
-              <col style="width: 2%" />
+              <col style="width: 6%" />
             </colgroup>
             <thead>
               <tr>
                 <th>
                   <div class="column-heading">
                     Nome
-                    <div class="column-heading-actions">
-                      <button
-                        class="column-sort-button"
-                        :class="{ active: isSorted(WorkerSortField.NAME) }"
-                        :disabled="isEditing"
-                        :title="sortButtonTitle(WorkerSortField.NAME)"
-                        @click="toggleSort(WorkerSortField.NAME)"
-                      >
-                        <ChevronDown v-if="isSorted(WorkerSortField.NAME, SortDirection.ASC)" :size="15" />
-                        <ChevronUp v-else-if="isSorted(WorkerSortField.NAME, SortDirection.DESC)" :size="15" />
-                        <ArrowUpDown v-else :size="15" />
-                      </button>
-                      <button
-                        class="column-filter-button"
-                        :class="{ active: hasColumnFilter(WorkerSortField.NAME) }"
-                        :disabled="isEditing"
-                        @click="openFilter(WorkerSortField.NAME, $event)"
-                      >
-                        <SlidersHorizontal :size="15" />
-                      </button>
-                    </div>
+                    <TableColumnFilter
+                      :config="workerFilterConfigs.name"
+                      :filters="workerFilters"
+                      :sort-by="workerFilters.sortBy"
+                      :sort-direction="workerFilters.sortDirection"
+                      :disabled="isEditing"
+                      @sort="toggleSort(WorkerSortField.NAME)"
+                      @apply="applyFilterValues"
+                      @clear="clearFilterValues"
+                    />
                   </div>
                 </th>
                 <th>
                   <div class="column-heading">
                     Tipo
-                    <div class="column-heading-actions">
-                      <button
-                        class="column-sort-button"
-                        :class="{ active: isSorted(WorkerSortField.WORKER_TYPE) }"
-                        :disabled="isEditing"
-                        :title="sortButtonTitle(WorkerSortField.WORKER_TYPE)"
-                        @click="toggleSort(WorkerSortField.WORKER_TYPE)"
-                      >
-                        <ChevronDown v-if="isSorted(WorkerSortField.WORKER_TYPE, SortDirection.ASC)" :size="15" />
-                        <ChevronUp v-else-if="isSorted(WorkerSortField.WORKER_TYPE, SortDirection.DESC)" :size="15" />
-                        <ArrowUpDown v-else :size="15" />
-                      </button>
-                      <button
-                        class="column-filter-button"
-                        :class="{ active: hasColumnFilter(WorkerSortField.WORKER_TYPE) }"
-                        :disabled="isEditing"
-                        @click="openFilter(WorkerSortField.WORKER_TYPE, $event)"
-                      >
-                        <SlidersHorizontal :size="15" />
-                      </button>
-                    </div>
+                    <TableColumnFilter
+                      :config="workerFilterConfigs.workerType"
+                      :filters="workerFilters"
+                      :sort-by="workerFilters.sortBy"
+                      :sort-direction="workerFilters.sortDirection"
+                      :disabled="isEditing"
+                      @sort="toggleSort(WorkerSortField.WORKER_TYPE)"
+                      @apply="applyFilterValues"
+                      @clear="clearFilterValues"
+                    />
                   </div>
                 </th>
                 <th>
                   <div class="column-heading">
                     Custo Hora
-                    <div class="column-heading-actions">
-                      <button
-                        class="column-sort-button"
-                        :class="{ active: isSorted(WorkerSortField.HOUR_COST) }"
-                        :disabled="isEditing"
-                        :title="sortButtonTitle(WorkerSortField.HOUR_COST)"
-                        @click="toggleSort(WorkerSortField.HOUR_COST)"
-                      >
-                        <ChevronDown v-if="isSorted(WorkerSortField.HOUR_COST, SortDirection.ASC)" :size="15" />
-                        <ChevronUp v-else-if="isSorted(WorkerSortField.HOUR_COST, SortDirection.DESC)" :size="15" />
-                        <ArrowUpDown v-else :size="15" />
-                      </button>
-                      <button
-                        class="column-filter-button"
-                        :class="{ active: hasColumnFilter(WorkerSortField.HOUR_COST) }"
-                        :disabled="isEditing"
-                        @click="openFilter(WorkerSortField.HOUR_COST, $event)"
-                      >
-                        <SlidersHorizontal :size="15" />
-                      </button>
-                    </div>
+                    <TableColumnFilter
+                      :config="workerFilterConfigs.hourCost"
+                      :filters="workerFilters"
+                      :sort-by="workerFilters.sortBy"
+                      :sort-direction="workerFilters.sortDirection"
+                      :disabled="isEditing"
+                      @sort="toggleSort(WorkerSortField.HOUR_COST)"
+                      @apply="applyFilterValues"
+                      @clear="clearFilterValues"
+                    />
                   </div>
                 </th>
                 <th>
                   <div class="column-heading">
                     Salário Mensal
-                    <div class="column-heading-actions">
-                      <button
-                        class="column-sort-button"
-                        :class="{ active: isSorted(WorkerSortField.MONTHLY_SALARY) }"
-                        :disabled="isEditing"
-                        :title="sortButtonTitle(WorkerSortField.MONTHLY_SALARY)"
-                        @click="toggleSort(WorkerSortField.MONTHLY_SALARY)"
-                      >
-                        <ChevronDown v-if="isSorted(WorkerSortField.MONTHLY_SALARY, SortDirection.ASC)" :size="15" />
-                        <ChevronUp
-                          v-else-if="isSorted(WorkerSortField.MONTHLY_SALARY, SortDirection.DESC)"
-                          :size="15"
-                        />
-                        <ArrowUpDown v-else :size="15" />
-                      </button>
-                      <button
-                        class="column-filter-button"
-                        :class="{ active: hasColumnFilter(WorkerSortField.MONTHLY_SALARY) }"
-                        :disabled="isEditing"
-                        @click="openFilter(WorkerSortField.MONTHLY_SALARY, $event)"
-                      >
-                        <SlidersHorizontal :size="15" />
-                      </button>
-                    </div>
+                    <TableColumnFilter
+                      :config="workerFilterConfigs.monthlySalary"
+                      :filters="workerFilters"
+                      :sort-by="workerFilters.sortBy"
+                      :sort-direction="workerFilters.sortDirection"
+                      :disabled="isEditing"
+                      @sort="toggleSort(WorkerSortField.MONTHLY_SALARY)"
+                      @apply="applyFilterValues"
+                      @clear="clearFilterValues"
+                    />
                   </div>
                 </th>
                 <th>
                   <div class="column-heading">
                     Rate Hora
-                    <div class="column-heading-actions">
-                      <button
-                        class="column-sort-button"
-                        :class="{ active: isSorted(WorkerSortField.HOUR_RATE) }"
-                        :disabled="isEditing"
-                        :title="sortButtonTitle(WorkerSortField.HOUR_RATE)"
-                        @click="toggleSort(WorkerSortField.HOUR_RATE)"
-                      >
-                        <ChevronDown v-if="isSorted(WorkerSortField.HOUR_RATE, SortDirection.ASC)" :size="15" />
-                        <ChevronUp v-else-if="isSorted(WorkerSortField.HOUR_RATE, SortDirection.DESC)" :size="15" />
-                        <ArrowUpDown v-else :size="15" />
-                      </button>
-                      <button
-                        class="column-filter-button"
-                        :class="{ active: hasColumnFilter(WorkerSortField.HOUR_RATE) }"
-                        :disabled="isEditing"
-                        title="Filtrar rate/hora"
-                        @click="openFilter(WorkerSortField.HOUR_RATE, $event)"
-                      >
-                        <SlidersHorizontal :size="15" />
-                      </button>
-                    </div>
+                    <TableColumnFilter
+                      :config="workerFilterConfigs.hourRate"
+                      :filters="workerFilters"
+                      :sort-by="workerFilters.sortBy"
+                      :sort-direction="workerFilters.sortDirection"
+                      :disabled="isEditing"
+                      @sort="toggleSort(WorkerSortField.HOUR_RATE)"
+                      @apply="applyFilterValues"
+                      @clear="clearFilterValues"
+                    />
                   </div>
                 </th>
-                <th></th>
+                <th>
+                  <button
+                    v-if="hasActiveTableControls"
+                    class="clear-table-controls"
+                    :disabled="isEditing || apiStatus.isLoading"
+                    title="Limpar todos os filtros e ordenação"
+                    aria-label="Limpar todos os filtros e ordenação"
+                    @click="clearAllTableControls"
+                  >
+                    <FunnelX :size="16" />
+                  </button>
+                </th>
               </tr>
             </thead>
             <tbody ref="tableBody">
@@ -267,52 +219,16 @@
               </tr>
             </tbody>
           </table>
+          <div v-if="apiStatus.isLoading" class="table-loading-overlay">
+            <div>
+              <LoaderCircle :size="18" class="spinner" />
+              A carregar colaboradores...
+            </div>
+          </div>
         </div>
 
-        <form
-          v-if="activeFilterColumn"
-          ref="filterDropdown"
-          class="filter-dropdown"
-          :style="filterDropdownStyle"
-          @submit.prevent="applyColumnFilter"
-        >
-          <div class="filter-popover-header">
-            <h4>{{ filterTitle }}</h4>
-            <button type="button" class="close-filter-button" aria-label="Fechar filtros" @click="closeFilter">
-              <X :size="18" />
-            </button>
-          </div>
-
-          <label v-if="activeFilterColumn === WorkerSortField.NAME">
-            <input v-model.trim="filterDraft.name" type="text" placeholder="Pesquisar por nome" />
-          </label>
-
-          <label v-else-if="activeFilterColumn === WorkerSortField.WORKER_TYPE">
-            <select v-model="filterDraft.workerType">
-              <option value="">Todos os tipos</option>
-              <option value="INTERNAL">INTERNAL</option>
-              <option value="CONTRACTOR">CONTRACTOR</option>
-            </select>
-          </label>
-
-          <div v-else class="range-fields">
-            <label>
-              <input v-model.number="filterDraft[minFilterKey]" type="number" min="0" step="0.01" />
-            </label>
-            <label> - </label>
-            <label>
-              <input v-model.number="filterDraft[maxFilterKey]" type="number" min="0" step="0.01" />
-            </label>
-          </div>
-
-          <div class="filter-popover-actions">
-            <button type="button" class="clear-filter-button" @click="clearColumnFilter">Limpar</button>
-            <button type="submit" class="apply-filter-button">Aplicar</button>
-          </div>
-        </form>
-
         <div class="actions">
-          <button :disabled="isEditing" @click="addWorker"><Plus :size="18" /> Add Worker</button>
+          <button :disabled="isEditing" @click="addWorker"><Plus :size="18" /> Adicionar Colaborador</button>
         </div>
 
         <Toast
@@ -326,25 +242,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, computed, nextTick } from 'vue';
+import { ref, onMounted, computed, nextTick } from 'vue';
 import api from '@/services/api';
 import { Worker, WorkerFilters, WorkerSortField } from '@/types/worker';
 import { ApiResponseStatus } from '@/types/api-response-status';
-import {
-  User,
-  Pencil,
-  Trash2,
-  Check,
-  Undo2,
-  Plus,
-  SlidersHorizontal,
-  ChevronUp,
-  ChevronDown,
-  ArrowUpDown,
-  X,
-} from 'lucide-vue-next';
+import { User, Pencil, Trash2, Check, Undo2, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
 import Toast from '@/composables/Toast.vue';
 import { SortDirection } from '@/types/sort-direction';
+import TableColumnFilter from '@/components/TableColumnFilter.vue';
+import { TableFilterKind, type TableColumnFilterConfig } from '@/types/table-filter';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
@@ -461,99 +367,53 @@ async function saveWorker(row: WorkerRow): Promise<void> {
 
 const workerFilters = ref<WorkerFilters>({});
 
-type RangeFilterColumn =
-  | WorkerSortField.HOUR_COST
-  | WorkerSortField.MONTHLY_SALARY
-  | WorkerSortField.HOUR_RATE;
+const hasActiveTableControls = computed(() =>
+  Object.values(workerFilters.value).some((value) => value !== undefined && value !== null && value !== ''),
+);
 
-const activeFilterColumn = ref<WorkerSortField | null>(null);
-const filterDraft = ref<WorkerFilters>({});
-const filterDropdownPosition = ref({ top: 0, left: 0 });
-const filterDropdown = ref<HTMLFormElement | null>(null);
-
-const filterDropdownStyle = computed(() => ({
-  top: `${filterDropdownPosition.value.top}px`,
-  left: `${filterDropdownPosition.value.left}px`,
-}));
-
-const filterTitle = computed(() => {
-  const labels: Record<WorkerSortField, string> = {
-    [WorkerSortField.NAME]: 'Nome',
-    [WorkerSortField.WORKER_TYPE]: 'Tipo',
-    [WorkerSortField.HOUR_COST]: 'Custo Hora',
-    [WorkerSortField.MONTHLY_SALARY]: 'Salário Mensal',
-    [WorkerSortField.HOUR_RATE]: 'Rate Hora',
-  };
-
-  return activeFilterColumn.value ? `Filtrar por - ${labels[activeFilterColumn.value]}` : '';
-});
-
-const minFilterKey = computed<'minHourCost' | 'minMonthlySalary' | 'minHourRate'>(() => {
-  const keys: Record<RangeFilterColumn, 'minHourCost' | 'minMonthlySalary' | 'minHourRate'> = {
-    [WorkerSortField.HOUR_COST]: 'minHourCost',
-    [WorkerSortField.MONTHLY_SALARY]: 'minMonthlySalary',
-    [WorkerSortField.HOUR_RATE]: 'minHourRate',
-  };
-
-  return keys[activeFilterColumn.value as RangeFilterColumn] ?? 'minHourRate';
-});
-
-const maxFilterKey = computed<'maxHourCost' | 'maxMonthlySalary' | 'maxHourRate'>(() => {
-  const keys: Record<RangeFilterColumn, 'maxHourCost' | 'maxMonthlySalary' | 'maxHourRate'> = {
-    [WorkerSortField.HOUR_COST]: 'maxHourCost',
-    [WorkerSortField.MONTHLY_SALARY]: 'maxMonthlySalary',
-    [WorkerSortField.HOUR_RATE]: 'maxHourRate',
-  };
-
-  return keys[activeFilterColumn.value as RangeFilterColumn] ?? 'maxHourRate';
-});
-
-function openFilter(column: WorkerSortField, event: MouseEvent): void {
-  const button = event.currentTarget as HTMLButtonElement;
-  const bounds = button.getBoundingClientRect();
-  const dropdownWidth = 380;
-
-  filterDropdownPosition.value = {
-    top: Math.max(12, Math.min(bounds.bottom + 8, window.innerHeight - 300)),
-    left: Math.max(12, Math.min(bounds.right - dropdownWidth, window.innerWidth - dropdownWidth - 12)),
-  };
-  activeFilterColumn.value = column;
-  filterDraft.value = copyWorkerFilters(workerFilters.value);
-}
-
-function closeFilter(): void {
-  activeFilterColumn.value = null;
-}
-
-function closeFilterOnOutsideClick(event: MouseEvent): void {
-  if (activeFilterColumn.value && !filterDropdown.value?.contains(event.target as Node)) {
-    closeFilter();
-  }
-}
-
-function hasColumnFilter(column: WorkerSortField): boolean {
-  switch (column) {
-    case WorkerSortField.NAME:
-      return Boolean(workerFilters.value.name);
-    case WorkerSortField.WORKER_TYPE:
-      return Boolean(workerFilters.value.workerType);
-    case WorkerSortField.HOUR_COST:
-      return workerFilters.value.minHourCost != null || workerFilters.value.maxHourCost != null;
-    case WorkerSortField.MONTHLY_SALARY:
-      return workerFilters.value.minMonthlySalary != null || workerFilters.value.maxMonthlySalary != null;
-    case WorkerSortField.HOUR_RATE:
-      return workerFilters.value.minHourRate != null || workerFilters.value.maxHourRate != null;
-  }
-}
+const workerFilterConfigs = {
+  name: {
+    column: WorkerSortField.NAME,
+    label: 'Nome',
+    kind: TableFilterKind.TEXT,
+    valueKey: 'name',
+    dropdownAlign: 'start',
+  },
+  workerType: {
+    column: WorkerSortField.WORKER_TYPE,
+    label: 'Tipo',
+    kind: TableFilterKind.SELECT,
+    valueKey: 'workerType',
+    options: [
+      { label: 'INTERNAL', value: 'INTERNAL' },
+      { label: 'CONTRACTOR', value: 'CONTRACTOR' },
+    ],
+  },
+  hourCost: {
+    column: WorkerSortField.HOUR_COST,
+    label: 'Custo Hora',
+    kind: TableFilterKind.NUMBER_RANGE,
+    minKey: 'minHourCost',
+    maxKey: 'maxHourCost',
+  },
+  monthlySalary: {
+    column: WorkerSortField.MONTHLY_SALARY,
+    label: 'Salário Mensal',
+    kind: TableFilterKind.NUMBER_RANGE,
+    minKey: 'minMonthlySalary',
+    maxKey: 'maxMonthlySalary',
+  },
+  hourRate: {
+    column: WorkerSortField.HOUR_RATE,
+    label: 'Rate Hora',
+    kind: TableFilterKind.NUMBER_RANGE,
+    minKey: 'minHourRate',
+    maxKey: 'maxHourRate',
+  },
+} satisfies Record<string, TableColumnFilterConfig<WorkerSortField>>;
 
 function isSorted(column: WorkerSortField, direction?: SortDirection): boolean {
   return workerFilters.value.sortBy === column && (!direction || workerFilters.value.sortDirection === direction);
-}
-
-function sortButtonTitle(column: WorkerSortField): string {
-  if (!isSorted(column)) return 'Ordenar: ascendente';
-  if (isSorted(column, SortDirection.ASC)) return 'Ordenar: descendente';
-  return 'Remover ordenação';
 }
 
 function toggleSort(column: WorkerSortField): void {
@@ -568,37 +428,19 @@ function toggleSort(column: WorkerSortField): void {
   void fetchWorkers();
 }
 
-function clearColumnFilter(): void {
-  const column = activeFilterColumn.value;
-  if (!column) return;
-
-  if (column === WorkerSortField.NAME) filterDraft.value.name = undefined;
-  if (column === WorkerSortField.WORKER_TYPE) filterDraft.value.workerType = '';
-  if (column === WorkerSortField.HOUR_COST) {
-    filterDraft.value.minHourCost = undefined;
-    filterDraft.value.maxHourCost = undefined;
-  }
-  if (column === WorkerSortField.MONTHLY_SALARY) {
-    filterDraft.value.minMonthlySalary = undefined;
-    filterDraft.value.maxMonthlySalary = undefined;
-  }
-  if (column === WorkerSortField.HOUR_RATE) {
-    filterDraft.value.minHourRate = undefined;
-    filterDraft.value.maxHourRate = undefined;
-  }
-  workerFilters.value = copyWorkerFilters(filterDraft.value);
-  closeFilter();
+function applyFilterValues(values: Record<string, unknown>): void {
+  workerFilters.value = { ...workerFilters.value, ...(values as Partial<WorkerFilters>) };
   void fetchWorkers();
 }
 
-function applyColumnFilter(): void {
-  workerFilters.value = copyWorkerFilters(filterDraft.value);
-  closeFilter();
+function clearFilterValues(values: Record<string, unknown>): void {
+  workerFilters.value = { ...workerFilters.value, ...(values as Partial<WorkerFilters>) };
   void fetchWorkers();
 }
 
-function copyWorkerFilters(filters: WorkerFilters): WorkerFilters {
-  return { ...filters };
+function clearAllTableControls(): void {
+  workerFilters.value = {};
+  void fetchWorkers();
 }
 
 async function fetchWorkers() {
@@ -631,122 +473,7 @@ async function fetchWorkers() {
   }
 }
 
-onMounted(() => {
-  document.addEventListener('mousedown', closeFilterOnOutsideClick);
-  void fetchWorkers();
-});
-
-onBeforeUnmount(() => {
-  document.removeEventListener('mousedown', closeFilterOnOutsideClick);
-});
+onMounted(fetchWorkers);
 </script>
 
-<style scoped lang="scss">
-.column-heading {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.4rem;
-}
-
-.column-heading-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.1rem;
-}
-
-.column-filter-button,
-.column-sort-button,
-.close-filter-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  background: transparent;
-  color: var(--color-text-muted);
-  cursor: pointer;
-}
-
-.column-filter-button,
-.column-sort-button {
-  width: 27px;
-  height: 27px;
-  border-radius: 6px;
-
-  &:hover:not(:disabled),
-  &.active {
-    background: var(--color-primary-light);
-    color: var(--color-primary);
-  }
-}
-
-.filter-dropdown {
-  position: fixed;
-  z-index: 20;
-  width: min(380px, calc(100vw - 24px));
-  max-height: calc(100vh - 24px);
-  overflow-y: auto;
-  padding: 1.25rem;
-  border: 1px solid var(--color-border-light);
-  border-radius: 12px;
-  background: var(--color-background);
-  box-shadow: var(--shadow-hover);
-
-  label {
-    display: grid;
-    gap: 0.4rem;
-    color: var(--color-text-secondary);
-    font-weight: 500;
-  }
-
-  input,
-  select {
-    width: 100%;
-  }
-}
-
-.filter-popover-header,
-.filter-popover-actions {
-  display: flex;
-  align-items: center;
-}
-
-.filter-popover-header {
-  justify-content: space-between;
-  margin-bottom: 1.25rem;
-
-  h4 {
-    font-size: 1rem;
-  }
-}
-
-.range-fields {
-  display: grid;
-  grid-template-columns: 1fr 0fr 1fr;
-  gap: 0.75rem;
-}
-
-.filter-popover-actions {
-  margin-top: 1.25rem;
-  justify-content: flex-end;
-  gap: 0.75rem;
-
-  button {
-    padding: 0.5rem 0.8rem;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-}
-
-.clear-filter-button {
-  border: 0;
-  background: transparent;
-  color: var(--color-text-muted);
-}
-
-.apply-filter-button {
-  border: 1px solid var(--color-primary);
-  background: var(--color-primary);
-  color: white;
-}
-</style>
+<style scoped lang="scss"></style>

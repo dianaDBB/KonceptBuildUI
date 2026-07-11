@@ -168,8 +168,8 @@ body {
   flex: 1;
   overflow: auto;
   min-height: 0;
-
   border: none;
+  position: relative;
 
   table {
     width: 100%;
@@ -199,6 +199,39 @@ body {
       border-bottom: 1px solid #eef0f7;
       color: var(--color-text-secondary);
     }
+  }
+}
+
+.table-loading-overlay {
+  position: absolute;
+  inset: 41px 0 0;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--color-text-muted);
+  pointer-events: all;
+
+  svg {
+    margin-right: 0.5rem;
+    vertical-align: middle;
+  }
+}
+
+.column-heading {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.4rem;
+}
+
+.table-loading {
+  height: 160px;
+  text-align: center;
+  color: var(--color-text-muted);
+
+  svg {
+    margin-right: 0.5rem;
+    vertical-align: middle;
   }
 }
 
@@ -239,6 +272,29 @@ body {
 .action-buttons.editing {
   opacity: 1;
   pointer-events: auto;
+}
+
+.clear-table-controls {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
 }
 
 /************************************************************************************************************* FIELDS */

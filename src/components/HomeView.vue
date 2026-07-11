@@ -74,7 +74,7 @@ const categories = [
 
   {
     id: 'hr',
-    label: 'RECURSOS HUAMNOS',
+    label: 'RECURSOS HUMANOS',
     items: [
       {
         label: 'Colaboradores',
