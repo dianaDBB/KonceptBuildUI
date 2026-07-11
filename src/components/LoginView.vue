@@ -47,9 +47,10 @@ async function submit(): Promise<void> {
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/';
     await router.replace(redirect);
   } catch (error: unknown) {
-    errorMessage.value = axios.isAxiosError(error) && error.response?.status === 401
-      ? 'Invalid username or password.'
-      : 'Unable to sign in. Please try again.';
+    errorMessage.value =
+      axios.isAxiosError(error) && error.response?.status === 401
+        ? 'Invalid username or password.'
+        : 'Unable to sign in. Please try again.';
   } finally {
     isSubmitting.value = false;
   }

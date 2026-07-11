@@ -3,6 +3,7 @@ import axios, { AxiosInstance } from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 const ACCESS_TOKEN_KEY = 'konceptbuild.accessToken';
+const USERNAME_KEY = 'konceptbuild.username';
 
 export interface LoginCredentials {
   username: string;
@@ -11,6 +12,7 @@ export interface LoginCredentials {
 
 interface LoginResponse {
   accessToken: string;
+  username: string;
 }
 
 class KoncepBuildApiService {
@@ -71,12 +73,17 @@ class KoncepBuildApiService {
     return localStorage.getItem(ACCESS_TOKEN_KEY);
   }
 
+  getUsername(): string | null {
+    return localStorage.getItem(USERNAME_KEY);
+  }
+
   isAuthenticated(): boolean {
     return Boolean(this.getAccessToken());
   }
 
   private clearAccessToken(): void {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(USERNAME_KEY);
   }
 
   async logout(): Promise<void> {
@@ -100,6 +107,7 @@ class KoncepBuildApiService {
     }
 
     localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    localStorage.setItem(USERNAME_KEY, response.data.username || credentials.username);
   }
 
   //*********************************************************************************************************** WORKERS
