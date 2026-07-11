@@ -2,8 +2,11 @@
   <div class="app">
     <header class="header">
       <div class="header-content">
-        <h1>KonceptBuild</h1>
-        <p>Building the future together</p>
+        <div>
+          <h1>KonceptBuild</h1>
+          <p>Building the future together</p>
+        </div>
+        <button v-if="showLogout" class="logout-button" @click="logout">Log out</button>
       </div>
     </header>
 
@@ -19,7 +22,23 @@
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import api from '@/services/api';
+
+const route = useRoute();
+const router = useRouter();
+const showLogout = computed(() => route.name !== 'login' && api.isAuthenticated());
+
+async function logout(): Promise<void> {
+  try {
+    await api.logout();
+  } finally {
+    await router.replace({ name: 'login' });
+  }
+}
+</script>
 
 <style>
 .app {
@@ -40,6 +59,10 @@
 .header-content {
   max-width: 1600px;
   margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 
   h1 {
     margin: 0 0 6px;
@@ -52,6 +75,22 @@
     margin: 0;
     font-size: 15px;
     color: var(--color-text-muted);
+  }
+}
+
+.logout-button {
+  position: absolute;
+  right: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-background);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
   }
 }
 
