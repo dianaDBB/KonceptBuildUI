@@ -14,7 +14,7 @@ npm run start
 ## UI
 
 - Local: http://localhost:5173/
-- Release: https://budget-ui-ht2i.onrender.com
+- Release: https://konceptbuildui.onrender.com/
 
 ## Deploy
 

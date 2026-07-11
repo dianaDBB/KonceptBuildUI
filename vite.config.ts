@@ -14,9 +14,10 @@ export default defineConfig({
     open: true,
     proxy: {
       '/api': {
-        // target: 'https://konceptbuild-cemp.onrender.com',
+        // target: 'http://localhost:8443',
+        target: 'https://konceptbuildui.onrender.com/',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '/budget/budget'),
+        rewrite: (path) => path.replace(/^\/api/, '/konceptbuild'),
       },
     },
   },

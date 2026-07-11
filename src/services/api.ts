@@ -1,4 +1,4 @@
-import { Worker } from '@/types/worker';
+import { Worker, WorkerFilters } from '@/types/worker';
 import axios, { AxiosInstance } from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -112,8 +112,13 @@ class KoncepBuildApiService {
 
   //*********************************************************************************************************** WORKERS
 
-  async getAllWorkers(): Promise<Worker[]> {
+  async getAllWorkers(filters: WorkerFilters = {}): Promise<Worker[]> {
+    const params = Object.fromEntries(
+      Object.entries(filters).filter(([, value]) => value !== undefined && value !== null && value !== ''),
+    );
+
     const response = await this.client.get('/worker/all', {
+      params,
       headers: { Accept: 'application/json' },
     });
 
