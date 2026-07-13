@@ -14,15 +14,56 @@
         <div class="table">
           <table>
             <colgroup>
-              <col style="width: 34%" />
-              <col style="width: 15%" />
-              <col style="width: 15%" />
-              <col style="width: 15%" />
-              <col style="width: 15%" />
-              <col style="width: 6%" />
+              <col style="width: 80px" />
+              <!-- code -->
+              <col style="width: 150px" />
+              <!-- name -->
+              <col style="width: 90px" />
+              <!-- status -->
+              <col style="width: 95px" />
+              <!-- contact -->
+              <col style="width: 150px" />
+              <!-- email -->
+              <col style="width: 100px" />
+              <!-- function -->
+              <col style="width: 100px" />
+              <!-- defaultHours -->
+              <col style="width: 100px" />
+              <!-- contractType -->
+              <col style="width: 80px" />
+              <!-- hourRate -->
+              <col style="width: 100px" />
+              <!-- monthlySalary -->
+              <col style="width: 80px" />
+              <!-- tsu -->
+              <col style="width: 100px" />
+              <!-- mealAllowance -->
+              <col style="width: 100px" />
+              <!-- accidentInsurance -->
+              <col style="width: 130px" />
+              <!-- startDate -->
+              <col style="width: 130px" />
+              <!-- endDate -->
+              <col style="width: 50px" />
+              <!-- ACTIONS -->
             </colgroup>
             <thead>
               <tr>
+                <th>
+                  <div class="column-heading">
+                    ID
+                    <TableColumnFilter
+                      :config="workerFilterConfigs.code"
+                      :filters="workerFilters"
+                      :sort-by="workerFilters.sortBy"
+                      :sort-direction="workerFilters.sortDirection"
+                      :disabled="isEditing"
+                      @sort="setSort"
+                      @apply="applyFilterValues"
+                      @clear="clearFilterValues"
+                    />
+                  </div>
+                </th>
                 <th>
                   <div class="column-heading">
                     Nome
@@ -32,7 +73,7 @@
                       :sort-by="workerFilters.sortBy"
                       :sort-direction="workerFilters.sortDirection"
                       :disabled="isEditing"
-                      @sort="toggleSort(WorkerSortField.NAME)"
+                      @sort="setSort"
                       @apply="applyFilterValues"
                       @clear="clearFilterValues"
                     />
@@ -40,14 +81,14 @@
                 </th>
                 <th>
                   <div class="column-heading">
-                    Tipo
+                    Estado
                     <TableColumnFilter
-                      :config="workerFilterConfigs.workerType"
+                      :config="workerFilterConfigs.status"
                       :filters="workerFilters"
                       :sort-by="workerFilters.sortBy"
                       :sort-direction="workerFilters.sortDirection"
                       :disabled="isEditing"
-                      @sort="toggleSort(WorkerSortField.WORKER_TYPE)"
+                      @sort="setSort"
                       @apply="applyFilterValues"
                       @clear="clearFilterValues"
                     />
@@ -55,14 +96,14 @@
                 </th>
                 <th>
                   <div class="column-heading">
-                    Custo Hora
+                    Tlf
                     <TableColumnFilter
-                      :config="workerFilterConfigs.hourCost"
+                      :config="workerFilterConfigs.contact"
                       :filters="workerFilters"
                       :sort-by="workerFilters.sortBy"
                       :sort-direction="workerFilters.sortDirection"
                       :disabled="isEditing"
-                      @sort="toggleSort(WorkerSortField.HOUR_COST)"
+                      @sort="setSort"
                       @apply="applyFilterValues"
                       @clear="clearFilterValues"
                     />
@@ -70,14 +111,14 @@
                 </th>
                 <th>
                   <div class="column-heading">
-                    Salário Mensal
+                    Email
                     <TableColumnFilter
-                      :config="workerFilterConfigs.monthlySalary"
+                      :config="workerFilterConfigs.email"
                       :filters="workerFilters"
                       :sort-by="workerFilters.sortBy"
                       :sort-direction="workerFilters.sortDirection"
                       :disabled="isEditing"
-                      @sort="toggleSort(WorkerSortField.MONTHLY_SALARY)"
+                      @sort="setSort"
                       @apply="applyFilterValues"
                       @clear="clearFilterValues"
                     />
@@ -85,14 +126,162 @@
                 </th>
                 <th>
                   <div class="column-heading">
-                    Rate Hora
+                    Função
+                    <TableColumnFilter
+                      :config="workerFilterConfigs.function"
+                      :filters="workerFilters"
+                      :sort-by="workerFilters.sortBy"
+                      :sort-direction="workerFilters.sortDirection"
+                      :disabled="isEditing"
+                      @sort="setSort"
+                      @apply="applyFilterValues"
+                      @clear="clearFilterValues"
+                    />
+                  </div>
+                </th>
+                <th>
+                  <div class="column-heading">
+                    Horas Dia <br />
+                    (Padrão)
+                    <TableColumnFilter
+                      :config="workerFilterConfigs.defaultHours"
+                      :filters="workerFilters"
+                      :sort-by="workerFilters.sortBy"
+                      :sort-direction="workerFilters.sortDirection"
+                      :disabled="isEditing"
+                      @sort="setSort"
+                      @apply="applyFilterValues"
+                      @clear="clearFilterValues"
+                    />
+                  </div>
+                </th>
+                <th>
+                  <div class="column-heading">
+                    Tipo <br />
+                    Contrato
+                    <TableColumnFilter
+                      :config="workerFilterConfigs.contractType"
+                      :filters="workerFilters"
+                      :sort-by="workerFilters.sortBy"
+                      :sort-direction="workerFilters.sortDirection"
+                      :disabled="isEditing"
+                      @sort="setSort"
+                      @apply="applyFilterValues"
+                      @clear="clearFilterValues"
+                    />
+                  </div>
+                </th>
+                <th>
+                  <div class="column-heading">
+                    Valor <br />
+                    Hora <br />
+                    (€)
                     <TableColumnFilter
                       :config="workerFilterConfigs.hourRate"
                       :filters="workerFilters"
                       :sort-by="workerFilters.sortBy"
                       :sort-direction="workerFilters.sortDirection"
                       :disabled="isEditing"
-                      @sort="toggleSort(WorkerSortField.HOUR_RATE)"
+                      @sort="setSort"
+                      @apply="applyFilterValues"
+                      @clear="clearFilterValues"
+                    />
+                  </div>
+                </th>
+                <th>
+                  <div class="column-heading">
+                    Ordenado <br />
+                    Mensal <br />
+                    (€/mês)
+                    <TableColumnFilter
+                      :config="workerFilterConfigs.montlhySalary"
+                      :filters="workerFilters"
+                      :sort-by="workerFilters.sortBy"
+                      :sort-direction="workerFilters.sortDirection"
+                      :disabled="isEditing"
+                      @sort="setSort"
+                      @apply="applyFilterValues"
+                      @clear="clearFilterValues"
+                    />
+                  </div>
+                </th>
+                <th>
+                  <div class="column-heading">
+                    TSU <br />
+                    Empresa <br />
+                    (%)
+                    <TableColumnFilter
+                      :config="workerFilterConfigs.tsu"
+                      :filters="workerFilters"
+                      :sort-by="workerFilters.sortBy"
+                      :sort-direction="workerFilters.sortDirection"
+                      :disabled="isEditing"
+                      @sort="setSort"
+                      @apply="applyFilterValues"
+                      @clear="clearFilterValues"
+                    />
+                  </div>
+                </th>
+                <th>
+                  <div class="column-heading">
+                    Sub. Ali. <br />
+                    (€/dia)
+                    <TableColumnFilter
+                      :config="workerFilterConfigs.mealAllowance"
+                      :filters="workerFilters"
+                      :sort-by="workerFilters.sortBy"
+                      :sort-direction="workerFilters.sortDirection"
+                      :disabled="isEditing"
+                      @sort="setSort"
+                      @apply="applyFilterValues"
+                      @clear="clearFilterValues"
+                    />
+                  </div>
+                </th>
+                <th>
+                  <div class="column-heading">
+                    Seg. Aci. <br />
+                    Trabalho <br />
+                    (€/mês)
+                    <TableColumnFilter
+                      :config="workerFilterConfigs.accidentInsurance"
+                      :filters="workerFilters"
+                      :sort-by="workerFilters.sortBy"
+                      :sort-direction="workerFilters.sortDirection"
+                      :disabled="isEditing"
+                      @sort="setSort"
+                      @apply="applyFilterValues"
+                      @clear="clearFilterValues"
+                    />
+                  </div>
+                </th>
+                <th>
+                  <div class="column-heading">
+                    Data <br />
+                    Admissão
+                    <TableColumnFilter
+                      :config="workerFilterConfigs.startDate"
+                      :filters="workerFilters"
+                      :sort-by="workerFilters.sortBy"
+                      :sort-direction="workerFilters.sortDirection"
+                      :disabled="isEditing"
+                      @sort="setSort"
+                      @apply="applyFilterValues"
+                      @clear="clearFilterValues"
+                    />
+                  </div>
+                </th>
+                <th>
+                  <div class="column-heading">
+                    Data <br />
+                    Cessação
+                    <TableColumnFilter
+                      :config="workerFilterConfigs.endDate"
+                      :filters="workerFilters"
+                      :sort-by="workerFilters.sortBy"
+                      :sort-direction="workerFilters.sortDirection"
+                      :disabled="isEditing"
+                      @sort="setSort"
                       @apply="applyFilterValues"
                       @clear="clearFilterValues"
                     />
@@ -114,6 +303,16 @@
             </thead>
             <tbody ref="tableBody">
               <tr v-for="row in workers" :key="row._key" :class="{ deleted: row._isDeleted }">
+                <!-- CODE -->
+                <td>
+                  <template v-if="rowHasChanges(row)">
+                    <input v-model="row.worker.code" type="text" :disabled="true" :class="{ required: false }" />
+                  </template>
+                  <template v-else>
+                    {{ row.worker.code }}
+                  </template>
+                </td>
+
                 <!-- NAME -->
                 <td>
                   <template v-if="rowHasChanges(row)">
@@ -129,53 +328,103 @@
                   </template>
                 </td>
 
-                <!-- WORKER TYPE -->
+                <!-- STATUS -->
                 <td>
                   <template v-if="rowHasChanges(row)">
                     <select
-                      v-model="row.worker.workerType"
-                      :class="{ required: !row.worker.workerType }"
+                      v-model="row.worker.status"
+                      :class="{ required: !row.worker.status }"
                       @change="row._isEdited = true"
                     >
-                      <option v-for="type in ['CONTRACTOR', 'INTERNAL']" :key="type" :value="type">
-                        {{ type }}
+                      <option v-for="status in WorkerStatus.OPTIONS" :key="status.value" :value="status.value">
+                        {{ status.label }}
                       </option>
                     </select>
                   </template>
                   <template v-else>
-                    {{ row.worker.workerType }}
+                    {{ WorkerStatus.getLabel(row.worker.status) }}
                   </template>
                 </td>
 
-                <!-- HOUR COST -->
+                <!-- CONTACT -->
                 <td>
                   <template v-if="rowHasChanges(row)">
                     <input
-                      :value="row.worker.hourCost?.toFixed(2)"
-                      :disabled="true"
-                      type="text"
-                      inputmode="decimal"
-                      :class="{ required: false }"
-                    />
-                  </template>
-                  <template v-else> {{ row.worker.hourCost?.toFixed(2) }} € </template>
-                </td>
-
-                <!-- MONTLHY SALARY -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <input
-                      :value="row.worker.monthlySalary?.toFixed(2)"
-                      :disabled="row.worker.workerType?.trim() == '' || row.worker.workerType == 'CONTRACTOR'"
-                      type="text"
-                      inputmode="decimal"
-                      :class="{ required: row.worker.workerType == 'INTERNAL' && !row.worker.monthlySalary }"
-                      @input="handleMoneyInput($event, row, 'monthlySalary')"
+                      v-model="row.worker.contact"
+                      type="tel"
+                      pattern="[0-9]{9}"
+                      maxlength="9"
+                      inputmode="numeric"
+                      :class="{ required: !isValidPhone(row.worker.contact) }"
                       @change="row._isEdited = true"
                     />
                   </template>
                   <template v-else>
-                    {{ row.worker.monthlySalary ? `${row.worker.monthlySalary.toFixed(2)} €` : '-' }}
+                    {{ row.worker.contact }}
+                  </template>
+                </td>
+
+                <!-- EMAIL -->
+                <td>
+                  <template v-if="rowHasChanges(row)">
+                    <input
+                      v-model="row.worker.email"
+                      type="email"
+                      :class="{ required: !isValidEmail(row.worker.email) }"
+                      @change="row._isEdited = true"
+                    />
+                  </template>
+                  <template v-else>
+                    {{ row.worker.email }}
+                  </template>
+                </td>
+
+                <!-- FUNCTION -->
+                <td>
+                  <template v-if="rowHasChanges(row)">
+                    <input
+                      v-model="row.worker.function"
+                      type="text"
+                      :class="{ required: !row.worker.function }"
+                      @change="row._isEdited = true"
+                    />
+                  </template>
+                  <template v-else>
+                    {{ row.worker.function }}
+                  </template>
+                </td>
+
+                <!-- DEFAULT HOURS -->
+                <td>
+                  <template v-if="rowHasChanges(row)">
+                    <input
+                      v-model.number="row.worker.defaultHours"
+                      type="number"
+                      step="0.1"
+                      :class="{ required: !row.worker.defaultHours }"
+                      @change="row._isEdited = true"
+                    />
+                  </template>
+                  <template v-else>
+                    {{ row.worker.defaultHours }}
+                  </template>
+                </td>
+
+                <!-- CONTRACT TYPE -->
+                <td>
+                  <template v-if="rowHasChanges(row)">
+                    <select
+                      v-model="row.worker.contractType"
+                      :class="{ required: !row.worker.contractType }"
+                      @change="onContractTypeChanged(row)"
+                    >
+                      <option v-for="type in ContractType.OPTIONS" :key="type.value" :value="type.value">
+                        {{ type.label }}
+                      </option>
+                    </select>
+                  </template>
+                  <template v-else>
+                    {{ ContractType.getLabel(row.worker.contractType) }}
                   </template>
                 </td>
 
@@ -184,20 +433,127 @@
                   <template v-if="rowHasChanges(row)">
                     <input
                       :value="row.worker.hourRate?.toFixed(2)"
-                      :disabled="
-                        !rowHasChanges(row) ||
-                        row.worker.workerType?.trim() == '' ||
-                        row.worker.workerType == 'INTERNAL'
-                      "
                       type="text"
                       inputmode="decimal"
-                      :class="{ required: row.worker.workerType == 'CONTRACTOR' && !row.worker.hourRate }"
-                      @input="handleMoneyInput($event, row, 'hourRate')"
+                      :disabled="!row.worker.contractType || row.worker.contractType == ContractType.INTERNAL"
+                      :class="{ required: row.worker.contractType == ContractType.CONTRACTOR && !row.worker.hourRate }"
+                      @input="handleMoneyInput($event, row.worker, 'hourRate')"
                       @change="row._isEdited = true"
                     />
                   </template>
                   <template v-else>
-                    {{ row.worker.hourRate ? `${row.worker.hourRate.toFixed(2)} €` : '-' }}
+                    {{ formatCurrency(row.worker.hourRate) }}
+                  </template>
+                </td>
+
+                <!-- MONTHLY SALARY -->
+                <td>
+                  <template v-if="rowHasChanges(row)">
+                    <input
+                      :value="row.worker.monthlySalary?.toFixed(2)"
+                      type="text"
+                      inputmode="decimal"
+                      :disabled="!row.worker.contractType || row.worker.contractType == ContractType.CONTRACTOR"
+                      :class="{
+                        required: row.worker.contractType == ContractType.INTERNAL && !row.worker.monthlySalary,
+                      }"
+                      @input="handleMoneyInput($event, row.worker, 'monthlySalary')"
+                      @change="row._isEdited = true"
+                    />
+                  </template>
+                  <template v-else>
+                    {{ formatCurrency(row.worker.monthlySalary) }}
+                  </template>
+                </td>
+
+                <!-- TSU -->
+                <td>
+                  <template v-if="rowHasChanges(row)">
+                    <input
+                      :value="row.worker.tsu?.toFixed(2)"
+                      type="text"
+                      inputmode="decimal"
+                      :disabled="!row.worker.contractType || row.worker.contractType == ContractType.CONTRACTOR"
+                      :class="{ required: row.worker.contractType == ContractType.INTERNAL && !row.worker.tsu }"
+                      @change="row._isEdited = true"
+                    />
+                  </template>
+                  <template v-else>
+                    {{ formatPercentage(row.worker.tsu) }}
+                  </template>
+                </td>
+
+                <!-- MEAL ALLOWANCE -->
+                <td>
+                  <template v-if="rowHasChanges(row)">
+                    <input
+                      :value="row.worker.mealAllowance?.toFixed(2)"
+                      type="text"
+                      inputmode="decimal"
+                      :disabled="!row.worker.contractType || row.worker.contractType == ContractType.CONTRACTOR"
+                      :class="{
+                        required:
+                          row.worker.contractType == ContractType.INTERNAL &&
+                          (row.worker.mealAllowance == undefined || row.worker.mealAllowance < 0),
+                      }"
+                      @input="handleMoneyInput($event, row.worker, 'mealAllowance')"
+                      @change="row._isEdited = true"
+                    />
+                  </template>
+                  <template v-else>
+                    {{ formatCurrency(row.worker.mealAllowance) }}
+                  </template>
+                </td>
+
+                <!-- ACCIDENT INSURANCE -->
+                <td>
+                  <template v-if="rowHasChanges(row)">
+                    <input
+                      :value="row.worker.accidentInsurance?.toFixed(2)"
+                      type="text"
+                      inputmode="decimal"
+                      :disabled="!row.worker.contractType || row.worker.contractType == ContractType.CONTRACTOR"
+                      :class="{
+                        required:
+                          row.worker.contractType == ContractType.INTERNAL &&
+                          (row.worker.accidentInsurance == undefined || row.worker.accidentInsurance < 0),
+                      }"
+                      @input="handleMoneyInput($event, row.worker, 'accidentInsurance')"
+                      @change="row._isEdited = true"
+                    />
+                  </template>
+                  <template v-else>
+                    {{ formatCurrency(row.worker.accidentInsurance) }}
+                  </template>
+                </td>
+
+                <!-- START DATE -->
+                <td>
+                  <template v-if="rowHasChanges(row)">
+                    <input
+                      v-model="row.worker.startDate"
+                      type="date"
+                      :class="{ required: !row.worker.startDate }"
+                      @change="row._isEdited = true"
+                    />
+                  </template>
+                  <template v-else>
+                    {{ row.worker.startDate ? row.worker.startDate : '-' }}
+                  </template>
+                </td>
+
+                <!-- END DATE -->
+                <td>
+                  <template v-if="rowHasChanges(row)">
+                    <input
+                      v-model="row.worker.endDate"
+                      type="date"
+                      :class="{ required: false }"
+                      @change="row._isEdited = true"
+                    />
+                  </template>
+                  <template v-else>
+                    {{ row.worker.endDate ? row.worker.endDate : '-' }}
                   </template>
                 </td>
 
@@ -244,13 +600,15 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, nextTick } from 'vue';
 import api from '@/services/api';
-import { Worker, WorkerFilters, WorkerSortField } from '@/types/worker';
+import { ContractType, Worker, WorkerFilters, WorkerSortField, WorkerStatus } from '@/types/worker';
 import { ApiResponseStatus } from '@/types/api-response-status';
 import { User, Pencil, Trash2, Check, Undo2, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
 import Toast from '@/composables/Toast.vue';
 import { SortDirection } from '@/types/sort-direction';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
 import { TableFilterKind, type TableColumnFilterConfig } from '@/types/table-filter';
+import { handleMoneyInput } from '@/utils/handle-money-input';
+import { formatCurrency, formatPercentage, isValidEmail, isValidPhone } from '@/utils/validation';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
@@ -298,30 +656,48 @@ function nextKey(): string {
 function isRowValid(row: WorkerRow) {
   return (
     row.worker.name?.trim() &&
-    row.worker.workerType?.trim() &&
-    ((row.worker.workerType === 'CONTRACTOR' && row.worker.hourRate != null && row.worker.hourRate > 0) ||
-      (row.worker.workerType === 'INTERNAL' && row.worker.monthlySalary != null && row.worker.monthlySalary > 0))
+    row.worker.status?.trim() &&
+    row.worker.contact &&
+    row.worker.email?.trim() &&
+    row.worker.function?.trim() &&
+    row.worker.defaultHours &&
+    row.worker.contractType?.trim() &&
+    row.worker.contractType?.trim() &&
+    ((row.worker.contractType == ContractType.CONTRACTOR && row.worker.hourRate != null && row.worker.hourRate > 0) ||
+      (row.worker.contractType === ContractType.INTERNAL &&
+        row.worker.monthlySalary != null &&
+        row.worker.monthlySalary > 0 &&
+        row.worker.tsu != null &&
+        row.worker.tsu > 0 &&
+        row.worker.mealAllowance != null &&
+        row.worker.mealAllowance >= 0 &&
+        row.worker.accidentInsurance != null &&
+        row.worker.accidentInsurance >= 0))
   );
 }
 
-function handleMoneyInput(event: Event, row: WorkerRow, field: keyof Pick<Worker, 'monthlySalary' | 'hourRate'>) {
-  const input = event.target as HTMLInputElement;
-  const digits = input.value.replace(/\D/g, '');
-  const value = Number(digits) / 100;
+function onContractTypeChanged(row: WorkerRow) {
+  row._isEdited = true;
 
-  row.worker[field] = value;
-  input.value = value.toFixed(2);
+  if (row.worker.contractType === ContractType.INTERNAL && row.worker.tsu == null) {
+    row.worker.tsu = 23.75;
+    row.worker.hourRate = undefined;
+  }
+
+  if (row.worker.contractType === ContractType.CONTRACTOR) {
+    row.worker.tsu = undefined;
+    row.worker.monthlySalary = undefined;
+    row.worker.mealAllowance = undefined;
+    row.worker.accidentInsurance = undefined;
+  }
 }
 
 async function addWorker(): Promise<void> {
   workers.value.push({
     worker: {
-      id: '',
-      name: '',
-      workerType: '',
-      hourRate: undefined,
-      monthlySalary: undefined,
-      hourCost: undefined,
+      status: WorkerStatus.ACTIVE,
+      defaultHours: 8,
+      startDate: new Date().toISOString().split('T')[0],
     },
     _key: nextKey(),
     _isNew: true,
@@ -372,6 +748,13 @@ const hasActiveTableControls = computed(() =>
 );
 
 const workerFilterConfigs = {
+  code: {
+    column: WorkerSortField.CODE,
+    label: 'ID',
+    kind: TableFilterKind.TEXT,
+    valueKey: 'code',
+    dropdownAlign: 'start',
+  },
   name: {
     column: WorkerSortField.NAME,
     label: 'Nome',
@@ -379,51 +762,109 @@ const workerFilterConfigs = {
     valueKey: 'name',
     dropdownAlign: 'start',
   },
-  workerType: {
-    column: WorkerSortField.WORKER_TYPE,
-    label: 'Tipo',
+  status: {
+    column: WorkerSortField.STATUS,
+    label: 'Estado',
     kind: TableFilterKind.SELECT,
-    valueKey: 'workerType',
+    valueKey: 'status',
+    dropdownAlign: 'start',
     options: [
-      { label: 'INTERNAL', value: 'INTERNAL' },
-      { label: 'CONTRACTOR', value: 'CONTRACTOR' },
+      { label: 'Activo', value: 'ACTIVE' },
+      { label: 'Inactivo', value: 'INACTIVE' },
     ],
   },
-  hourCost: {
-    column: WorkerSortField.HOUR_COST,
-    label: 'Custo Hora',
-    kind: TableFilterKind.NUMBER_RANGE,
-    minKey: 'minHourCost',
-    maxKey: 'maxHourCost',
+  contact: {
+    column: WorkerSortField.CONTACT,
+    label: 'Contacto',
+    kind: TableFilterKind.TEXT,
+    valueKey: 'contact',
   },
-  monthlySalary: {
-    column: WorkerSortField.MONTHLY_SALARY,
-    label: 'Salário Mensal',
+  email: {
+    column: WorkerSortField.EMAIL,
+    label: 'E-mail',
+    kind: TableFilterKind.TEXT,
+    valueKey: 'email',
+  },
+  function: {
+    column: WorkerSortField.FUNCTION,
+    label: 'Função',
+    kind: TableFilterKind.TEXT,
+    valueKey: 'function',
+  },
+  defaultHours: {
+    column: WorkerSortField.DEFAULT_HOURS,
+    label: 'Horas Dia (Padrão)',
     kind: TableFilterKind.NUMBER_RANGE,
-    minKey: 'minMonthlySalary',
-    maxKey: 'maxMonthlySalary',
+    minKey: 'defaultHoursMin',
+    maxKey: 'defaultHoursMax',
+  },
+  contractType: {
+    column: WorkerSortField.CONTRACT_TYPE,
+    label: 'Tipo de Contracto',
+    kind: TableFilterKind.SELECT,
+    valueKey: 'contractType',
+    options: [
+      { label: 'Contracto', value: 'INTERNAL' },
+      { label: 'Hora', value: 'CONTRACTOR' },
+    ],
   },
   hourRate: {
     column: WorkerSortField.HOUR_RATE,
-    label: 'Rate Hora',
+    label: 'Valor /Hora',
     kind: TableFilterKind.NUMBER_RANGE,
-    minKey: 'minHourRate',
-    maxKey: 'maxHourRate',
+    minKey: 'hourRateMin',
+    maxKey: 'hourRateMax',
+  },
+  montlhySalary: {
+    column: WorkerSortField.MONTHLY_SALARY,
+    label: 'Ordenado Base Mensal',
+    kind: TableFilterKind.NUMBER_RANGE,
+    minKey: 'montlhySalaryMin',
+    maxKey: 'montlhySalaryMax',
+  },
+  tsu: {
+    column: WorkerSortField.TSU,
+    label: 'TSU Empresa (%)',
+    kind: TableFilterKind.NUMBER_RANGE,
+    minKey: 'tsuMin',
+    maxKey: 'tsuMax',
+  },
+  mealAllowance: {
+    column: WorkerSortField.MEAL_ALLOWANCE,
+    label: 'Subsídio Alim. /Dia (€)',
+    kind: TableFilterKind.NUMBER_RANGE,
+    minKey: 'mealAllowanceMin',
+    maxKey: 'mealAllowanceMax',
+  },
+  accidentInsurance: {
+    column: WorkerSortField.ACCIDENT_INSURANCE,
+    label: 'Seguro Ac. Trabalho (€/mês)',
+    kind: TableFilterKind.NUMBER_RANGE,
+    minKey: 'accidentInsuranceMin',
+    maxKey: 'accidentInsuranceMax',
+  },
+  startDate: {
+    column: WorkerSortField.START_DATE,
+    label: 'Data Admissão',
+    kind: TableFilterKind.NUMBER_RANGE,
+    minKey: 'startDateMin',
+    maxKey: 'startDateMax',
+  },
+  endDate: {
+    column: WorkerSortField.END_DATE,
+    label: 'Data Cessação',
+    kind: TableFilterKind.NUMBER_RANGE,
+    minKey: 'endDateMin',
+    maxKey: 'endDateMax',
   },
 } satisfies Record<string, TableColumnFilterConfig<WorkerSortField>>;
 
-function isSorted(column: WorkerSortField, direction?: SortDirection): boolean {
-  return workerFilters.value.sortBy === column && (!direction || workerFilters.value.sortDirection === direction);
-}
-
-function toggleSort(column: WorkerSortField): void {
-  if (!isSorted(column)) {
-    workerFilters.value = { ...workerFilters.value, sortBy: column, sortDirection: SortDirection.ASC };
-  } else if (isSorted(column, SortDirection.ASC)) {
-    workerFilters.value = { ...workerFilters.value, sortDirection: SortDirection.DESC };
-  } else {
-    workerFilters.value = { ...workerFilters.value, sortBy: undefined, sortDirection: undefined };
-  }
+function setSort(event: { column: WorkerSortField; direction: SortDirection | undefined }): void {
+  workerFilters.value = {
+    ...workerFilters.value,
+    sortBy: event.direction ? event.column : undefined,
+    sortDirection: event.direction,
+  };
 
   void fetchWorkers();
 }
@@ -447,16 +888,19 @@ async function fetchWorkers() {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
 
   try {
-    const gotWorkers = await api.getAllWorkers(workerFilters.value);
+    const gotWorkers = await api.searchWorkers(workerFilters.value);
 
     workers.value = gotWorkers.map((worker) => ({
       worker: {
         ...worker,
-        hourCost: worker.hourCost ? parseFloat(worker.hourCost.toFixed(2)) : undefined,
-        monthlySalary: worker.monthlySalary ? parseFloat(worker.monthlySalary.toFixed(2)) : undefined,
+        defaultHours: worker.defaultHours ? parseFloat(worker.defaultHours.toFixed(2)) : undefined,
         hourRate: worker.hourRate ? parseFloat(worker.hourRate.toFixed(2)) : undefined,
+        monthlySalary: worker.monthlySalary ? parseFloat(worker.monthlySalary.toFixed(2)) : undefined,
+        tsu: worker.tsu ? parseFloat(worker.tsu.toFixed(2)) : undefined,
+        mealAllowance: worker.mealAllowance ? parseFloat(worker.mealAllowance.toFixed(2)) : undefined,
+        accidentInsurance: worker.accidentInsurance ? parseFloat(worker.accidentInsurance.toFixed(2)) : undefined,
       },
-      _key: worker.id ?? nextKey(),
+      _key: worker.code ?? nextKey(),
       _isNew: false,
       _isEdited: false,
       _isDeleted: false,

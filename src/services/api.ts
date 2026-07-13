@@ -112,13 +112,8 @@ class KoncepBuildApiService {
 
   //*********************************************************************************************************** WORKERS
 
-  async getAllWorkers(filters: WorkerFilters = {}): Promise<Worker[]> {
-    const params = Object.fromEntries(
-      Object.entries(filters).filter(([, value]) => value !== undefined && value !== null && value !== ''),
-    );
-
-    const response = await this.client.get('/worker/all', {
-      params,
+  async searchWorkers(filters: WorkerFilters = {}): Promise<Worker[]> {
+    const response = await this.client.post('/worker/search', filters, {
       headers: { Accept: 'application/json' },
     });
 
