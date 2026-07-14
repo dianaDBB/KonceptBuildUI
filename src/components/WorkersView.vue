@@ -599,7 +599,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, nextTick } from 'vue';
-import api from '@/services/api';
+import workerApi from '@/services/worker-api';
 import { ContractType, Worker, WorkerFilters, WorkerSortField, WorkerStatus } from '@/types/worker';
 import { ApiResponseStatus } from '@/types/api-response-status';
 import { User, Pencil, Trash2, Check, Undo2, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
@@ -720,7 +720,7 @@ async function saveWorker(row: WorkerRow): Promise<void> {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
 
   try {
-    await api.addWorker(row.worker);
+    await workerApi.addWorker(row.worker);
     await fetchWorkers();
 
     apiStatus.value = {
@@ -888,7 +888,7 @@ async function fetchWorkers() {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
 
   try {
-    const gotWorkers = await api.searchWorkers(workerFilters.value);
+    const gotWorkers = await workerApi.searchWorkers(workerFilters.value);
 
     workers.value = gotWorkers.map((worker) => ({
       worker: {

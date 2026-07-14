@@ -29,7 +29,7 @@
 import axios from 'axios';
 import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import api from '@/services/api';
+import authApi from '@/services/auth-api';
 
 const username = ref('');
 const password = ref('');
@@ -43,7 +43,7 @@ async function submit(): Promise<void> {
   errorMessage.value = '';
 
   try {
-    await api.login({ username: username.value, password: password.value });
+    await authApi.login({ username: username.value, password: password.value });
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/';
     await router.replace(redirect);
   } catch (error: unknown) {

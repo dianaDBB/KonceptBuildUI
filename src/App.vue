@@ -51,14 +51,14 @@
 import { computed, onBeforeUnmount, onMounted, onUnmounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { LogOut, User2Icon } from 'lucide-vue-next';
-import api from '@/services/api';
+import authApi from '@/services/auth-api';
 
 const route = useRoute();
 const router = useRouter();
 
-const showLogout = computed(() => route.name !== 'login' && api.isAuthenticated());
+const showLogout = computed(() => route.name !== 'login' && authApi.isAuthenticated());
 
-const username = computed(() => api.getUsername());
+const username = computed(() => authApi.getUsername());
 let interval: number;
 
 const isProfileMenuOpen = ref(false);
@@ -70,10 +70,10 @@ onBeforeUnmount(() => {
 });
 
 onMounted(() => {
-  api.checkAuthentication();
+  authApi.checkAuthentication();
 
   interval = window.setInterval(() => {
-    api.checkAuthentication();
+    authApi.checkAuthentication();
   }, 30000); // 30 seconds
 
   document.addEventListener('click', closeProfileMenuButton);
@@ -100,7 +100,7 @@ async function logout(): Promise<void> {
   isProfileMenuOpen.value = false;
 
   try {
-    await api.logout();
+    await authApi.logout();
   } finally {
     await router.replace({ name: 'login' });
   }

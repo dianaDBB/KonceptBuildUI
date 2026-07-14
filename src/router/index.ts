@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '@/components/HomeView.vue';
 import LoginView from '@/components/LoginView.vue';
 import WorkersView from '@/components/WorkersView.vue';
-import api from '@/services/api';
+import authApi from '@/services/auth-api';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -29,12 +29,12 @@ const router = createRouter({
 });
 
 router.beforeEach((to) => {
-  if (to.meta.requiresAuth && !api.isAuthenticated()) {
-    api.logout();
+  if (to.meta.requiresAuth && !authApi.isAuthenticated()) {
+    authApi.logout();
     return { name: 'login', query: { redirect: to.fullPath } };
   }
 
-  if (to.name === 'login' && api.isAuthenticated()) {
+  if (to.name === 'login' && authApi.isAuthenticated()) {
     return { name: 'home' };
   }
 });
