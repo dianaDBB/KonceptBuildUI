@@ -31,7 +31,7 @@ class AuthApi {
     localStorage.setItem(USERNAME_KEY, response.data.username || credentials.username);
   }
 
-  private clearAccessToken(): void {
+  public clearAccessToken(): void {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(USERNAME_KEY);
   }
@@ -41,6 +41,8 @@ class AuthApi {
       await client.post('/auth/logout', undefined, {
         headers: { Accept: 'application/json' },
       });
+    } catch (error: unknown) {
+      this.clearAccessToken();
     } finally {
       this.clearAccessToken();
     }

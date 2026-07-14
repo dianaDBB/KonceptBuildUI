@@ -1,12 +1,17 @@
+import { UUID } from 'node:crypto';
 import { SortDirection } from './sort-direction';
 
 export interface Worker {
+  id?: UUID;
   code?: string;
   name?: string;
+  nif?: string;
   status?: string;
-  contact?: string;
+  phoneCountryCode?: string;
+  phone?: string;
   email?: string;
   function?: string;
+  hourCost?: number;
   defaultHours?: number;
   contractType?: string;
   hourRate?: number;
@@ -21,10 +26,12 @@ export interface Worker {
 export enum WorkerSortField {
   CODE = 'CODE',
   NAME = 'NAME',
+  NIF = 'NIF',
   STATUS = 'STATUS',
-  CONTACT = 'CONTACT',
+  PHONE = 'PHONE',
   EMAIL = 'EMAIL',
   FUNCTION = 'FUNCTION',
+  HOUR_COST = 'HOUR_COST',
   DEFAULT_HOURS = 'DEFAULT_HOURS',
   CONTRACT_TYPE = 'CONTRACT_TYPE',
   HOUR_RATE = 'HOUR_RATE',
@@ -39,10 +46,13 @@ export enum WorkerSortField {
 export interface WorkerFilters {
   code?: string;
   name?: string;
+  nif?: string;
   status?: string;
-  contact?: string;
+  phone?: string;
   email?: string;
   function?: string;
+  hourCostMin?: number;
+  hourCostMax?: number;
   defaultHoursMin?: number;
   defaultHoursMax?: number;
   contractType?: string;

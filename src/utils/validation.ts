@@ -2,6 +2,10 @@ export function isValidPhone(phone?: string): boolean {
   return /^[0-9]{9}$/.test(phone ?? '');
 }
 
+export function isValidPhoneCountryCode(phoneCountryCode?: string): boolean {
+  return /^\+[1-9]\d{0,2}$/.test(phoneCountryCode ?? '');
+}
+
 export function isValidEmail(email?: string): boolean {
   if (!email) {
     return false;

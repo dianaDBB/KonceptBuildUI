@@ -14,38 +14,42 @@
         <div class="table">
           <table>
             <colgroup>
-              <col style="width: 80px" />
               <!-- code -->
-              <col style="width: 150px" />
-              <!-- name -->
               <col style="width: 90px" />
-              <!-- status -->
-              <col style="width: 95px" />
-              <!-- contact -->
+              <!-- name -->
               <col style="width: 150px" />
+              <!-- nif -->
+              <col style="width: 95px" />
+              <!-- status -->
+              <col style="width: 90px" />
+              <!-- phone -->
+              <col style="width: 140px" />
               <!-- email -->
-              <col style="width: 100px" />
+              <col style="width: 150px" />
               <!-- function -->
+              <col style="width: 100px" />
+              <!-- hourCost -->
               <col style="width: 100px" />
               <!-- defaultHours -->
               <col style="width: 100px" />
               <!-- contractType -->
-              <col style="width: 80px" />
+              <col style="width: 100px" />
               <!-- hourRate -->
-              <col style="width: 100px" />
-              <!-- monthlySalary -->
               <col style="width: 80px" />
-              <!-- tsu -->
+              <!-- monthlySalary -->
               <col style="width: 100px" />
+              <!-- tsu -->
+              <col style="width: 80px" />
               <!-- mealAllowance -->
               <col style="width: 100px" />
               <!-- accidentInsurance -->
-              <col style="width: 130px" />
+              <col style="width: 100px" />
               <!-- startDate -->
               <col style="width: 130px" />
               <!-- endDate -->
-              <col style="width: 50px" />
+              <col style="width: 130px" />
               <!-- ACTIONS -->
+              <col style="width: 50px" />
             </colgroup>
             <thead>
               <tr>
@@ -81,6 +85,21 @@
                 </th>
                 <th>
                   <div class="column-heading">
+                    NIF
+                    <TableColumnFilter
+                      :config="workerFilterConfigs.nif"
+                      :filters="workerFilters"
+                      :sort-by="workerFilters.sortBy"
+                      :sort-direction="workerFilters.sortDirection"
+                      :disabled="isEditing"
+                      @sort="setSort"
+                      @apply="applyFilterValues"
+                      @clear="clearFilterValues"
+                    />
+                  </div>
+                </th>
+                <th>
+                  <div class="column-heading">
                     Estado
                     <TableColumnFilter
                       :config="workerFilterConfigs.status"
@@ -98,7 +117,7 @@
                   <div class="column-heading">
                     Tlf
                     <TableColumnFilter
-                      :config="workerFilterConfigs.contact"
+                      :config="workerFilterConfigs.phone"
                       :filters="workerFilters"
                       :sort-by="workerFilters.sortBy"
                       :sort-direction="workerFilters.sortDirection"
@@ -129,6 +148,23 @@
                     Função
                     <TableColumnFilter
                       :config="workerFilterConfigs.function"
+                      :filters="workerFilters"
+                      :sort-by="workerFilters.sortBy"
+                      :sort-direction="workerFilters.sortDirection"
+                      :disabled="isEditing"
+                      @sort="setSort"
+                      @apply="applyFilterValues"
+                      @clear="clearFilterValues"
+                    />
+                  </div>
+                </th>
+                <th>
+                  <div class="column-heading">
+                    Valor <br />
+                    Hora <br />
+                    Base (€)
+                    <TableColumnFilter
+                      :config="workerFilterConfigs.hourCost"
                       :filters="workerFilters"
                       :sort-by="workerFilters.sortBy"
                       :sort-direction="workerFilters.sortDirection"
@@ -302,7 +338,12 @@
               </tr>
             </thead>
             <tbody ref="tableBody">
-              <tr v-for="row in workers" :key="row._key" :class="{ deleted: row._isDeleted }">
+              <tr
+                v-for="row in workers"
+                :key="row._key"
+                :class="{ disabled: !workerIsActive(row) }"
+                @dblclick="startEditWorker(row)"
+              >
                 <!-- CODE -->
                 <td>
                   <template v-if="rowHasChanges(row)">
@@ -314,7 +355,7 @@
                 </td>
 
                 <!-- NAME -->
-                <td>
+                <td :class="{ highlight: workerIsActive(row) }">
                   <template v-if="rowHasChanges(row)">
                     <input
                       v-model="row.worker.name"
@@ -325,6 +366,21 @@
                   </template>
                   <template v-else>
                     {{ row.worker.name }}
+                  </template>
+                </td>
+
+                <!-- NIF -->
+                <td>
+                  <template v-if="rowHasChanges(row)">
+                    <input
+                      v-model="row.worker.nif"
+                      type="text"
+                      :class="{ required: !row.worker.nif }"
+                      @change="row._isEdited = true"
+                    />
+                  </template>
+                  <template v-else>
+                    {{ row.worker.nif }}
                   </template>
                 </td>
 
@@ -346,21 +402,34 @@
                   </template>
                 </td>
 
-                <!-- CONTACT -->
+                <!-- PHONE -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <input
-                      v-model="row.worker.contact"
-                      type="tel"
-                      pattern="[0-9]{9}"
-                      maxlength="9"
-                      inputmode="numeric"
-                      :class="{ required: !isValidPhone(row.worker.contact) }"
-                      @change="row._isEdited = true"
-                    />
+                    <div class="phone-input">
+                      <input
+                        v-model="row.worker.phoneCountryCode"
+                        pattern="[0-9]{9}"
+                        maxlength="4"
+                        inputmode="text"
+                        placeholder="+351"
+                        class="country-code"
+                        :class="{ required: !isValidPhoneCountryCode(row.worker.phoneCountryCode) }"
+                        @change="row._isEdited = true"
+                      />
+                      <input
+                        v-model="row.worker.phone"
+                        type="tel"
+                        pattern="[0-9]{9}"
+                        maxlength="9"
+                        inputmode="numeric"
+                        class="phone-number"
+                        :class="{ required: !isValidPhone(row.worker.phone) }"
+                        @change="row._isEdited = true"
+                      />
+                    </div>
                   </template>
                   <template v-else>
-                    {{ row.worker.contact }}
+                    {{ `${row.worker.phoneCountryCode} ${row.worker.phone}` }}
                   </template>
                 </td>
 
@@ -391,6 +460,22 @@
                   </template>
                   <template v-else>
                     {{ row.worker.function }}
+                  </template>
+                </td>
+
+                <!-- HOUR COST -->
+                <td :class="{ highlight: workerIsActive(row) }">
+                  <template v-if="rowHasChanges(row)">
+                    <input
+                      :value="row.worker.hourCost?.toFixed(2)"
+                      type="text"
+                      inputmode="decimal"
+                      :disabled="true"
+                      :class="{ required: false }"
+                    />
+                  </template>
+                  <template v-else>
+                    {{ formatCurrency(row.worker.hourCost) }}
                   </template>
                 </td>
 
@@ -560,8 +645,8 @@
                 <!-- ACTIONS -->
                 <td>
                   <div v-if="!rowHasChanges(row)" class="action-buttons">
-                    <button :disabled="isEditing"><Trash2 :size="16" /></button>
-                    <button :disabled="isEditing" @click="editWorker(row)">
+                    <button :disabled="isEditing" @click="askDelete(row)"><Trash2 :size="16" /></button>
+                    <button :disabled="isEditing" @click="startEditWorker(row)">
                       <Pencil :size="16" />
                     </button>
                   </div>
@@ -584,7 +669,9 @@
         </div>
 
         <div class="actions">
-          <button :disabled="isEditing" @click="addWorker"><Plus :size="18" /> Adicionar Colaborador</button>
+          <button :disabled="isEditing || apiStatus.isLoading" @click="addWorker">
+            <Plus :size="18" /> Adicionar Colaborador
+          </button>
         </div>
 
         <Toast
@@ -595,6 +682,16 @@
       </div>
     </div>
   </div>
+
+  <!-- delete dialog-->
+  <ConfirmDialog
+    v-model="showDeleteDialog"
+    title="Eliminar colaborador"
+    :message="`Tem a certeza que quer eliminar definitivamente o colaborador '${workerToDelete?.worker.name}' com o NIF ${workerToDelete?.worker.nif}?`"
+    confirm-text="Apagar"
+    cancel-text="Cancelar"
+    @confirm="confirmDelete"
+  />
 </template>
 
 <script setup lang="ts">
@@ -608,18 +705,40 @@ import { SortDirection } from '@/types/sort-direction';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
 import { TableFilterKind, type TableColumnFilterConfig } from '@/types/table-filter';
 import { handleMoneyInput } from '@/utils/handle-money-input';
-import { formatCurrency, formatPercentage, isValidEmail, isValidPhone } from '@/utils/validation';
+import {
+  formatCurrency,
+  formatPercentage,
+  isValidEmail,
+  isValidPhone,
+  isValidPhoneCountryCode,
+} from '@/utils/validation';
+import ConfirmDialog from '@/composables/ConfirmDialog.vue';
+import axios from 'axios';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
-const isEditing = computed(() => workers.value.some((row) => row._isNew || row._isEdited));
-
 const tableBody = ref<HTMLTableSectionElement | null>(null);
 
-function editWorker(row: WorkerRow) {
-  row._isEdited = true;
+/******************************************************************************************************** ROW ACTIONS */
 
-  row._original = structuredClone({ ...row.worker });
+interface WorkerRow {
+  worker: Worker;
+  _key: string;
+  _isNew: boolean;
+  _isEdited: boolean;
+  _original?: Worker;
+}
+
+const workers = ref<WorkerRow[]>([]);
+const isEditing = computed(() => workers.value.some((row) => row._isNew || row._isEdited));
+let _keyCounter = 0;
+
+function nextKey(): string {
+  return `row-${++_keyCounter}`;
+}
+
+function rowHasChanges(row: WorkerRow) {
+  return row._isNew || row._isEdited;
 }
 
 function discardRow(row: WorkerRow) {
@@ -629,35 +748,14 @@ function discardRow(row: WorkerRow) {
     row.worker = row._original!;
     row._isNew = false;
     row._isEdited = false;
-    row._isDeleted = false;
   }
-}
-
-function rowHasChanges(row: WorkerRow) {
-  return row._isNew || row._isEdited || row._isDeleted;
-}
-
-interface WorkerRow {
-  worker: Worker;
-  _key: string;
-  _isNew: boolean;
-  _isEdited: boolean;
-  _isDeleted: boolean;
-  _original?: Worker;
-}
-
-const workers = ref<WorkerRow[]>([]);
-
-let _keyCounter = 0;
-function nextKey(): string {
-  return `row-${++_keyCounter}`;
 }
 
 function isRowValid(row: WorkerRow) {
   return (
     row.worker.name?.trim() &&
     row.worker.status?.trim() &&
-    row.worker.contact &&
+    row.worker.phone &&
     row.worker.email?.trim() &&
     row.worker.function?.trim() &&
     row.worker.defaultHours &&
@@ -676,6 +774,47 @@ function isRowValid(row: WorkerRow) {
   );
 }
 
+function workerIsActive(row: WorkerRow) {
+  return row.worker.status == WorkerStatus.ACTIVE;
+}
+
+/**************************************************************************************************************** GET */
+
+async function fetchWorkers() {
+  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
+
+  try {
+    const gotWorkers = await workerApi.searchWorkers(workerFilters.value);
+
+    workers.value = gotWorkers.map((worker) => ({
+      worker: {
+        ...worker,
+      },
+      _key: worker.code ?? nextKey(),
+      _isNew: false,
+      _isEdited: false,
+      _isDeleted: false,
+    }));
+
+    apiStatus.value = { isLoading: false, isSuccess: true, isError: false };
+  } catch (error: unknown) {
+    apiStatus.value = {
+      isLoading: false,
+      isSuccess: false,
+      isError: true,
+      message: error instanceof Error ? error.message : 'Could not load workers.',
+    };
+  }
+}
+
+/*************************************************************************************************************** EDIT */
+
+function startEditWorker(row: WorkerRow) {
+  row._isEdited = true;
+
+  row._original = structuredClone({ ...row.worker });
+}
+
 function onContractTypeChanged(row: WorkerRow) {
   row._isEdited = true;
 
@@ -692,17 +831,19 @@ function onContractTypeChanged(row: WorkerRow) {
   }
 }
 
+/**************************************************************************************************************** ADD */
+
 async function addWorker(): Promise<void> {
   workers.value.push({
     worker: {
       status: WorkerStatus.ACTIVE,
+      phoneCountryCode: '+351',
       defaultHours: 8,
       startDate: new Date().toISOString().split('T')[0],
     },
     _key: nextKey(),
     _isNew: true,
     _isEdited: false,
-    _isDeleted: false,
   });
 
   await nextTick();
@@ -716,30 +857,93 @@ async function addWorker(): Promise<void> {
   (lastRow?.querySelector('input') as HTMLInputElement)?.focus();
 }
 
+/*************************************************************************************************************** SAVE */
+
 async function saveWorker(row: WorkerRow): Promise<void> {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
 
   try {
-    await workerApi.addWorker(row.worker);
+    if (row._isNew) {
+      await workerApi.addWorker(row.worker);
+    }
+
+    if (row._isEdited) {
+      await workerApi.editWorker(row.worker);
+    }
+
     await fetchWorkers();
 
     apiStatus.value = {
       isLoading: false,
       isSuccess: true,
       isError: false,
-      message: 'Workers added successfully.',
+      message: 'Worker saved successfully.',
     };
   } catch (error: unknown) {
+    let message = 'Failed to save worker.';
+
+    if (axios.isAxiosError(error)) {
+      message = error.response?.data?.message ?? error.message;
+    } else if (error instanceof Error) {
+      message = error.message;
+    }
     apiStatus.value = {
       isLoading: false,
       isSuccess: false,
       isError: true,
-      message: error instanceof Error ? error.message : 'Failed to add workers.',
+      message: message,
     };
   }
 }
 
-/** FILTERS */
+/************************************************************************************************************* DELETE */
+
+const showDeleteDialog = ref(false);
+const workerToDelete = ref<WorkerRow | null>(null);
+
+function askDelete(row: WorkerRow) {
+  workerToDelete.value = row;
+  showDeleteDialog.value = true;
+}
+
+async function confirmDelete(): Promise<void> {
+  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
+
+  try {
+    if (!workerToDelete.value?.worker.id) {
+      return;
+    }
+
+    await workerApi.deleteWorker(workerToDelete.value.worker.id);
+    await fetchWorkers();
+
+    apiStatus.value = {
+      isLoading: false,
+      isSuccess: true,
+      isError: false,
+      message: 'Worker deleted successfully.',
+    };
+
+    showDeleteDialog.value = false;
+    workerToDelete.value = null;
+  } catch (error: unknown) {
+    let message = 'Failed to delete worker.';
+
+    if (axios.isAxiosError(error)) {
+      message = error.response?.data?.message ?? error.message;
+    } else if (error instanceof Error) {
+      message = error.message;
+    }
+    apiStatus.value = {
+      isLoading: false,
+      isSuccess: false,
+      isError: true,
+      message: message,
+    };
+  }
+}
+
+/************************************************************************************************************ FILTERS */
 
 const workerFilters = ref<WorkerFilters>({});
 
@@ -762,22 +966,28 @@ const workerFilterConfigs = {
     valueKey: 'name',
     dropdownAlign: 'start',
   },
+  nif: {
+    column: WorkerSortField.NIF,
+    label: 'Nif',
+    kind: TableFilterKind.TEXT,
+    valueKey: 'nif',
+    dropdownAlign: 'start',
+  },
   status: {
     column: WorkerSortField.STATUS,
     label: 'Estado',
     kind: TableFilterKind.SELECT,
     valueKey: 'status',
-    dropdownAlign: 'start',
     options: [
       { label: 'Activo', value: 'ACTIVE' },
       { label: 'Inactivo', value: 'INACTIVE' },
     ],
   },
-  contact: {
-    column: WorkerSortField.CONTACT,
-    label: 'Contacto',
+  phone: {
+    column: WorkerSortField.PHONE,
+    label: 'Tlf',
     kind: TableFilterKind.TEXT,
-    valueKey: 'contact',
+    valueKey: 'phone',
   },
   email: {
     column: WorkerSortField.EMAIL,
@@ -790,6 +1000,13 @@ const workerFilterConfigs = {
     label: 'Função',
     kind: TableFilterKind.TEXT,
     valueKey: 'function',
+  },
+  hourCost: {
+    column: WorkerSortField.HOUR_COST,
+    label: 'Valor/Hora Base',
+    kind: TableFilterKind.NUMBER_RANGE,
+    minKey: 'hourCostMin',
+    maxKey: 'hourCostMax',
   },
   defaultHours: {
     column: WorkerSortField.DEFAULT_HOURS,
@@ -866,58 +1083,41 @@ function setSort(event: { column: WorkerSortField; direction: SortDirection | un
     sortDirection: event.direction,
   };
 
-  void fetchWorkers();
+  fetchWorkers();
 }
 
 function applyFilterValues(values: Record<string, unknown>): void {
   workerFilters.value = { ...workerFilters.value, ...(values as Partial<WorkerFilters>) };
-  void fetchWorkers();
+
+  fetchWorkers();
 }
 
 function clearFilterValues(values: Record<string, unknown>): void {
   workerFilters.value = { ...workerFilters.value, ...(values as Partial<WorkerFilters>) };
-  void fetchWorkers();
+
+  fetchWorkers();
 }
 
 function clearAllTableControls(): void {
   workerFilters.value = {};
+
   void fetchWorkers();
-}
-
-async function fetchWorkers() {
-  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
-
-  try {
-    const gotWorkers = await workerApi.searchWorkers(workerFilters.value);
-
-    workers.value = gotWorkers.map((worker) => ({
-      worker: {
-        ...worker,
-        defaultHours: worker.defaultHours ? parseFloat(worker.defaultHours.toFixed(2)) : undefined,
-        hourRate: worker.hourRate ? parseFloat(worker.hourRate.toFixed(2)) : undefined,
-        monthlySalary: worker.monthlySalary ? parseFloat(worker.monthlySalary.toFixed(2)) : undefined,
-        tsu: worker.tsu ? parseFloat(worker.tsu.toFixed(2)) : undefined,
-        mealAllowance: worker.mealAllowance ? parseFloat(worker.mealAllowance.toFixed(2)) : undefined,
-        accidentInsurance: worker.accidentInsurance ? parseFloat(worker.accidentInsurance.toFixed(2)) : undefined,
-      },
-      _key: worker.code ?? nextKey(),
-      _isNew: false,
-      _isEdited: false,
-      _isDeleted: false,
-    }));
-
-    apiStatus.value = { isLoading: false, isSuccess: true, isError: false };
-  } catch (error: unknown) {
-    apiStatus.value = {
-      isLoading: false,
-      isSuccess: false,
-      isError: true,
-      message: error instanceof Error ? error.message : 'Could not load workers.',
-    };
-  }
 }
 
 onMounted(fetchWorkers);
 </script>
+<style scoped lang="scss">
+.phone-input {
+  display: flex;
+}
 
-<style scoped lang="scss"></style>
+.country-code {
+  width: 40px;
+  border-right: none;
+  border-radius: 4px 0 0 4px;
+}
+
+.phone-number {
+  border-radius: 0 4px 4px 0;
+}
+</style>
