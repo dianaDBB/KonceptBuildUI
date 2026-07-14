@@ -9,15 +9,15 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
+      path: '/login',
+      name: 'login',
+      component: LoginView,
+    },
+    {
       path: '/',
       name: 'home',
       component: HomeView,
       meta: { requiresAuth: true },
-    },
-    {
-      path: '/login',
-      name: 'login',
-      component: LoginView,
     },
     {
       path: '/hr/workers',
@@ -30,6 +30,7 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   if (to.meta.requiresAuth && !api.isAuthenticated()) {
+    api.logout();
     return { name: 'login', query: { redirect: to.fullPath } };
   }
 

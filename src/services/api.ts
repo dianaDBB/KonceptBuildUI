@@ -40,7 +40,6 @@ class KoncepBuildApiService {
         return config;
       },
       (error) => {
-        console.error('Request error:', error);
         return Promise.reject(error);
       },
     );
@@ -50,11 +49,6 @@ class KoncepBuildApiService {
         return response;
       },
       (error) => {
-        console.error('Response error:', error);
-        if (error.code === 'ERR_NETWORK') {
-          console.error('Network error - API might not be reachable at', API_BASE_URL);
-        }
-
         if (error.response?.status === 401) {
           this.clearAccessToken();
 
@@ -81,6 +75,20 @@ class KoncepBuildApiService {
     return Boolean(this.getAccessToken());
   }
 
+  async login(credentials: LoginCredentials): Promise<void> {
+    const response = await this.client.post<LoginResponse>('/auth/login', credentials, {
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    });
+
+    const accessToken = response.data.accessToken;
+    if (!accessToken) {
+      throw new Error('Login response did not include an access token.');
+    }
+
+    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    localStorage.setItem(USERNAME_KEY, response.data.username || credentials.username);
+  }
+
   private clearAccessToken(): void {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(USERNAME_KEY);
@@ -96,18 +104,25 @@ class KoncepBuildApiService {
     }
   }
 
-  async login(credentials: LoginCredentials): Promise<void> {
-    const response = await this.client.post<LoginResponse>('/auth/login', credentials, {
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    });
-
-    const accessToken = response.data.accessToken;
-    if (!accessToken) {
-      throw new Error('Login response did not include an access token.');
+  isTokenExpired(token: string | null): boolean {
+    if (token == null) {
+      return true;
     }
 
-    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
-    localStorage.setItem(USERNAME_KEY, response.data.username || credentials.username);
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.exp * 1000 <= Date.now();
+    } catch {
+      return true;
+    }
+  }
+
+  async checkAuthentication() {
+    const token = this.getAccessToken();
+
+    if (this.isTokenExpired(token)) {
+      await this.logout();
+    }
   }
 
   //*********************************************************************************************************** WORKERS

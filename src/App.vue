@@ -48,39 +48,53 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, onUnmounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { LogOut, User2Icon } from 'lucide-vue-next';
 import api from '@/services/api';
 
 const route = useRoute();
 const router = useRouter();
+
 const showLogout = computed(() => route.name !== 'login' && api.isAuthenticated());
-const username = computed(() => api.getUsername() || 'KonceptBuild user');
+
+const username = computed(() => api.getUsername());
+let interval: number;
+
 const isProfileMenuOpen = ref(false);
 const profileMenu = ref<HTMLElement | null>(null);
 
-function closeProfileMenu(event: MouseEvent): void {
+onBeforeUnmount(() => {
+  document.removeEventListener('click', closeProfileMenuButton);
+  document.removeEventListener('keydown', closeProfileMenuEscape);
+});
+
+onMounted(() => {
+  api.checkAuthentication();
+
+  interval = window.setInterval(() => {
+    api.checkAuthentication();
+  }, 30000); // 30 seconds
+
+  document.addEventListener('click', closeProfileMenuButton);
+  document.addEventListener('keydown', closeProfileMenuEscape);
+});
+
+onUnmounted(() => {
+  clearInterval(interval);
+});
+
+function closeProfileMenuButton(event: MouseEvent): void {
   if (!profileMenu.value?.contains(event.target as Node)) {
     isProfileMenuOpen.value = false;
   }
 }
 
-function closeOnEscape(event: KeyboardEvent): void {
+function closeProfileMenuEscape(event: KeyboardEvent): void {
   if (event.key === 'Escape') {
     isProfileMenuOpen.value = false;
   }
 }
-
-onMounted(() => {
-  document.addEventListener('click', closeProfileMenu);
-  document.addEventListener('keydown', closeOnEscape);
-});
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', closeProfileMenu);
-  document.removeEventListener('keydown', closeOnEscape);
-});
 
 async function logout(): Promise<void> {
   isProfileMenuOpen.value = false;
