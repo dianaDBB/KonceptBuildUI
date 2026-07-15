@@ -1,4 +1,4 @@
-import client from './api';
+import axiosClient from './api';
 import { LoginCredentials, LoginResponse } from '@/types/authentication';
 
 const ACCESS_TOKEN_KEY = 'konceptbuild.accessToken';
@@ -18,7 +18,7 @@ class AuthApi {
   }
 
   async login(credentials: LoginCredentials): Promise<void> {
-    const response = await client.post<LoginResponse>('/auth/login', credentials, {
+    const response = await axiosClient.post<LoginResponse>('/auth/login', credentials, {
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     });
 
@@ -38,10 +38,10 @@ class AuthApi {
 
   async logout(): Promise<void> {
     try {
-      await client.post('/auth/logout', undefined, {
+      await axiosClient.post('/auth/logout', undefined, {
         headers: { Accept: 'application/json' },
       });
-    } catch (error: unknown) {
+    } catch {
       this.clearAccessToken();
     } finally {
       this.clearAccessToken();

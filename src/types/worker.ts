@@ -75,30 +75,16 @@ export interface WorkerFilters {
   sortDirection?: SortDirection;
 }
 
-export class WorkerStatus {
-  static readonly ACTIVE = 'ACTIVE';
-  static readonly INACTIVE = 'INACTIVE';
-
-  static readonly OPTIONS = [
-    { value: 'ACTIVE', label: 'Activo' },
-    { value: 'INACTIVE', label: 'Inactivo' },
-  ];
-
-  static getLabel(value?: string): string {
-    return WorkerStatus.OPTIONS.find((option) => option.value === value)?.label ?? '';
-  }
-}
-
-export class ContractType {
+export class WorkerContractType {
   static readonly INTERNAL = 'INTERNAL';
   static readonly CONTRACTOR = 'CONTRACTOR';
 
   static readonly OPTIONS = [
-    { value: ContractType.INTERNAL, label: 'Contracto' },
-    { value: ContractType.CONTRACTOR, label: 'Hora' },
+    { value: WorkerContractType.INTERNAL, label: 'Contracto' },
+    { value: WorkerContractType.CONTRACTOR, label: 'Hora' },
   ];
 
   static getLabel(value?: string): string {
-    return ContractType.OPTIONS.find((option) => option.value === value)?.label ?? '';
+    return WorkerContractType.OPTIONS.find((option) => option.value === value)?.label ?? '';
   }
 }

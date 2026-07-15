@@ -1,11 +1,11 @@
 import { Worker, WorkerFilters } from '@/types/worker';
-import client from './api';
+import axiosClient from './api';
 import { UUID } from 'crypto';
 import { WorkerPayload } from './payload/worker-payload';
 
 class WorkerApi {
   async searchWorkers(filters: WorkerFilters = {}): Promise<Worker[]> {
-    const response = await client.post('/worker/search', filters, {
+    const response = await axiosClient.post('/worker/search', filters, {
       headers: { Accept: 'application/json' },
     });
 
@@ -32,7 +32,7 @@ class WorkerApi {
       endDate: worker.endDate,
     };
 
-    await client.post('/worker/', payload, {
+    await axiosClient.post('/worker/', payload, {
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     });
   }
@@ -58,13 +58,13 @@ class WorkerApi {
       endDate: worker.endDate,
     };
 
-    await client.put('/worker/', payload, {
+    await axiosClient.put('/worker/', payload, {
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     });
   }
 
   async deleteWorker(id: UUID): Promise<void> {
-    await client.delete(`/worker/${id}`, {
+    await axiosClient.delete(`/worker/${id}`, {
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     });
   }

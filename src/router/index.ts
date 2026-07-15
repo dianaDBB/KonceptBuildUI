@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '@/components/HomeView.vue';
 import LoginView from '@/components/LoginView.vue';
 import WorkersView from '@/components/WorkersView.vue';
+import ClientsView from '@/components/ClientsView.vue';
 import authApi from '@/services/auth-api';
 
 const router = createRouter({
@@ -17,6 +18,12 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/sales/clients',
+      name: 'clients',
+      component: ClientsView,
       meta: { requiresAuth: true },
     },
     {

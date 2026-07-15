@@ -3,12 +3,12 @@ import AuthApi from './auth-api';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-const client = axios.create({
+const axiosClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000,
 });
 
-client.interceptors.request.use((config) => {
+axiosClient.interceptors.request.use((config) => {
   const token = AuthApi.getAccessToken();
 
   if (token && config.url !== '/auth/login') {
@@ -18,7 +18,7 @@ client.interceptors.request.use((config) => {
   return config;
 });
 
-client.interceptors.response.use(
+axiosClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
@@ -33,4 +33,4 @@ client.interceptors.response.use(
   },
 );
 
-export default client;
+export default axiosClient;

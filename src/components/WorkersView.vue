@@ -357,12 +357,7 @@
                 <!-- NAME -->
                 <td :class="{ highlight: workerIsActive(row) }">
                   <template v-if="rowHasChanges(row)">
-                    <input
-                      v-model="row.worker.name"
-                      type="text"
-                      :class="{ required: !row.worker.name }"
-                      @change="row._isEdited = true"
-                    />
+                    <input v-model="row.worker.name" type="text" :class="{ required: !row.worker.name }" />
                   </template>
                   <template v-else>
                     {{ row.worker.name }}
@@ -372,12 +367,7 @@
                 <!-- NIF -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <input
-                      v-model="row.worker.nif"
-                      type="text"
-                      :class="{ required: !row.worker.nif }"
-                      @change="row._isEdited = true"
-                    />
+                    <input v-model="row.worker.nif" type="text" :class="{ required: !row.worker.nif }" />
                   </template>
                   <template v-else>
                     {{ row.worker.nif }}
@@ -387,18 +377,14 @@
                 <!-- STATUS -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <select
-                      v-model="row.worker.status"
-                      :class="{ required: !row.worker.status }"
-                      @change="row._isEdited = true"
-                    >
-                      <option v-for="status in WorkerStatus.OPTIONS" :key="status.value" :value="status.value">
+                    <select v-model="row.worker.status" :class="{ required: !row.worker.status }">
+                      <option v-for="status in Status.OPTIONS" :key="status.value" :value="status.value">
                         {{ status.label }}
                       </option>
                     </select>
                   </template>
                   <template v-else>
-                    {{ WorkerStatus.getLabel(row.worker.status) }}
+                    {{ Status.getLabel(row.worker.status) }}
                   </template>
                 </td>
 
@@ -414,7 +400,6 @@
                         placeholder="+351"
                         class="country-code"
                         :class="{ required: !isValidPhoneCountryCode(row.worker.phoneCountryCode) }"
-                        @change="row._isEdited = true"
                       />
                       <input
                         v-model="row.worker.phone"
@@ -424,7 +409,6 @@
                         inputmode="numeric"
                         class="phone-number"
                         :class="{ required: !isValidPhone(row.worker.phone) }"
-                        @change="row._isEdited = true"
                       />
                     </div>
                   </template>
@@ -440,7 +424,6 @@
                       v-model="row.worker.email"
                       type="email"
                       :class="{ required: !isValidEmail(row.worker.email) }"
-                      @change="row._isEdited = true"
                     />
                   </template>
                   <template v-else>
@@ -451,12 +434,7 @@
                 <!-- FUNCTION -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <input
-                      v-model="row.worker.function"
-                      type="text"
-                      :class="{ required: !row.worker.function }"
-                      @change="row._isEdited = true"
-                    />
+                    <input v-model="row.worker.function" type="text" :class="{ required: !row.worker.function }" />
                   </template>
                   <template v-else>
                     {{ row.worker.function }}
@@ -487,7 +465,6 @@
                       type="number"
                       step="0.1"
                       :class="{ required: !row.worker.defaultHours }"
-                      @change="row._isEdited = true"
                     />
                   </template>
                   <template v-else>
@@ -503,13 +480,13 @@
                       :class="{ required: !row.worker.contractType }"
                       @change="onContractTypeChanged(row)"
                     >
-                      <option v-for="type in ContractType.OPTIONS" :key="type.value" :value="type.value">
+                      <option v-for="type in WorkerContractType.OPTIONS" :key="type.value" :value="type.value">
                         {{ type.label }}
                       </option>
                     </select>
                   </template>
                   <template v-else>
-                    {{ ContractType.getLabel(row.worker.contractType) }}
+                    {{ WorkerContractType.getLabel(row.worker.contractType) }}
                   </template>
                 </td>
 
@@ -520,10 +497,11 @@
                       :value="row.worker.hourRate?.toFixed(2)"
                       type="text"
                       inputmode="decimal"
-                      :disabled="!row.worker.contractType || row.worker.contractType == ContractType.INTERNAL"
-                      :class="{ required: row.worker.contractType == ContractType.CONTRACTOR && !row.worker.hourRate }"
+                      :disabled="!row.worker.contractType || row.worker.contractType == WorkerContractType.INTERNAL"
+                      :class="{
+                        required: row.worker.contractType == WorkerContractType.CONTRACTOR && !row.worker.hourRate,
+                      }"
                       @input="handleMoneyInput($event, row.worker, 'hourRate')"
-                      @change="row._isEdited = true"
                     />
                   </template>
                   <template v-else>
@@ -538,12 +516,11 @@
                       :value="row.worker.monthlySalary?.toFixed(2)"
                       type="text"
                       inputmode="decimal"
-                      :disabled="!row.worker.contractType || row.worker.contractType == ContractType.CONTRACTOR"
+                      :disabled="!row.worker.contractType || row.worker.contractType == WorkerContractType.CONTRACTOR"
                       :class="{
-                        required: row.worker.contractType == ContractType.INTERNAL && !row.worker.monthlySalary,
+                        required: row.worker.contractType == WorkerContractType.INTERNAL && !row.worker.monthlySalary,
                       }"
                       @input="handleMoneyInput($event, row.worker, 'monthlySalary')"
-                      @change="row._isEdited = true"
                     />
                   </template>
                   <template v-else>
@@ -558,9 +535,8 @@
                       :value="row.worker.tsu?.toFixed(2)"
                       type="text"
                       inputmode="decimal"
-                      :disabled="!row.worker.contractType || row.worker.contractType == ContractType.CONTRACTOR"
-                      :class="{ required: row.worker.contractType == ContractType.INTERNAL && !row.worker.tsu }"
-                      @change="row._isEdited = true"
+                      :disabled="!row.worker.contractType || row.worker.contractType == WorkerContractType.CONTRACTOR"
+                      :class="{ required: row.worker.contractType == WorkerContractType.INTERNAL && !row.worker.tsu }"
                     />
                   </template>
                   <template v-else>
@@ -575,14 +551,13 @@
                       :value="row.worker.mealAllowance?.toFixed(2)"
                       type="text"
                       inputmode="decimal"
-                      :disabled="!row.worker.contractType || row.worker.contractType == ContractType.CONTRACTOR"
+                      :disabled="!row.worker.contractType || row.worker.contractType == WorkerContractType.CONTRACTOR"
                       :class="{
                         required:
-                          row.worker.contractType == ContractType.INTERNAL &&
+                          row.worker.contractType == WorkerContractType.INTERNAL &&
                           (row.worker.mealAllowance == undefined || row.worker.mealAllowance < 0),
                       }"
                       @input="handleMoneyInput($event, row.worker, 'mealAllowance')"
-                      @change="row._isEdited = true"
                     />
                   </template>
                   <template v-else>
@@ -597,14 +572,13 @@
                       :value="row.worker.accidentInsurance?.toFixed(2)"
                       type="text"
                       inputmode="decimal"
-                      :disabled="!row.worker.contractType || row.worker.contractType == ContractType.CONTRACTOR"
+                      :disabled="!row.worker.contractType || row.worker.contractType == WorkerContractType.CONTRACTOR"
                       :class="{
                         required:
-                          row.worker.contractType == ContractType.INTERNAL &&
+                          row.worker.contractType == WorkerContractType.INTERNAL &&
                           (row.worker.accidentInsurance == undefined || row.worker.accidentInsurance < 0),
                       }"
                       @input="handleMoneyInput($event, row.worker, 'accidentInsurance')"
-                      @change="row._isEdited = true"
                     />
                   </template>
                   <template v-else>
@@ -615,12 +589,7 @@
                 <!-- START DATE -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <input
-                      v-model="row.worker.startDate"
-                      type="date"
-                      :class="{ required: !row.worker.startDate }"
-                      @change="row._isEdited = true"
-                    />
+                    <input v-model="row.worker.startDate" type="date" :class="{ required: !row.worker.startDate }" />
                   </template>
                   <template v-else>
                     {{ row.worker.startDate ? row.worker.startDate : '-' }}
@@ -630,12 +599,7 @@
                 <!-- END DATE -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <input
-                      v-model="row.worker.endDate"
-                      type="date"
-                      :class="{ required: false }"
-                      @change="row._isEdited = true"
-                    />
+                    <input v-model="row.worker.endDate" type="date" :class="{ required: false }" />
                   </template>
                   <template v-else>
                     {{ row.worker.endDate ? row.worker.endDate : '-' }}
@@ -697,7 +661,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, nextTick } from 'vue';
 import workerApi from '@/services/worker-api';
-import { ContractType, Worker, WorkerFilters, WorkerSortField, WorkerStatus } from '@/types/worker';
+import { WorkerContractType, Worker, WorkerFilters, WorkerSortField } from '@/types/worker';
 import { ApiResponseStatus } from '@/types/api-response-status';
 import { User, Pencil, Trash2, Check, Undo2, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
 import Toast from '@/composables/Toast.vue';
@@ -714,6 +678,7 @@ import {
 } from '@/utils/validation';
 import ConfirmDialog from '@/composables/ConfirmDialog.vue';
 import axios from 'axios';
+import { Status } from '@/types/status';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
@@ -755,14 +720,17 @@ function isRowValid(row: WorkerRow) {
   return (
     row.worker.name?.trim() &&
     row.worker.status?.trim() &&
+    row.worker.nif?.trim() &&
     row.worker.phone &&
     row.worker.email?.trim() &&
     row.worker.function?.trim() &&
     row.worker.defaultHours &&
     row.worker.contractType?.trim() &&
     row.worker.contractType?.trim() &&
-    ((row.worker.contractType == ContractType.CONTRACTOR && row.worker.hourRate != null && row.worker.hourRate > 0) ||
-      (row.worker.contractType === ContractType.INTERNAL &&
+    ((row.worker.contractType == WorkerContractType.CONTRACTOR &&
+      row.worker.hourRate != null &&
+      row.worker.hourRate > 0) ||
+      (row.worker.contractType === WorkerContractType.INTERNAL &&
         row.worker.monthlySalary != null &&
         row.worker.monthlySalary > 0 &&
         row.worker.tsu != null &&
@@ -775,7 +743,7 @@ function isRowValid(row: WorkerRow) {
 }
 
 function workerIsActive(row: WorkerRow) {
-  return row.worker.status == WorkerStatus.ACTIVE;
+  return row.worker.status == Status.ACTIVE;
 }
 
 /**************************************************************************************************************** GET */
@@ -818,12 +786,12 @@ function startEditWorker(row: WorkerRow) {
 function onContractTypeChanged(row: WorkerRow) {
   row._isEdited = true;
 
-  if (row.worker.contractType === ContractType.INTERNAL && row.worker.tsu == null) {
+  if (row.worker.contractType === WorkerContractType.INTERNAL && row.worker.tsu == null) {
     row.worker.tsu = 23.75;
     row.worker.hourRate = undefined;
   }
 
-  if (row.worker.contractType === ContractType.CONTRACTOR) {
+  if (row.worker.contractType === WorkerContractType.CONTRACTOR) {
     row.worker.tsu = undefined;
     row.worker.monthlySalary = undefined;
     row.worker.mealAllowance = undefined;
@@ -836,7 +804,7 @@ function onContractTypeChanged(row: WorkerRow) {
 async function addWorker(): Promise<void> {
   workers.value.push({
     worker: {
-      status: WorkerStatus.ACTIVE,
+      status: Status.ACTIVE,
       phoneCountryCode: '+351',
       defaultHours: 8,
       startDate: new Date().toISOString().split('T')[0],
