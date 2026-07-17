@@ -2,6 +2,11 @@ type NumericKeys<T> = {
   [K in keyof T]-?: T[K] extends number | null | undefined ? K : never;
 }[keyof T];
 
+const formatter = new Intl.NumberFormat('pt-PT', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
 export function handleMoneyInput<T extends Record<string, unknown>, K extends NumericKeys<T>>(
   event: Event,
   obj: T,
@@ -12,5 +17,7 @@ export function handleMoneyInput<T extends Record<string, unknown>, K extends Nu
   const value = Number(digits) / 100;
 
   obj[field] = value as T[K];
-  input.value = value.toFixed(2);
+  input.value = formatter.format(value);
+
+  console.log(input.value);
 }

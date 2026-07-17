@@ -21,19 +21,13 @@ const numberFormatter = new Intl.NumberFormat('pt-PT', {
 });
 
 export function formatNumber(value?: number | null): string {
-  if (value == null) return '';
-
-  return value.toFixed(2);
+  return value == null ? '' : numberFormatter.format(value);
 }
 
 export function formatCurrency(value?: number | null): string {
-  if (value == null) return '-';
-
-  return `${numberFormatter.format(value).replace(/\u00A0/g, '.')} €`;
+  return value == null ? '-' : `${numberFormatter.format(value).replace(/\u00A0/g, ' ')} €`;
 }
 
 export function formatPercentage(value?: number | null): string {
-  if (value == null) return '-';
-
-  return `${numberFormatter.format(value)} %`;
+  return value == null ? '-' : `${numberFormatter.format(value)} %`;
 }
