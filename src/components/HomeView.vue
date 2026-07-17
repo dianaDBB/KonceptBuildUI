@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { User, Users, ClipboardList, LayoutDashboard, ShoppingCart, Package } from 'lucide-vue-next';
+import { Contact, Users, List, LayoutDashboard, ShoppingCart, Package } from 'lucide-vue-next';
 import { ref, computed } from 'vue';
 
 const categories = [
@@ -46,8 +46,8 @@ const categories = [
       },
       {
         label: 'Obras',
-        description: 'Mock - Não faz nada ainda.',
-        icon: ClipboardList,
+        description: 'Gerir dados das obras.',
+        icon: List,
         route: '/works/list',
       },
     ],
@@ -104,7 +104,7 @@ const categories = [
       {
         label: 'Colaboradores',
         description: 'Gerir dados dos colaboradores, custos e remunerações.',
-        icon: User,
+        icon: Contact,
         route: '/hr/workers',
       },
     ],

@@ -5,6 +5,7 @@ import LoginView from '@/components/LoginView.vue';
 import WorkersView from '@/components/WorkersView.vue';
 import ClientsView from '@/components/ClientsView.vue';
 import authApi from '@/services/auth-api';
+import WorksView from '@/components/WorksView.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -18,6 +19,12 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/works/list',
+      name: 'works',
+      component: WorksView,
       meta: { requiresAuth: true },
     },
     {

@@ -1,7 +1,7 @@
 <template>
   <div class="main-section">
     <div class="section-header">
-      <span><User :size="24" /></span>
+      <span><Contact :size="24" /></span>
       <h3>Colaboradores</h3>
 
       <div class="page-nav">
@@ -663,7 +663,7 @@ import { ref, onMounted, computed, nextTick } from 'vue';
 import workerApi from '@/services/worker-api';
 import { WorkerContractType, Worker, WorkerFilters, WorkerSortField } from '@/types/worker';
 import { ApiResponseStatus } from '@/types/api-response-status';
-import { User, Pencil, Trash2, Check, Undo2, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
+import { Contact, Pencil, Trash2, Check, Undo2, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
 import Toast from '@/composables/Toast.vue';
 import { SortDirection } from '@/types/sort-direction';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';

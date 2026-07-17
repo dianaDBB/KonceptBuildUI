@@ -1,7 +1,7 @@
 <template>
   <div class="main-section">
     <div class="section-header">
-      <span><User :size="24" /></span>
+      <span><Users :size="24" /></span>
       <h3>Clientes</h3>
 
       <div class="page-nav">
@@ -450,7 +450,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, nextTick } from 'vue';
 import { ApiResponseStatus } from '@/types/api-response-status';
-import { User, Pencil, Trash2, Check, Undo2, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
+import { Users, Pencil, Trash2, Check, Undo2, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
 import Toast from '@/composables/Toast.vue';
 import { SortDirection } from '@/types/sort-direction';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
@@ -581,12 +581,10 @@ async function saveClient(row: ClientRow): Promise<void> {
 
   try {
     if (row._isNew) {
-      console.log('ADDING CLIENT');
       await clientApi.addClient(row.client);
     }
 
     if (row._isEdited) {
-      console.log('EDITING CLIENT');
       await clientApi.editClient(row.client);
     }
 
