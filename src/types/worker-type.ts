@@ -1,7 +1,7 @@
 import { UUID } from 'node:crypto';
 import { SortDirection } from './sort-direction';
 
-export interface Worker {
+export interface WorkerType {
   id?: UUID;
   code?: string;
   name?: string;
@@ -13,7 +13,7 @@ export interface Worker {
   function?: string;
   hourCost?: number;
   defaultHours?: number;
-  contractType?: string;
+  workerContractType?: string;
   hourRate?: number;
   monthlySalary?: number;
   tsu?: number;
@@ -33,7 +33,7 @@ export enum WorkerSortField {
   FUNCTION = 'FUNCTION',
   HOUR_COST = 'HOUR_COST',
   DEFAULT_HOURS = 'DEFAULT_HOURS',
-  CONTRACT_TYPE = 'CONTRACT_TYPE',
+  WORKER_CONTRACT_TYPE = 'CONTRACT_TYPE',
   HOUR_RATE = 'HOUR_RATE',
   MONTHLY_SALARY = 'MONTHLY_SALARY',
   TSU = 'TSU',
@@ -55,7 +55,7 @@ export interface WorkerFilters {
   hourCostMax?: number;
   defaultHoursMin?: number;
   defaultHoursMax?: number;
-  contractType?: string;
+  workerContractType?: string;
   hourRateMin?: number;
   hourRateMax?: number;
   monthlySalaryMin?: number;

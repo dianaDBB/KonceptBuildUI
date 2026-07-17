@@ -1,5 +1,5 @@
 import { Status } from '@/types/status';
-import { WorkerContractType } from '@/types/worker';
+import { WorkerContractType } from '@/types/worker-type';
 import { UUID } from 'node:crypto';
 
 export type WorkerPayload = {
@@ -12,7 +12,7 @@ export type WorkerPayload = {
   email: string;
   function: string;
   defaultHours: number;
-  contractType: WorkerContractType;
+  workerContractType: WorkerContractType;
   hourRate?: number;
   monthlySalary?: number;
   tsu?: number;

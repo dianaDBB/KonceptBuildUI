@@ -1,10 +1,10 @@
 import axiosClient from './api';
 import { UUID } from 'crypto';
-import { Client, ClientFilters } from '@/types/client';
+import { ClientType } from '@/types/client-type';
 import { ClientPayload } from './payload/client-payload';
 
 class ClientApi {
-  async searchClients(filters: ClientFilters = {}): Promise<Client[]> {
+  async searchClients(filters = {}): Promise<ClientType[]> {
     const response = await axiosClient.post('/client/search', filters, {
       headers: { Accept: 'application/json' },
     });
@@ -12,7 +12,7 @@ class ClientApi {
     return response.data;
   }
 
-  async addClient(client: Client): Promise<void> {
+  async addClient(client: ClientType): Promise<void> {
     const payload: ClientPayload = {
       companyName: client.companyName!,
       address: client.address,
@@ -33,7 +33,7 @@ class ClientApi {
     });
   }
 
-  async editClient(client: Client): Promise<void> {
+  async editClient(client: ClientType): Promise<void> {
     const payload: ClientPayload = {
       id: client.id,
       companyName: client.companyName!,

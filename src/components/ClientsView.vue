@@ -43,176 +43,12 @@
             </colgroup>
             <thead>
               <tr>
-                <th>
+                <th v-for="config in Object.values(Client.configs)" :key="config.label">
                   <div class="column-heading">
-                    ID
+                    {{ config.label }}
+
                     <TableColumnFilter
-                      :config="clientFilterConfigs.code"
-                      :filters="clientFilters"
-                      :sort-by="clientFilters.sortBy"
-                      :sort-direction="clientFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Nome / Empresa
-                    <TableColumnFilter
-                      :config="clientFilterConfigs.companyName"
-                      :filters="clientFilters"
-                      :sort-by="clientFilters.sortBy"
-                      :sort-direction="clientFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Morada
-                    <TableColumnFilter
-                      :config="clientFilterConfigs.address"
-                      :filters="clientFilters"
-                      :sort-by="clientFilters.sortBy"
-                      :sort-direction="clientFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Código Postal
-                    <TableColumnFilter
-                      :config="clientFilterConfigs.postalCode"
-                      :filters="clientFilters"
-                      :sort-by="clientFilters.sortBy"
-                      :sort-direction="clientFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Localidade
-                    <TableColumnFilter
-                      :config="clientFilterConfigs.city"
-                      :filters="clientFilters"
-                      :sort-by="clientFilters.sortBy"
-                      :sort-direction="clientFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Distrito
-                    <TableColumnFilter
-                      :config="clientFilterConfigs.district"
-                      :filters="clientFilters"
-                      :sort-by="clientFilters.sortBy"
-                      :sort-direction="clientFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    NIF
-                    <TableColumnFilter
-                      :config="clientFilterConfigs.nif"
-                      :filters="clientFilters"
-                      :sort-by="clientFilters.sortBy"
-                      :sort-direction="clientFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Contacto
-                    <TableColumnFilter
-                      :config="clientFilterConfigs.contact"
-                      :filters="clientFilters"
-                      :sort-by="clientFilters.sortBy"
-                      :sort-direction="clientFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Email
-                    <TableColumnFilter
-                      :config="clientFilterConfigs.email"
-                      :filters="clientFilters"
-                      :sort-by="clientFilters.sortBy"
-                      :sort-direction="clientFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Tlf
-                    <TableColumnFilter
-                      :config="clientFilterConfigs.phone"
-                      :filters="clientFilters"
-                      :sort-by="clientFilters.sortBy"
-                      :sort-direction="clientFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Estado
-                    <TableColumnFilter
-                      :config="clientFilterConfigs.status"
-                      :filters="clientFilters"
-                      :sort-by="clientFilters.sortBy"
-                      :sort-direction="clientFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Notas
-                    <TableColumnFilter
-                      :config="clientFilterConfigs.note"
+                      :config="config"
                       :filters="clientFilters"
                       :sort-by="clientFilters.sortBy"
                       :sort-direction="clientFilters.sortDirection"
@@ -247,7 +83,12 @@
                 <!-- CODE -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <input v-model="row.client.code" type="text" :disabled="true" :class="{ required: false }" />
+                    <input
+                      v-model="row.client.code"
+                      type="text"
+                      :disabled="Client.configs.code.showDisabled(row.client)"
+                      :class="{ required: Client.configs.code.isInvalid(row.client) }"
+                    />
                   </template>
                   <template v-else>
                     {{ row.client.code }}
@@ -260,7 +101,8 @@
                     <input
                       v-model="row.client.companyName"
                       type="text"
-                      :class="{ required: !row.client.companyName }"
+                      :disabled="Client.configs.companyName.showDisabled(row.client)"
+                      :class="{ required: Client.configs.companyName.isInvalid(row.client) }"
                     />
                   </template>
                   <template v-else>
@@ -271,7 +113,12 @@
                 <!-- ADDRESS -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <input v-model="row.client.address" type="text" :class="{ required: false }" />
+                    <input
+                      v-model="row.client.address"
+                      type="text"
+                      :disabled="Client.configs.address.showDisabled(row.client)"
+                      :class="{ required: Client.configs.address.isInvalid(row.client) }"
+                    />
                   </template>
                   <template v-else>
                     {{ row.client.address }}
@@ -281,7 +128,12 @@
                 <!-- POSTAL CODE -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <input v-model="row.client.postalCode" type="text" :class="{ required: false }" />
+                    <input
+                      v-model="row.client.postalCode"
+                      type="text"
+                      :disabled="Client.configs.postalCode.showDisabled(row.client)"
+                      :class="{ required: Client.configs.postalCode.isInvalid(row.client) }"
+                    />
                   </template>
                   <template v-else>
                     {{ row.client.postalCode }}
@@ -291,7 +143,12 @@
                 <!-- CITY -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <input v-model="row.client.city" type="text" :class="{ required: false }" />
+                    <input
+                      v-model="row.client.city"
+                      type="text"
+                      :disabled="Client.configs.city.showDisabled(row.client)"
+                      :class="{ required: Client.configs.city.isInvalid(row.client) }"
+                    />
                   </template>
                   <template v-else>
                     {{ row.client.city }}
@@ -301,7 +158,12 @@
                 <!-- DISTRICT -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <input v-model="row.client.district" type="text" :class="{ required: false }" />
+                    <input
+                      v-model="row.client.district"
+                      type="text"
+                      :disabled="Client.configs.district.showDisabled(row.client)"
+                      :class="{ required: Client.configs.district.isInvalid(row.client) }"
+                    />
                   </template>
                   <template v-else>
                     {{ row.client.district }}
@@ -311,7 +173,12 @@
                 <!-- NIF -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <input v-model="row.client.nif" type="text" :class="{ required: !row.client.nif }" />
+                    <input
+                      v-model="row.client.nif"
+                      type="text"
+                      :disabled="Client.configs.nif.showDisabled(row.client)"
+                      :class="{ required: Client.configs.nif.isInvalid(row.client) }"
+                    />
                   </template>
                   <template v-else>
                     {{ row.client.nif }}
@@ -321,7 +188,12 @@
                 <!-- CONTACT -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <input v-model="row.client.contact" type="text" :class="{ required: !row.client.contact }" />
+                    <input
+                      v-model="row.client.contact"
+                      type="text"
+                      :disabled="Client.configs.contact.showDisabled(row.client)"
+                      :class="{ required: Client.configs.contact.isInvalid(row.client) }"
+                    />
                   </template>
                   <template v-else>
                     {{ row.client.contact }}
@@ -334,7 +206,8 @@
                     <input
                       v-model="row.client.email"
                       type="email"
-                      :class="{ required: !isValidEmail(row.client.email) }"
+                      :disabled="Client.configs.email.showDisabled(row.client)"
+                      :class="{ required: Client.configs.email.isInvalid(row.client) }"
                     />
                   </template>
                   <template v-else>
@@ -348,21 +221,23 @@
                     <div class="phone-input">
                       <input
                         v-model="row.client.phoneCountryCode"
+                        inputmode="text"
                         pattern="[0-9]{9}"
                         maxlength="4"
-                        inputmode="text"
                         placeholder="+351"
+                        :disabled="Client.configs.phone.showDisabled(row.client)"
+                        :class="{ required: Client.configs.phone.isInvalid(row.client) }"
                         class="country-code"
-                        :class="{ required: !isValidPhoneCountryCode(row.client.phoneCountryCode) }"
                       />
                       <input
                         v-model="row.client.phone"
                         type="tel"
+                        inputmode="numeric"
                         pattern="[0-9]{9}"
                         maxlength="9"
-                        inputmode="numeric"
+                        :disabled="Client.configs.phone.showDisabled(row.client)"
+                        :class="{ required: Client.configs.phone.isInvalid(row.client) }"
                         class="phone-number"
-                        :class="{ required: !isValidPhone(row.client.phone) }"
                       />
                     </div>
                   </template>
@@ -374,9 +249,13 @@
                 <!-- STATUS -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <select v-model="row.client.status" :class="{ required: !row.client.status }">
-                      <option v-for="status in Status.OPTIONS" :key="status.value" :value="status.value">
-                        {{ status.label }}
+                    <select
+                      v-model="row.client.status"
+                      :disabled="Client.configs.status.showDisabled(row.client)"
+                      :class="{ required: Client.configs.status.isInvalid(row.client) }"
+                    >
+                      <option v-for="option in Client.configs.status.options" :key="option.value" :value="option.value">
+                        {{ option.label }}
                       </option>
                     </select>
                   </template>
@@ -388,7 +267,12 @@
                 <!-- NOTE -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <input v-model="row.client.note" type="text" :class="{ required: false }" />
+                    <input
+                      v-model="row.client.note"
+                      type="text"
+                      :disabled="Client.configs.note.showDisabled(row.client)"
+                      :class="{ required: Client.configs.note.isInvalid(row.client) }"
+                    />
                   </template>
                   <template v-else>
                     {{ row.client.note }}
@@ -454,13 +338,12 @@ import { Users, Pencil, Trash2, Check, Undo2, Plus, LoaderCircle, FunnelX } from
 import Toast from '@/composables/Toast.vue';
 import { SortDirection } from '@/types/sort-direction';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
-import { TableFilterKind, type TableColumnFilterConfig } from '@/types/table-filter';
-import { isValidEmail, isValidPhone, isValidPhoneCountryCode } from '@/utils/validation';
 import ConfirmDialog from '@/composables/ConfirmDialog.vue';
 import axios from 'axios';
 import { Status } from '@/types/status';
-import { Client, ClientFilters, ClientSortField } from '@/types/client';
+import { ClientType, ClientFilters, ClientSortField } from '@/types/client-type';
 import clientApi from '@/services/client-api';
+import { Client } from '@/entities/client';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
@@ -469,11 +352,11 @@ const tableBody = ref<HTMLTableSectionElement | null>(null);
 /******************************************************************************************************** ROW ACTIONS */
 
 interface ClientRow {
-  client: Client;
+  client: ClientType;
   _key: string;
   _isNew: boolean;
   _isEdited: boolean;
-  _original?: Client;
+  _original?: ClientType;
 }
 
 const clients = ref<ClientRow[]>([]);
@@ -522,9 +405,7 @@ async function fetchClients() {
     const gotClients = await clientApi.searchClients(clientFilters.value);
 
     clients.value = gotClients.map((client) => ({
-      client: {
-        ...client,
-      },
+      client: { ...client },
       _key: client.code ?? nextKey(),
       _isNew: false,
       _isEdited: false,
@@ -667,88 +548,6 @@ const clientFilters = ref<ClientFilters>({});
 const hasActiveTableControls = computed(() =>
   Object.values(clientFilters.value).some((value) => value !== undefined && value !== null && value !== ''),
 );
-
-const clientFilterConfigs = {
-  code: {
-    column: ClientSortField.CODE,
-    label: 'ID',
-    kind: TableFilterKind.TEXT,
-    valueKey: 'code',
-    dropdownAlign: 'start',
-  },
-  companyName: {
-    column: ClientSortField.COMPANY_NAME,
-    label: 'Nome / Empresa',
-    kind: TableFilterKind.TEXT,
-    valueKey: 'companyName',
-    dropdownAlign: 'start',
-  },
-  address: {
-    column: ClientSortField.ADDRESS,
-    label: 'Morada',
-    kind: TableFilterKind.TEXT,
-    valueKey: 'address',
-    dropdownAlign: 'start',
-  },
-  postalCode: {
-    column: ClientSortField.POSTAL_CODE,
-    label: 'Código Postal',
-    kind: TableFilterKind.TEXT,
-    valueKey: 'postalCode',
-  },
-  city: {
-    column: ClientSortField.CITY,
-    label: 'Localidade',
-    kind: TableFilterKind.TEXT,
-    valueKey: 'city',
-  },
-  district: {
-    column: ClientSortField.DISTRICT,
-    label: 'Distrito',
-    kind: TableFilterKind.TEXT,
-    valueKey: 'district',
-  },
-  nif: {
-    column: ClientSortField.NIF,
-    label: 'Nif',
-    kind: TableFilterKind.TEXT,
-    valueKey: 'nif',
-  },
-  contact: {
-    column: ClientSortField.CONTACT,
-    label: 'Contacto',
-    kind: TableFilterKind.TEXT,
-    valueKey: 'contact',
-  },
-  email: {
-    column: ClientSortField.EMAIL,
-    label: 'E-mail',
-    kind: TableFilterKind.TEXT,
-    valueKey: 'email',
-  },
-  phone: {
-    column: ClientSortField.PHONE,
-    label: 'Tlf',
-    kind: TableFilterKind.TEXT,
-    valueKey: 'phone',
-  },
-  status: {
-    column: ClientSortField.STATUS,
-    label: 'Estado',
-    kind: TableFilterKind.SELECT,
-    valueKey: 'status',
-    options: [
-      { label: 'Activo', value: 'ACTIVE' },
-      { label: 'Inactivo', value: 'INACTIVE' },
-    ],
-  },
-  note: {
-    column: ClientSortField.NOTE,
-    label: 'Notas',
-    kind: TableFilterKind.TEXT,
-    valueKey: 'note',
-  },
-} satisfies Record<string, TableColumnFilterConfig<ClientSortField>>;
 
 function setSort(event: { column: ClientSortField; direction: SortDirection | undefined }): void {
   clientFilters.value = {

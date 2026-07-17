@@ -45,191 +45,12 @@
             </colgroup>
             <thead>
               <tr>
-                <th>
+                <th v-for="config in Object.values(Work.configs)" :key="config.label">
                   <div class="column-heading">
-                    ID
+                    {{ config.label }}
+
                     <TableColumnFilter
-                      :config="workFilterConfigs.code"
-                      :filters="workFilters"
-                      :sort-by="workFilters.sortBy"
-                      :sort-direction="workFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Nome da Obra
-                    <TableColumnFilter
-                      :config="workFilterConfigs.name"
-                      :filters="workFilters"
-                      :sort-by="workFilters.sortBy"
-                      :sort-direction="workFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Estado
-                    <TableColumnFilter
-                      :config="workFilterConfigs.status"
-                      :filters="workFilters"
-                      :sort-by="workFilters.sortBy"
-                      :sort-direction="workFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Orçamento Adjudicado (€)
-                    <TableColumnFilter
-                      :config="workFilterConfigs.contractedBudget"
-                      :filters="workFilters"
-                      :sort-by="workFilters.sortBy"
-                      :sort-direction="workFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Custo Previsto (€)
-                    <TableColumnFilter
-                      :config="workFilterConfigs.estimatedCost"
-                      :filters="workFilters"
-                      :sort-by="workFilters.sortBy"
-                      :sort-direction="workFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Custo Previsto Materiais (€)
-                    <TableColumnFilter
-                      :config="workFilterConfigs.estimatedCostMaterials"
-                      :filters="workFilters"
-                      :sort-by="workFilters.sortBy"
-                      :sort-direction="workFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Custo Previsto Mão-Obra (€)
-                    <TableColumnFilter
-                      :config="workFilterConfigs.estimatedCostLabor"
-                      :filters="workFilters"
-                      :sort-by="workFilters.sortBy"
-                      :sort-direction="workFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Margem Prevista (€)
-                    <TableColumnFilter
-                      :config="workFilterConfigs.estimatedMarginEur"
-                      :filters="workFilters"
-                      :sort-by="workFilters.sortBy"
-                      :sort-direction="workFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Margem Prevista (%)
-                    <TableColumnFilter
-                      :config="workFilterConfigs.estimatedMarginPercentual"
-                      :filters="workFilters"
-                      :sort-by="workFilters.sortBy"
-                      :sort-direction="workFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Data início
-                    <TableColumnFilter
-                      :config="workFilterConfigs.startDate"
-                      :filters="workFilters"
-                      :sort-by="workFilters.sortBy"
-                      :sort-direction="workFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Data fim prevista
-                    <TableColumnFilter
-                      :config="workFilterConfigs.estimatedEndDate"
-                      :filters="workFilters"
-                      :sort-by="workFilters.sortBy"
-                      :sort-direction="workFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Data fim
-                    <TableColumnFilter
-                      :config="workFilterConfigs.endDate"
-                      :filters="workFilters"
-                      :sort-by="workFilters.sortBy"
-                      :sort-direction="workFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Cliente
-                    <TableColumnFilter
-                      :config="workFilterConfigs.clientName"
+                      :config="config"
                       :filters="workFilters"
                       :sort-by="workFilters.sortBy"
                       :sort-direction="workFilters.sortDirection"
@@ -264,7 +85,12 @@
                 <!-- CODE -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <input v-model="row.work.code" type="text" :disabled="true" :class="{ required: false }" />
+                    <input
+                      v-model="row.work.code"
+                      type="text"
+                      :disabled="Work.configs.code.showDisabled(row.work)"
+                      :class="{ required: Work.configs.code.isInvalid(row.work) }"
+                    />
                   </template>
                   <template v-else>
                     {{ row.work.code }}
@@ -274,7 +100,12 @@
                 <!-- NAME -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <input v-model="row.work.name" type="text" :class="{ required: !row.work.name }" />
+                    <input
+                      v-model="row.work.name"
+                      type="text"
+                      :disabled="Work.configs.name.showDisabled(row.work)"
+                      :class="{ required: Work.configs.name.isInvalid(row.work) }"
+                    />
                   </template>
                   <template v-else>
                     {{ row.work.name }}
@@ -284,9 +115,13 @@
                 <!-- STATUS -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <select v-model="row.work.status" :class="{ required: !row.work.status }">
-                      <option v-for="status in WorkStatus.OPTIONS" :key="status.value" :value="status.value">
-                        {{ status.label }}
+                    <select
+                      v-model="row.work.status"
+                      :disabled="Work.configs.status.showDisabled(row.work)"
+                      :class="{ required: Work.configs.status.isInvalid(row.work) }"
+                    >
+                      <option v-for="option in Work.configs.status.options" :key="option.value" :value="option.value">
+                        {{ option.label }}
                       </option>
                     </select>
                   </template>
@@ -299,10 +134,11 @@
                 <td>
                   <template v-if="rowHasChanges(row)">
                     <input
-                      :value="row.work.contractedBudget?.toFixed(2)"
+                      :value="formatNumber(row.work.contractedBudget)"
                       type="text"
                       inputmode="decimal"
-                      :class="{ required: !row.work.contractedBudget }"
+                      :disabled="Work.configs.contractedBudget.showDisabled(row.work)"
+                      :class="{ required: Work.configs.contractedBudget.isInvalid(row.work) }"
                       @input="handleMoneyInput($event, row.work, 'contractedBudget')"
                     />
                   </template>
@@ -315,11 +151,12 @@
                 <td>
                   <template v-if="rowHasChanges(row)">
                     <input
-                      :value="row.work.estimatedCost?.toFixed(2)"
+                      :value="formatNumber(row.work.estimatedCost)"
                       type="text"
                       inputmode="decimal"
-                      :disabled="true"
-                      :class="{ required: false }"
+                      :disabled="Work.configs.estimatedCost.showDisabled(row.work)"
+                      :class="{ required: Work.configs.estimatedCost.isInvalid(row.work) }"
+                      @input="handleMoneyInput($event, row.work, 'estimatedCost')"
                     />
                   </template>
                   <template v-else>
@@ -331,10 +168,11 @@
                 <td>
                   <template v-if="rowHasChanges(row)">
                     <input
-                      :value="row.work.estimatedCostMaterials?.toFixed(2)"
+                      :value="formatNumber(row.work.estimatedCostMaterials)"
                       type="text"
                       inputmode="decimal"
-                      :class="{ required: !row.work.estimatedCostMaterials }"
+                      :disabled="Work.configs.estimatedCostMaterials.showDisabled(row.work)"
+                      :class="{ required: Work.configs.estimatedCostMaterials.isInvalid(row.work) }"
                       @input="handleMoneyInput($event, row.work, 'estimatedCostMaterials')"
                     />
                   </template>
@@ -347,10 +185,11 @@
                 <td>
                   <template v-if="rowHasChanges(row)">
                     <input
-                      :value="row.work.estimatedCostLabor?.toFixed(2)"
+                      :value="formatNumber(row.work.estimatedCostLabor)"
                       type="text"
                       inputmode="decimal"
-                      :class="{ required: !row.work.estimatedCostLabor }"
+                      :disabled="Work.configs.estimatedCostLabor.showDisabled(row.work)"
+                      :class="{ required: Work.configs.estimatedCostLabor.isInvalid(row.work) }"
                       @input="handleMoneyInput($event, row.work, 'estimatedCostLabor')"
                     />
                   </template>
@@ -363,11 +202,12 @@
                 <td>
                   <template v-if="rowHasChanges(row)">
                     <input
-                      :value="row.work.estimatedMarginEur?.toFixed(2)"
+                      :value="formatNumber(row.work.estimatedMarginEur)"
                       type="text"
                       inputmode="decimal"
-                      :disabled="true"
-                      :class="{ required: false }"
+                      :disabled="Work.configs.estimatedMarginEur.showDisabled(row.work)"
+                      :class="{ required: Work.configs.estimatedMarginEur.isInvalid(row.work) }"
+                      @input="handleMoneyInput($event, row.work, 'estimatedMarginEur')"
                     />
                   </template>
                   <template v-else>
@@ -379,11 +219,11 @@
                 <td>
                   <template v-if="rowHasChanges(row)">
                     <input
-                      :value="row.work.estimatedMarginPercentual?.toFixed(2)"
+                      :value="formatNumber(row.work.estimatedMarginPercentual)"
                       type="text"
                       inputmode="decimal"
-                      :disabled="true"
-                      :class="{ required: false }"
+                      :disabled="Work.configs.estimatedMarginPercentual.showDisabled(row.work)"
+                      :class="{ required: Work.configs.estimatedMarginPercentual.isInvalid(row.work) }"
                     />
                   </template>
                   <template v-else>
@@ -394,7 +234,12 @@
                 <!-- START DATE -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <input v-model="row.work.startDate" type="date" :class="{ required: !row.work.startDate }" />
+                    <input
+                      v-model="row.work.startDate"
+                      type="date"
+                      :disabled="Work.configs.startDate.showDisabled(row.work)"
+                      :class="{ required: Work.configs.startDate.isInvalid(row.work) }"
+                    />
                   </template>
                   <template v-else>
                     {{ row.work.startDate ? row.work.startDate : '-' }}
@@ -407,7 +252,8 @@
                     <input
                       v-model="row.work.estimatedEndDate"
                       type="date"
-                      :class="{ required: !row.work.estimatedEndDate }"
+                      :disabled="Work.configs.estimatedEndDate.showDisabled(row.work)"
+                      :class="{ required: Work.configs.estimatedEndDate.isInvalid(row.work) }"
                     />
                   </template>
                   <template v-else>
@@ -418,7 +264,12 @@
                 <!-- END DATE -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <input v-model="row.work.endDate" type="date" :class="{ required: false }" />
+                    <input
+                      v-model="row.work.endDate"
+                      type="date"
+                      :disabled="Work.configs.endDate.showDisabled(row.work)"
+                      :class="{ required: Work.configs.endDate.isInvalid(row.work) }"
+                    />
                   </template>
                   <template v-else>
                     {{ row.work.endDate ? row.work.endDate : '-' }}
@@ -428,7 +279,12 @@
                 <!-- CLIENT -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <SearchSelect v-model="row.work.client" :options="clients">
+                    <SearchSelect
+                      v-model="row.work.client"
+                      :options="clients"
+                      :disabled="Work.configs.clientName.showDisabled(row.work)"
+                      :isValid="Work.configs.clientName.isInvalid(row.work)"
+                    >
                       <template #selected="{ option }">
                         {{ option.companyName }}
                       </template>
@@ -448,27 +304,21 @@
                         :title="row.work.client.companyName"
                         position="left"
                         :items="[
-                          { label: 'ID', value: row.work.client.code },
-                          { label: 'Nome / Empresa', value: row.work.client.companyName },
-                          { label: 'AddresMorada', value: row.work.client.address },
-                          { label: 'Código Postal', value: row.work.client.postalCode },
-                          { label: 'Localidade', value: row.work.client.city },
-                          { label: 'Distrito', value: row.work.client.district },
-                          { label: 'NIF', value: row.work.client.nif },
-                          { label: 'Contacto', value: row.work.client.contact },
-                          { label: 'Email', value: row.work.client.email },
+                          { label: Client.configs.code.label, value: row.work.client.code },
+                          { label: Client.configs.companyName.label, value: row.work.client.companyName },
+                          { label: Client.configs.address.label, value: row.work.client.address },
+                          { label: Client.configs.postalCode.label, value: row.work.client.postalCode },
+                          { label: Client.configs.city.label, value: row.work.client.city },
+                          { label: Client.configs.district.label, value: row.work.client.district },
+                          { label: Client.configs.nif.label, value: row.work.client.nif },
+                          { label: Client.configs.contact.label, value: row.work.client.contact },
+                          { label: Client.configs.email.label, value: row.work.client.email },
                           {
-                            label: 'Tlf',
+                            label: Client.configs.phone.label,
                             value: `${row.work.client.phoneCountryCode ?? ''} ${row.work.client.phone ?? ''}`,
                           },
-                          {
-                            label: 'Estado',
-                            value: Status.getLabel(row.work.client.status),
-                          },
-                          {
-                            label: 'Notas',
-                            value: row.work.client.note,
-                          },
+                          { label: Client.configs.status.label, value: Status.getLabel(row.work.client.status) },
+                          { label: Client.configs.note.label, value: row.work.client.note },
                         ]"
                       />
                     </div>
@@ -534,19 +384,20 @@ import { List, Pencil, Trash2, Check, Undo2, Plus, LoaderCircle, FunnelX } from 
 import Toast from '@/composables/Toast.vue';
 import { SortDirection } from '@/types/sort-direction';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
-import { TableFilterKind, type TableColumnFilterConfig } from '@/types/table-filter';
-import { formatCurrency, formatPercentage } from '@/utils/validation';
+import { formatCurrency, formatNumber, formatPercentage } from '@/utils/validation';
 import ConfirmDialog from '@/composables/ConfirmDialog.vue';
 import axios from 'axios';
-import { Work, WorkFilters, WorkSortField } from '@/types/work';
+import { WorkType, WorkFilters, WorkSortField } from '@/types/work-type';
 import { WorkStatus } from '@/types/work-status';
 import workApi from '@/services/work-api';
 import { handleMoneyInput } from '@/utils/handle-money-input';
-import { Client } from '@/types/client';
+import { ClientType } from '@/types/client-type';
 import clientApi from '@/services/client-api';
 import InfoTooltip from '@/composables/InfoTooltip.vue';
 import SearchSelect from '@/composables/SearchSelect.vue';
 import { Status } from '@/types/status';
+import { Work } from '@/entities/work';
+import { Client } from '@/entities/client';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
@@ -555,14 +406,14 @@ const tableBody = ref<HTMLTableSectionElement | null>(null);
 /******************************************************************************************************** ROW ACTIONS */
 
 interface WorkRow {
-  work: Work;
+  work: WorkType;
   _key: string;
   _isNew: boolean;
   _isEdited: boolean;
-  _original?: Work;
+  _original?: WorkType;
 }
 
-const clients = ref<Client[]>([]);
+const clients = ref<ClientType[]>([]);
 const works = ref<WorkRow[]>([]);
 const isEditing = computed(() => works.value.some((row) => row._isNew || row._isEdited));
 let _keyCounter = 0;
@@ -757,100 +608,6 @@ const workFilters = ref<WorkFilters>({});
 const hasActiveTableControls = computed(() =>
   Object.values(workFilters.value).some((value) => value !== undefined && value !== null && value !== ''),
 );
-
-const workFilterConfigs = {
-  code: {
-    column: WorkSortField.CODE,
-    label: 'ID',
-    kind: TableFilterKind.TEXT,
-    valueKey: 'code',
-    dropdownAlign: 'start',
-  },
-  name: {
-    column: WorkSortField.NAME,
-    label: 'Nome da Obra',
-    kind: TableFilterKind.TEXT,
-    valueKey: 'name',
-    dropdownAlign: 'start',
-  },
-  status: {
-    column: WorkSortField.STATUS,
-    label: 'Estado',
-    kind: TableFilterKind.SELECT,
-    valueKey: 'status',
-    options: WorkStatus.OPTIONS,
-    dropdownAlign: 'start',
-  },
-  contractedBudget: {
-    column: WorkSortField.CONTRACTED_BUDGET,
-    label: 'Orçamento Adjudicado (€)',
-    kind: TableFilterKind.NUMBER_RANGE,
-    minKey: 'contractedBudgetMin',
-    maxKey: 'contractedBudgetMax',
-  },
-  estimatedCost: {
-    column: WorkSortField.ESTIMATED_COST,
-    label: 'Custo Previsto (€)',
-    kind: TableFilterKind.NUMBER_RANGE,
-    minKey: 'estimatedCostMin',
-    maxKey: 'estimatedCostMax',
-  },
-  estimatedCostMaterials: {
-    column: WorkSortField.ESTIMATED_COST_MATERIALS,
-    label: 'Custo Previsto Materiais (€)',
-    kind: TableFilterKind.NUMBER_RANGE,
-    minKey: 'estimatedCostMaterialMin',
-    maxKey: 'estimatedCostMaterialMax',
-  },
-  estimatedCostLabor: {
-    column: WorkSortField.ESTIMATED_COST_LABOR,
-    label: 'Custo Previsto Mão-Obra (€)',
-    kind: TableFilterKind.NUMBER_RANGE,
-    minKey: 'estimatedCostLaborMin',
-    maxKey: 'estimatedCostLaborMax',
-  },
-  estimatedMarginEur: {
-    column: WorkSortField.ESTIMATED_MARGIN_EUR,
-    label: 'Margem Prevista (€)',
-    kind: TableFilterKind.NUMBER_RANGE,
-    minKey: 'estimatedMarginEurMin',
-    maxKey: 'estimatedMarginEurMax',
-  },
-  estimatedMarginPercentual: {
-    column: WorkSortField.ESTIMATED_MARGIN_PERCENTUAL,
-    label: 'Margem Prevista (%)',
-    kind: TableFilterKind.NUMBER_RANGE,
-    minKey: 'estimatedMarginPercentualMin',
-    maxKey: 'estimatedMarginPercentualMax',
-  },
-  startDate: {
-    column: WorkSortField.START_DATE,
-    label: 'Data início',
-    kind: TableFilterKind.NUMBER_RANGE,
-    minKey: 'startDateMin',
-    maxKey: 'startDateMax',
-  },
-  estimatedEndDate: {
-    column: WorkSortField.ESTIMATED_END_DATE,
-    label: 'Data início',
-    kind: TableFilterKind.NUMBER_RANGE,
-    minKey: 'estimatedEndDateMin',
-    maxKey: 'estimatedEndDateMax',
-  },
-  endDate: {
-    column: WorkSortField.END_DATE,
-    label: 'Data início',
-    kind: TableFilterKind.NUMBER_RANGE,
-    minKey: 'endDateMin',
-    maxKey: 'endDateMax',
-  },
-  clientName: {
-    column: WorkSortField.CLIENT_NAME,
-    label: 'Cliente',
-    kind: TableFilterKind.TEXT,
-    valueKey: 'clientName',
-  },
-} satisfies Record<string, TableColumnFilterConfig<WorkSortField>>;
 
 function setSort(event: { column: WorkSortField; direction: SortDirection | undefined }): void {
   workFilters.value = {

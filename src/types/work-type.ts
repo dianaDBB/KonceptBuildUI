@@ -1,8 +1,8 @@
 import { UUID } from 'node:crypto';
 import { SortDirection } from './sort-direction';
-import { Client } from './client';
+import { ClientType } from './client-type';
 
-export interface Work {
+export interface WorkType {
   id?: UUID;
   code?: string;
   name?: string;
@@ -16,7 +16,7 @@ export interface Work {
   startDate?: string;
   estimatedEndDate?: string;
   endDate?: string;
-  client?: Client;
+  client?: ClientType;
 }
 
 export enum WorkSortField {

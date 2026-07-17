@@ -32,7 +32,7 @@
               <col style="width: 100px" />
               <!-- defaultHours -->
               <col style="width: 100px" />
-              <!-- contractType -->
+              <!-- workerContractType -->
               <col style="width: 100px" />
               <!-- hourRate -->
               <col style="width: 80px" />
@@ -53,266 +53,12 @@
             </colgroup>
             <thead>
               <tr>
-                <th>
+                <th v-for="config in Object.values(Worker.configs)" :key="config.label">
                   <div class="column-heading">
-                    ID
+                    {{ config.label }}
+
                     <TableColumnFilter
-                      :config="workerFilterConfigs.code"
-                      :filters="workerFilters"
-                      :sort-by="workerFilters.sortBy"
-                      :sort-direction="workerFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Nome
-                    <TableColumnFilter
-                      :config="workerFilterConfigs.name"
-                      :filters="workerFilters"
-                      :sort-by="workerFilters.sortBy"
-                      :sort-direction="workerFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    NIF
-                    <TableColumnFilter
-                      :config="workerFilterConfigs.nif"
-                      :filters="workerFilters"
-                      :sort-by="workerFilters.sortBy"
-                      :sort-direction="workerFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Estado
-                    <TableColumnFilter
-                      :config="workerFilterConfigs.status"
-                      :filters="workerFilters"
-                      :sort-by="workerFilters.sortBy"
-                      :sort-direction="workerFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Tlf
-                    <TableColumnFilter
-                      :config="workerFilterConfigs.phone"
-                      :filters="workerFilters"
-                      :sort-by="workerFilters.sortBy"
-                      :sort-direction="workerFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Email
-                    <TableColumnFilter
-                      :config="workerFilterConfigs.email"
-                      :filters="workerFilters"
-                      :sort-by="workerFilters.sortBy"
-                      :sort-direction="workerFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Função
-                    <TableColumnFilter
-                      :config="workerFilterConfigs.function"
-                      :filters="workerFilters"
-                      :sort-by="workerFilters.sortBy"
-                      :sort-direction="workerFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Valor <br />
-                    Hora <br />
-                    Base (€)
-                    <TableColumnFilter
-                      :config="workerFilterConfigs.hourCost"
-                      :filters="workerFilters"
-                      :sort-by="workerFilters.sortBy"
-                      :sort-direction="workerFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Horas Dia <br />
-                    (Padrão)
-                    <TableColumnFilter
-                      :config="workerFilterConfigs.defaultHours"
-                      :filters="workerFilters"
-                      :sort-by="workerFilters.sortBy"
-                      :sort-direction="workerFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Tipo <br />
-                    Contrato
-                    <TableColumnFilter
-                      :config="workerFilterConfigs.contractType"
-                      :filters="workerFilters"
-                      :sort-by="workerFilters.sortBy"
-                      :sort-direction="workerFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Valor <br />
-                    Hora <br />
-                    (€)
-                    <TableColumnFilter
-                      :config="workerFilterConfigs.hourRate"
-                      :filters="workerFilters"
-                      :sort-by="workerFilters.sortBy"
-                      :sort-direction="workerFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Ordenado <br />
-                    Mensal <br />
-                    (€/mês)
-                    <TableColumnFilter
-                      :config="workerFilterConfigs.montlhySalary"
-                      :filters="workerFilters"
-                      :sort-by="workerFilters.sortBy"
-                      :sort-direction="workerFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    TSU <br />
-                    Empresa <br />
-                    (%)
-                    <TableColumnFilter
-                      :config="workerFilterConfigs.tsu"
-                      :filters="workerFilters"
-                      :sort-by="workerFilters.sortBy"
-                      :sort-direction="workerFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Sub. Ali. <br />
-                    (€/dia)
-                    <TableColumnFilter
-                      :config="workerFilterConfigs.mealAllowance"
-                      :filters="workerFilters"
-                      :sort-by="workerFilters.sortBy"
-                      :sort-direction="workerFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Seg. Aci. <br />
-                    Trabalho <br />
-                    (€/mês)
-                    <TableColumnFilter
-                      :config="workerFilterConfigs.accidentInsurance"
-                      :filters="workerFilters"
-                      :sort-by="workerFilters.sortBy"
-                      :sort-direction="workerFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Data <br />
-                    Admissão
-                    <TableColumnFilter
-                      :config="workerFilterConfigs.startDate"
-                      :filters="workerFilters"
-                      :sort-by="workerFilters.sortBy"
-                      :sort-direction="workerFilters.sortDirection"
-                      :disabled="isEditing"
-                      @sort="setSort"
-                      @apply="applyFilterValues"
-                      @clear="clearFilterValues"
-                    />
-                  </div>
-                </th>
-                <th>
-                  <div class="column-heading">
-                    Data <br />
-                    Cessação
-                    <TableColumnFilter
-                      :config="workerFilterConfigs.endDate"
+                      :config="config"
                       :filters="workerFilters"
                       :sort-by="workerFilters.sortBy"
                       :sort-direction="workerFilters.sortDirection"
@@ -347,7 +93,12 @@
                 <!-- CODE -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <input v-model="row.worker.code" type="text" :disabled="true" :class="{ required: false }" />
+                    <input
+                      v-model="row.worker.code"
+                      type="text"
+                      :disabled="Worker.configs.code.showDisabled(row.worker)"
+                      :class="{ required: Worker.configs.code.isInvalid(row.worker) }"
+                    />
                   </template>
                   <template v-else>
                     {{ row.worker.code }}
@@ -357,7 +108,12 @@
                 <!-- NAME -->
                 <td :class="{ highlight: workerIsActive(row) }">
                   <template v-if="rowHasChanges(row)">
-                    <input v-model="row.worker.name" type="text" :class="{ required: !row.worker.name }" />
+                    <input
+                      v-model="row.worker.name"
+                      type="text"
+                      :disabled="Worker.configs.name.showDisabled(row.worker)"
+                      :class="{ required: Worker.configs.name.isInvalid(row.worker) }"
+                    />
                   </template>
                   <template v-else>
                     {{ row.worker.name }}
@@ -367,7 +123,12 @@
                 <!-- NIF -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <input v-model="row.worker.nif" type="text" :class="{ required: !row.worker.nif }" />
+                    <input
+                      v-model="row.worker.nif"
+                      type="text"
+                      :disabled="Worker.configs.nif.showDisabled(row.worker)"
+                      :class="{ required: Worker.configs.nif.isInvalid(row.worker) }"
+                    />
                   </template>
                   <template v-else>
                     {{ row.worker.nif }}
@@ -377,9 +138,13 @@
                 <!-- STATUS -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <select v-model="row.worker.status" :class="{ required: !row.worker.status }">
-                      <option v-for="status in Status.OPTIONS" :key="status.value" :value="status.value">
-                        {{ status.label }}
+                    <select
+                      v-model="row.worker.status"
+                      :disabled="Worker.configs.status.showDisabled(row.worker)"
+                      :class="{ required: Worker.configs.status.isInvalid(row.worker) }"
+                    >
+                      <option v-for="option in Worker.configs.status.options" :key="option.value" :value="option.value">
+                        {{ option.label }}
                       </option>
                     </select>
                   </template>
@@ -394,21 +159,23 @@
                     <div class="phone-input">
                       <input
                         v-model="row.worker.phoneCountryCode"
+                        inputmode="text"
                         pattern="[0-9]{9}"
                         maxlength="4"
-                        inputmode="text"
                         placeholder="+351"
+                        :disabled="Worker.configs.phone.showDisabled(row.worker)"
+                        :class="{ required: Worker.configs.phone.isInvalid(row.worker) }"
                         class="country-code"
-                        :class="{ required: !isValidPhoneCountryCode(row.worker.phoneCountryCode) }"
                       />
                       <input
                         v-model="row.worker.phone"
                         type="tel"
+                        inputmode="numeric"
                         pattern="[0-9]{9}"
                         maxlength="9"
-                        inputmode="numeric"
+                        :disabled="Worker.configs.phone.showDisabled(row.worker)"
+                        :class="{ required: Worker.configs.phone.isInvalid(row.worker) }"
                         class="phone-number"
-                        :class="{ required: !isValidPhone(row.worker.phone) }"
                       />
                     </div>
                   </template>
@@ -423,7 +190,8 @@
                     <input
                       v-model="row.worker.email"
                       type="email"
-                      :class="{ required: !isValidEmail(row.worker.email) }"
+                      :disabled="Worker.configs.email.showDisabled(row.worker)"
+                      :class="{ required: Worker.configs.email.isInvalid(row.worker) }"
                     />
                   </template>
                   <template v-else>
@@ -434,7 +202,12 @@
                 <!-- FUNCTION -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <input v-model="row.worker.function" type="text" :class="{ required: !row.worker.function }" />
+                    <input
+                      v-model="row.worker.function"
+                      type="text"
+                      :disabled="Worker.configs.function.showDisabled(row.worker)"
+                      :class="{ required: Worker.configs.function.isInvalid(row.worker) }"
+                    />
                   </template>
                   <template v-else>
                     {{ row.worker.function }}
@@ -445,11 +218,12 @@
                 <td :class="{ highlight: workerIsActive(row) }">
                   <template v-if="rowHasChanges(row)">
                     <input
-                      :value="row.worker.hourCost?.toFixed(2)"
+                      :value="formatNumber(row.worker.hourCost)"
                       type="text"
                       inputmode="decimal"
-                      :disabled="true"
-                      :class="{ required: false }"
+                      :disabled="Worker.configs.hourCost.showDisabled(row.worker)"
+                      :class="{ required: Worker.configs.hourCost.isInvalid(row.worker) }"
+                      @input="handleMoneyInput($event, row.worker, 'hourCost')"
                     />
                   </template>
                   <template v-else>
@@ -464,7 +238,8 @@
                       v-model.number="row.worker.defaultHours"
                       type="number"
                       step="0.1"
-                      :class="{ required: !row.worker.defaultHours }"
+                      :disabled="Worker.configs.defaultHours.showDisabled(row.worker)"
+                      :class="{ required: Worker.configs.defaultHours.isInvalid(row.worker) }"
                     />
                   </template>
                   <template v-else>
@@ -476,17 +251,22 @@
                 <td>
                   <template v-if="rowHasChanges(row)">
                     <select
-                      v-model="row.worker.contractType"
-                      :class="{ required: !row.worker.contractType }"
+                      v-model="row.worker.workerContractType"
+                      :disabled="Worker.configs.workerContractType.showDisabled(row.worker)"
+                      :class="{ required: Worker.configs.workerContractType.isInvalid(row.worker) }"
                       @change="onContractTypeChanged(row)"
                     >
-                      <option v-for="type in WorkerContractType.OPTIONS" :key="type.value" :value="type.value">
-                        {{ type.label }}
+                      <option
+                        v-for="option in Worker.configs.workerContractType.options"
+                        :key="option.value"
+                        :value="option.value"
+                      >
+                        {{ option.label }}
                       </option>
                     </select>
                   </template>
                   <template v-else>
-                    {{ WorkerContractType.getLabel(row.worker.contractType) }}
+                    {{ WorkerContractType.getLabel(row.worker.workerContractType) }}
                   </template>
                 </td>
 
@@ -494,13 +274,11 @@
                 <td>
                   <template v-if="rowHasChanges(row)">
                     <input
-                      :value="row.worker.hourRate?.toFixed(2)"
+                      :value="formatNumber(row.worker.hourRate)"
                       type="text"
                       inputmode="decimal"
-                      :disabled="!row.worker.contractType || row.worker.contractType == WorkerContractType.INTERNAL"
-                      :class="{
-                        required: row.worker.contractType == WorkerContractType.CONTRACTOR && !row.worker.hourRate,
-                      }"
+                      :disabled="Worker.configs.hourRate.showDisabled(row.worker)"
+                      :class="{ required: Worker.configs.hourRate.isInvalid(row.worker) }"
                       @input="handleMoneyInput($event, row.worker, 'hourRate')"
                     />
                   </template>
@@ -513,13 +291,11 @@
                 <td>
                   <template v-if="rowHasChanges(row)">
                     <input
-                      :value="row.worker.monthlySalary?.toFixed(2)"
+                      :value="formatNumber(row.worker.monthlySalary)"
                       type="text"
                       inputmode="decimal"
-                      :disabled="!row.worker.contractType || row.worker.contractType == WorkerContractType.CONTRACTOR"
-                      :class="{
-                        required: row.worker.contractType == WorkerContractType.INTERNAL && !row.worker.monthlySalary,
-                      }"
+                      :disabled="Worker.configs.monthlySalary.showDisabled(row.worker)"
+                      :class="{ required: Worker.configs.monthlySalary.isInvalid(row.worker) }"
                       @input="handleMoneyInput($event, row.worker, 'monthlySalary')"
                     />
                   </template>
@@ -532,11 +308,11 @@
                 <td>
                   <template v-if="rowHasChanges(row)">
                     <input
-                      :value="row.worker.tsu?.toFixed(2)"
+                      :value="formatNumber(row.worker.tsu)"
                       type="text"
                       inputmode="decimal"
-                      :disabled="!row.worker.contractType || row.worker.contractType == WorkerContractType.CONTRACTOR"
-                      :class="{ required: row.worker.contractType == WorkerContractType.INTERNAL && !row.worker.tsu }"
+                      :disabled="Worker.configs.tsu.showDisabled(row.worker)"
+                      :class="{ required: Worker.configs.tsu.isInvalid(row.worker) }"
                     />
                   </template>
                   <template v-else>
@@ -548,15 +324,11 @@
                 <td>
                   <template v-if="rowHasChanges(row)">
                     <input
-                      :value="row.worker.mealAllowance?.toFixed(2)"
+                      :value="formatNumber(row.worker.mealAllowance)"
                       type="text"
                       inputmode="decimal"
-                      :disabled="!row.worker.contractType || row.worker.contractType == WorkerContractType.CONTRACTOR"
-                      :class="{
-                        required:
-                          row.worker.contractType == WorkerContractType.INTERNAL &&
-                          (row.worker.mealAllowance == undefined || row.worker.mealAllowance < 0),
-                      }"
+                      :disabled="Worker.configs.mealAllowance.showDisabled(row.worker)"
+                      :class="{ required: Worker.configs.mealAllowance.isInvalid(row.worker) }"
                       @input="handleMoneyInput($event, row.worker, 'mealAllowance')"
                     />
                   </template>
@@ -569,15 +341,11 @@
                 <td>
                   <template v-if="rowHasChanges(row)">
                     <input
-                      :value="row.worker.accidentInsurance?.toFixed(2)"
+                      :value="formatNumber(row.worker.accidentInsurance)"
                       type="text"
                       inputmode="decimal"
-                      :disabled="!row.worker.contractType || row.worker.contractType == WorkerContractType.CONTRACTOR"
-                      :class="{
-                        required:
-                          row.worker.contractType == WorkerContractType.INTERNAL &&
-                          (row.worker.accidentInsurance == undefined || row.worker.accidentInsurance < 0),
-                      }"
+                      :disabled="Worker.configs.accidentInsurance.showDisabled(row.worker)"
+                      :class="{ required: Worker.configs.accidentInsurance.isInvalid(row.worker) }"
                       @input="handleMoneyInput($event, row.worker, 'accidentInsurance')"
                     />
                   </template>
@@ -589,7 +357,12 @@
                 <!-- START DATE -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <input v-model="row.worker.startDate" type="date" :class="{ required: !row.worker.startDate }" />
+                    <input
+                      v-model="row.worker.startDate"
+                      type="date"
+                      :disabled="Worker.configs.startDate.showDisabled(row.worker)"
+                      :class="{ required: Worker.configs.startDate.isInvalid(row.worker) }"
+                    />
                   </template>
                   <template v-else>
                     {{ row.worker.startDate ? row.worker.startDate : '-' }}
@@ -599,7 +372,12 @@
                 <!-- END DATE -->
                 <td>
                   <template v-if="rowHasChanges(row)">
-                    <input v-model="row.worker.endDate" type="date" :class="{ required: false }" />
+                    <input
+                      v-model="row.worker.endDate"
+                      type="date"
+                      :disabled="Worker.configs.endDate.showDisabled(row.worker)"
+                      :class="{ required: Worker.configs.endDate.isInvalid(row.worker) }"
+                    />
                   </template>
                   <template v-else>
                     {{ row.worker.endDate ? row.worker.endDate : '-' }}
@@ -616,7 +394,7 @@
                   </div>
                   <div v-if="rowHasChanges(row)" class="action-buttons editing">
                     <button @click="discardRow(row)"><Undo2 :size="16" /></button>
-                    <button :disabled="!isRowValid(row)" @click="saveWorker(row)">
+                    <button :disabled="!Worker.isValid(row.worker)" @click="saveWorker(row)">
                       <Check :size="16" />
                     </button>
                   </div>
@@ -661,24 +439,18 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, nextTick } from 'vue';
 import workerApi from '@/services/worker-api';
-import { WorkerContractType, Worker, WorkerFilters, WorkerSortField } from '@/types/worker';
+import { WorkerContractType, WorkerType, WorkerFilters, WorkerSortField } from '@/types/worker-type';
 import { ApiResponseStatus } from '@/types/api-response-status';
 import { Contact, Pencil, Trash2, Check, Undo2, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
 import Toast from '@/composables/Toast.vue';
 import { SortDirection } from '@/types/sort-direction';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
-import { TableFilterKind, type TableColumnFilterConfig } from '@/types/table-filter';
 import { handleMoneyInput } from '@/utils/handle-money-input';
-import {
-  formatCurrency,
-  formatPercentage,
-  isValidEmail,
-  isValidPhone,
-  isValidPhoneCountryCode,
-} from '@/utils/validation';
+import { formatCurrency, formatNumber, formatPercentage } from '@/utils/validation';
 import ConfirmDialog from '@/composables/ConfirmDialog.vue';
 import axios from 'axios';
 import { Status } from '@/types/status';
+import { Worker } from '@/entities/worker';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
@@ -687,11 +459,11 @@ const tableBody = ref<HTMLTableSectionElement | null>(null);
 /******************************************************************************************************** ROW ACTIONS */
 
 interface WorkerRow {
-  worker: Worker;
+  worker: WorkerType;
   _key: string;
   _isNew: boolean;
   _isEdited: boolean;
-  _original?: Worker;
+  _original?: WorkerType;
 }
 
 const workers = ref<WorkerRow[]>([]);
@@ -714,32 +486,6 @@ function discardRow(row: WorkerRow) {
     row._isNew = false;
     row._isEdited = false;
   }
-}
-
-function isRowValid(row: WorkerRow) {
-  return (
-    row.worker.name?.trim() &&
-    row.worker.status?.trim() &&
-    row.worker.nif?.trim() &&
-    row.worker.phone &&
-    row.worker.email?.trim() &&
-    row.worker.function?.trim() &&
-    row.worker.defaultHours &&
-    row.worker.contractType?.trim() &&
-    row.worker.contractType?.trim() &&
-    ((row.worker.contractType == WorkerContractType.CONTRACTOR &&
-      row.worker.hourRate != null &&
-      row.worker.hourRate > 0) ||
-      (row.worker.contractType === WorkerContractType.INTERNAL &&
-        row.worker.monthlySalary != null &&
-        row.worker.monthlySalary > 0 &&
-        row.worker.tsu != null &&
-        row.worker.tsu > 0 &&
-        row.worker.mealAllowance != null &&
-        row.worker.mealAllowance >= 0 &&
-        row.worker.accidentInsurance != null &&
-        row.worker.accidentInsurance >= 0))
-  );
 }
 
 function workerIsActive(row: WorkerRow) {
@@ -786,12 +532,12 @@ function startEditWorker(row: WorkerRow) {
 function onContractTypeChanged(row: WorkerRow) {
   row._isEdited = true;
 
-  if (row.worker.contractType === WorkerContractType.INTERNAL && row.worker.tsu == null) {
+  if (row.worker.workerContractType === WorkerContractType.INTERNAL && row.worker.tsu == null) {
     row.worker.tsu = 23.75;
     row.worker.hourRate = undefined;
   }
 
-  if (row.worker.contractType === WorkerContractType.CONTRACTOR) {
+  if (row.worker.workerContractType === WorkerContractType.CONTRACTOR) {
     row.worker.tsu = undefined;
     row.worker.monthlySalary = undefined;
     row.worker.mealAllowance = undefined;
@@ -918,131 +664,6 @@ const workerFilters = ref<WorkerFilters>({});
 const hasActiveTableControls = computed(() =>
   Object.values(workerFilters.value).some((value) => value !== undefined && value !== null && value !== ''),
 );
-
-const workerFilterConfigs = {
-  code: {
-    column: WorkerSortField.CODE,
-    label: 'ID',
-    kind: TableFilterKind.TEXT,
-    valueKey: 'code',
-    dropdownAlign: 'start',
-  },
-  name: {
-    column: WorkerSortField.NAME,
-    label: 'Nome',
-    kind: TableFilterKind.TEXT,
-    valueKey: 'name',
-    dropdownAlign: 'start',
-  },
-  nif: {
-    column: WorkerSortField.NIF,
-    label: 'Nif',
-    kind: TableFilterKind.TEXT,
-    valueKey: 'nif',
-    dropdownAlign: 'start',
-  },
-  status: {
-    column: WorkerSortField.STATUS,
-    label: 'Estado',
-    kind: TableFilterKind.SELECT,
-    valueKey: 'status',
-    options: [
-      { label: 'Activo', value: 'ACTIVE' },
-      { label: 'Inactivo', value: 'INACTIVE' },
-    ],
-  },
-  phone: {
-    column: WorkerSortField.PHONE,
-    label: 'Tlf',
-    kind: TableFilterKind.TEXT,
-    valueKey: 'phone',
-  },
-  email: {
-    column: WorkerSortField.EMAIL,
-    label: 'E-mail',
-    kind: TableFilterKind.TEXT,
-    valueKey: 'email',
-  },
-  function: {
-    column: WorkerSortField.FUNCTION,
-    label: 'Função',
-    kind: TableFilterKind.TEXT,
-    valueKey: 'function',
-  },
-  hourCost: {
-    column: WorkerSortField.HOUR_COST,
-    label: 'Valor/Hora Base',
-    kind: TableFilterKind.NUMBER_RANGE,
-    minKey: 'hourCostMin',
-    maxKey: 'hourCostMax',
-  },
-  defaultHours: {
-    column: WorkerSortField.DEFAULT_HOURS,
-    label: 'Horas Dia (Padrão)',
-    kind: TableFilterKind.NUMBER_RANGE,
-    minKey: 'defaultHoursMin',
-    maxKey: 'defaultHoursMax',
-  },
-  contractType: {
-    column: WorkerSortField.CONTRACT_TYPE,
-    label: 'Tipo de Contracto',
-    kind: TableFilterKind.SELECT,
-    valueKey: 'contractType',
-    options: [
-      { label: 'Contracto', value: 'INTERNAL' },
-      { label: 'Hora', value: 'CONTRACTOR' },
-    ],
-  },
-  hourRate: {
-    column: WorkerSortField.HOUR_RATE,
-    label: 'Valor /Hora',
-    kind: TableFilterKind.NUMBER_RANGE,
-    minKey: 'hourRateMin',
-    maxKey: 'hourRateMax',
-  },
-  montlhySalary: {
-    column: WorkerSortField.MONTHLY_SALARY,
-    label: 'Ordenado Base Mensal',
-    kind: TableFilterKind.NUMBER_RANGE,
-    minKey: 'montlhySalaryMin',
-    maxKey: 'montlhySalaryMax',
-  },
-  tsu: {
-    column: WorkerSortField.TSU,
-    label: 'TSU Empresa (%)',
-    kind: TableFilterKind.NUMBER_RANGE,
-    minKey: 'tsuMin',
-    maxKey: 'tsuMax',
-  },
-  mealAllowance: {
-    column: WorkerSortField.MEAL_ALLOWANCE,
-    label: 'Subsídio Alim. /Dia (€)',
-    kind: TableFilterKind.NUMBER_RANGE,
-    minKey: 'mealAllowanceMin',
-    maxKey: 'mealAllowanceMax',
-  },
-  accidentInsurance: {
-    column: WorkerSortField.ACCIDENT_INSURANCE,
-    label: 'Seguro Ac. Trabalho (€/mês)',
-    kind: TableFilterKind.NUMBER_RANGE,
-    minKey: 'accidentInsuranceMin',
-    maxKey: 'accidentInsuranceMax',
-  },
-  startDate: {
-    column: WorkerSortField.START_DATE,
-    label: 'Data Admissão',
-    kind: TableFilterKind.NUMBER_RANGE,
-    minKey: 'startDateMin',
-    maxKey: 'startDateMax',
-  },
-  endDate: {
-    column: WorkerSortField.END_DATE,
-    label: 'Data Cessação',
-    kind: TableFilterKind.NUMBER_RANGE,
-    minKey: 'endDateMin',
-    maxKey: 'endDateMax',
-  },
-} satisfies Record<string, TableColumnFilterConfig<WorkerSortField>>;
 
 function setSort(event: { column: WorkerSortField; direction: SortDirection | undefined }): void {
   workerFilters.value = {

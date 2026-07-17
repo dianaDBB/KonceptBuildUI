@@ -1,7 +1,7 @@
 import { UUID } from 'node:crypto';
 import { SortDirection } from './sort-direction';
 
-export interface Client {
+export interface ClientType {
   id?: UUID;
   code?: string;
   companyName?: string;

@@ -1,10 +1,10 @@
 import axiosClient from './api';
 import { UUID } from 'crypto';
-import { Work, WorkFilters } from '@/types/work';
+import { WorkType, WorkFilters } from '@/types/work-type';
 import { WorkPayload } from './payload/work-payload';
 
 class WorkApi {
-  async searchWorks(filters: WorkFilters = {}): Promise<Work[]> {
+  async searchWorks(filters: WorkFilters = {}): Promise<WorkType[]> {
     const response = await axiosClient.post('/work/search', filters, {
       headers: { Accept: 'application/json' },
     });
@@ -12,7 +12,7 @@ class WorkApi {
     return response.data;
   }
 
-  async addWork(work: Work): Promise<void> {
+  async addWork(work: WorkType): Promise<void> {
     const payload: WorkPayload = {
       name: work.name!,
       status: work.status!,
@@ -30,7 +30,7 @@ class WorkApi {
     });
   }
 
-  async editWork(work: Work): Promise<void> {
+  async editWork(work: WorkType): Promise<void> {
     const payload: WorkPayload = {
       id: work.id,
       name: work.name!,

@@ -15,7 +15,7 @@
     <form
       v-if="isOpen"
       class="filter-dropdown"
-      :class="`align-${config.dropdownAlign ?? 'end'}`"
+      :class="`align-${config.filter.dropdownAlign ?? 'end'}`"
       @submit.prevent="apply"
     >
       <div class="filter-dropdown-header">
@@ -46,13 +46,13 @@
       <hr />
 
       <input
-        v-if="config.kind === TableFilterKind.TEXT"
-        v-model.trim="filterValues[config.valueKey!]"
+        v-if="config.filter.kind === TableFilterKind.TEXT"
+        v-model.trim="filterValues[config.filter.valueKey!]"
         type="text"
         :placeholder="`Pesquisar por ${config.label.toLowerCase()}`"
       />
 
-      <select v-else-if="config.kind === TableFilterKind.SELECT" v-model="filterValues[config.valueKey!]">
+      <select v-else-if="config.filter.kind === TableFilterKind.SELECT" v-model="filterValues[config.filter.valueKey!]">
         <option value="">-</option>
 
         <option v-for="option in config.options" :key="option.value" :value="option.value">
@@ -61,11 +61,23 @@
       </select>
 
       <div v-else class="range-fields">
-        <input v-model.number="filterValues[config.minKey!]" type="number" min="0" step="0.01" placeholder="Mínimo" />
+        <input
+          v-model.number="filterValues[config.filter.minKey!]"
+          type="number"
+          min="0"
+          step="0.01"
+          placeholder="Mínimo"
+        />
 
         <span>-</span>
 
-        <input v-model.number="filterValues[config.maxKey!]" type="number" min="0" step="0.01" placeholder="Máximo" />
+        <input
+          v-model.number="filterValues[config.filter.maxKey!]"
+          type="number"
+          min="0"
+          step="0.01"
+          placeholder="Máximo"
+        />
       </div>
 
       <div class="filter-actions">
@@ -77,18 +89,19 @@
   </div>
 </template>
 
-<script setup lang="ts" generic="TColumn extends string">
+<script setup lang="ts" generic="TColumn extends string, TEntity">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { ArrowUpDown, ChevronDown, ChevronUp, Funnel, X, CircleX } from 'lucide-vue-next';
 
-import { TableFilterKind, type TableColumnFilterConfig } from '@/types/table-filter';
 import { SortDirection } from '@/types/sort-direction';
+import { EntityConfig } from '@/types/entity-configs';
+import { TableFilterKind } from '@/types/table-filter';
 
 type FilterValues = Record<string, unknown>;
 
 const props = withDefaults(
   defineProps<{
-    config: TableColumnFilterConfig<TColumn>;
+    config: EntityConfig<TEntity, TColumn>;
     filters: object;
     sortBy?: TColumn;
     sortDirection?: SortDirection;
@@ -119,12 +132,13 @@ const filterValues = ref<FilterValues>({});
 const currentFilters = computed(() => props.filters as FilterValues);
 
 const filterKeys = computed(
-  () => [props.config.valueKey, props.config.minKey, props.config.maxKey].filter(Boolean) as string[],
+  () =>
+    [props.config.filter.valueKey, props.config.filter.minKey, props.config.filter.maxKey].filter(Boolean) as string[],
 );
 
 const isFilterActive = computed(() => filterKeys.value.some((key) => hasValue(currentFilters.value[key])));
 
-const isSorted = computed(() => props.sortBy === props.config.column);
+const isSorted = computed(() => props.sortBy === props.config.filter.column);
 
 function hasValue(value: unknown): boolean {
   return value !== undefined && value !== null && value !== '';
@@ -147,7 +161,7 @@ function close() {
 
 function emitSort(direction: SortDirection | undefined) {
   emit('sort', {
-    column: props.config.column,
+    column: props.config.filter.column,
     direction,
   });
 

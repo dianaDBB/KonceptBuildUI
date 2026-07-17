@@ -1,3 +1,41 @@
+<template>
+  <div ref="target" class="search-select">
+    <button type="button" class="select-button" @click="toggle" :disabled="disabled" :class="{ required: isValid }">
+      <span class="selected-value">
+        <template v-if="selected">
+          <slot name="selected" :option="selected" />
+        </template>
+      </span>
+
+      <ChevronDown class="chevron" :class="{ open }" :size="16" />
+    </button>
+
+    <div v-if="open" class="dropdown">
+      <input
+        ref="searchInput"
+        v-model="search"
+        class="search-input"
+        type="text"
+        placeholder="Search..."
+        @click.stop
+        @keydown.esc="open = false"
+      />
+
+      <button
+        v-for="option in filteredOptions"
+        :key="JSON.stringify(option)"
+        type="button"
+        class="option"
+        @click="select(option)"
+      >
+        <slot name="option" :option="option" />
+      </button>
+
+      <div v-if="filteredOptions.length === 0" class="no-results">No results found</div>
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts" generic="T">
 import { computed, nextTick, ref, watch } from 'vue';
 import { onClickOutside } from '@vueuse/core';
@@ -8,6 +46,8 @@ const props = withDefaults(
     modelValue?: T;
     options: T[];
     filter?: (option: T) => string;
+    disabled?: boolean;
+    isValid?: boolean;
   }>(),
   {},
 );
@@ -63,44 +103,6 @@ function toggle() {
   open.value = !open.value;
 }
 </script>
-
-<template>
-  <div ref="target" class="search-select">
-    <button type="button" class="select-button" @click="toggle">
-      <span class="selected-value">
-        <template v-if="selected">
-          <slot name="selected" :option="selected" />
-        </template>
-      </span>
-
-      <ChevronDown class="chevron" :class="{ open }" :size="16" />
-    </button>
-
-    <div v-if="open" class="dropdown">
-      <input
-        ref="searchInput"
-        v-model="search"
-        class="search-input"
-        type="text"
-        placeholder="Search..."
-        @click.stop
-        @keydown.esc="open = false"
-      />
-
-      <button
-        v-for="option in filteredOptions"
-        :key="JSON.stringify(option)"
-        type="button"
-        class="option"
-        @click="select(option)"
-      >
-        <slot name="option" :option="option" />
-      </button>
-
-      <div v-if="filteredOptions.length === 0" class="no-results">No results found</div>
-    </div>
-  </div>
-</template>
 
 <style scoped>
 .search-select {

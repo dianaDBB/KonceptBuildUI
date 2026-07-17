@@ -20,6 +20,12 @@ const numberFormatter = new Intl.NumberFormat('pt-PT', {
   maximumFractionDigits: 2,
 });
 
+export function formatNumber(value?: number | null): string {
+  if (value == null) return '';
+
+  return value.toFixed(2);
+}
+
 export function formatCurrency(value?: number | null): string {
   if (value == null) return '-';
 

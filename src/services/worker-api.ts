@@ -1,10 +1,10 @@
-import { Worker, WorkerFilters } from '@/types/worker';
+import { WorkerType, WorkerFilters } from '@/types/worker-type';
 import axiosClient from './api';
 import { UUID } from 'crypto';
 import { WorkerPayload } from './payload/worker-payload';
 
 class WorkerApi {
-  async searchWorkers(filters: WorkerFilters = {}): Promise<Worker[]> {
+  async searchWorkers(filters: WorkerFilters = {}): Promise<WorkerType[]> {
     const response = await axiosClient.post('/worker/search', filters, {
       headers: { Accept: 'application/json' },
     });
@@ -12,7 +12,7 @@ class WorkerApi {
     return response.data;
   }
 
-  async addWorker(worker: Worker): Promise<void> {
+  async addWorker(worker: WorkerType): Promise<void> {
     const payload: WorkerPayload = {
       name: worker.name!,
       nif: worker.nif!,
@@ -22,7 +22,7 @@ class WorkerApi {
       email: worker.email!,
       function: worker.function!,
       defaultHours: worker.defaultHours!,
-      contractType: worker.contractType!,
+      workerContractType: worker.workerContractType!,
       hourRate: worker.hourRate,
       monthlySalary: worker.monthlySalary,
       tsu: worker.tsu,
@@ -37,7 +37,7 @@ class WorkerApi {
     });
   }
 
-  async editWorker(worker: Worker): Promise<void> {
+  async editWorker(worker: WorkerType): Promise<void> {
     const payload: WorkerPayload = {
       id: worker.id,
       name: worker.name!,
@@ -48,7 +48,7 @@ class WorkerApi {
       email: worker.email!,
       function: worker.function!,
       defaultHours: worker.defaultHours!,
-      contractType: worker.contractType!,
+      workerContractType: worker.workerContractType!,
       hourRate: worker.hourRate,
       monthlySalary: worker.monthlySalary,
       tsu: worker.tsu,
