@@ -14,33 +14,7 @@
         <div class="table">
           <table>
             <colgroup>
-              <!-- code -->
-              <col style="width: 90px" />
-              <!-- name -->
-              <col style="width: 150px" />
-              <!-- status -->
-              <col style="width: 90px" />
-              <!-- contractedBudget -->
-              <col style="width: 100px" />
-              <!-- estimatedCost -->
-              <col style="width: 100px" />
-              <!-- estimatedCostMaterials -->
-              <col style="width: 100px" />
-              <!-- estimatedCostLabor -->
-              <col style="width: 100px" />
-              <!-- estimatedMarginEur -->
-              <col style="width: 100px" />
-              <!-- estimatedMarginPercentual -->
-              <col style="width: 100px" />
-              <!-- startDate -->
-              <col style="width: 130px" />
-              <!-- estimatedEndDate -->
-              <col style="width: 130px" />
-              <!-- endDate -->
-              <col style="width: 130px" />
-              <!-- client -->
-              <col style="width: 200px" />
-              <!-- ACTIONS -->
+              <col v-for="config in Object.values(Work.configs)" :key="config.label" :style="config.columnStyle" />
               <col style="width: 50px" />
             </colgroup>
             <thead>
@@ -75,273 +49,18 @@
                 </th>
               </tr>
             </thead>
-            <tbody ref="tableBody">
-              <tr
-                v-for="row in works"
-                :key="row._key"
-                :class="{ disabled: !workIsActive(row) }"
-                @dblclick="startEditWork(row)"
-              >
-                <!-- CODE -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <input
-                      v-model="row.work.code"
-                      type="text"
-                      :disabled="Work.configs.code.showDisabled(row.work)"
-                      :class="{ required: Work.configs.code.isInvalid(row.work) }"
-                    />
-                  </template>
-                  <template v-else>
-                    {{ row.work.code }}
-                  </template>
-                </td>
-
-                <!-- NAME -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <input
-                      v-model="row.work.name"
-                      type="text"
-                      :disabled="Work.configs.name.showDisabled(row.work)"
-                      :class="{ required: Work.configs.name.isInvalid(row.work) }"
-                    />
-                  </template>
-                  <template v-else>
-                    {{ row.work.name }}
-                  </template>
-                </td>
-
-                <!-- STATUS -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <select
-                      v-model="row.work.status"
-                      :disabled="Work.configs.status.showDisabled(row.work)"
-                      :class="{ required: Work.configs.status.isInvalid(row.work) }"
-                    >
-                      <option v-for="option in Work.configs.status.options" :key="option.value" :value="option.value">
-                        {{ option.label }}
-                      </option>
-                    </select>
-                  </template>
-                  <template v-else>
-                    {{ WorkStatus.getLabel(row.work.status) }}
-                  </template>
-                </td>
-
-                <!-- CONTRACTED BUDGET -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <input
-                      :value="formatNumber(row.work.contractedBudget)"
-                      type="text"
-                      inputmode="decimal"
-                      :disabled="Work.configs.contractedBudget.showDisabled(row.work)"
-                      :class="{ required: Work.configs.contractedBudget.isInvalid(row.work) }"
-                      @input="handleMoneyInput($event, row.work, 'contractedBudget')"
-                    />
-                  </template>
-                  <template v-else>
-                    {{ formatCurrency(row.work.contractedBudget) }}
-                  </template>
-                </td>
-
-                <!-- ESTIMATED COST -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <input
-                      :value="formatNumber(row.work.estimatedCost)"
-                      type="text"
-                      inputmode="decimal"
-                      :disabled="Work.configs.estimatedCost.showDisabled(row.work)"
-                      :class="{ required: Work.configs.estimatedCost.isInvalid(row.work) }"
-                      @input="handleMoneyInput($event, row.work, 'estimatedCost')"
-                    />
-                  </template>
-                  <template v-else>
-                    {{ formatCurrency(row.work.estimatedCost) }}
-                  </template>
-                </td>
-
-                <!-- ESTIMATED COST MATERIALS -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <input
-                      :value="formatNumber(row.work.estimatedCostMaterials)"
-                      type="text"
-                      inputmode="decimal"
-                      :disabled="Work.configs.estimatedCostMaterials.showDisabled(row.work)"
-                      :class="{ required: Work.configs.estimatedCostMaterials.isInvalid(row.work) }"
-                      @input="handleMoneyInput($event, row.work, 'estimatedCostMaterials')"
-                    />
-                  </template>
-                  <template v-else>
-                    {{ formatCurrency(row.work.estimatedCostMaterials) }}
-                  </template>
-                </td>
-
-                <!-- ESTIMATED COST LABOR -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <input
-                      :value="formatNumber(row.work.estimatedCostLabor)"
-                      type="text"
-                      inputmode="decimal"
-                      :disabled="Work.configs.estimatedCostLabor.showDisabled(row.work)"
-                      :class="{ required: Work.configs.estimatedCostLabor.isInvalid(row.work) }"
-                      @input="handleMoneyInput($event, row.work, 'estimatedCostLabor')"
-                    />
-                  </template>
-                  <template v-else>
-                    {{ formatCurrency(row.work.estimatedCostLabor) }}
-                  </template>
-                </td>
-
-                <!-- ESTIMATED MARGIN EUR -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <input
-                      :value="formatNumber(row.work.estimatedMarginEur)"
-                      type="text"
-                      inputmode="decimal"
-                      :disabled="Work.configs.estimatedMarginEur.showDisabled(row.work)"
-                      :class="{ required: Work.configs.estimatedMarginEur.isInvalid(row.work) }"
-                      @input="handleMoneyInput($event, row.work, 'estimatedMarginEur')"
-                    />
-                  </template>
-                  <template v-else>
-                    {{ formatCurrency(row.work.estimatedMarginEur) }}
-                  </template>
-                </td>
-
-                <!-- ESTIMATED MARGIN PERCENTUAL -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <input
-                      :value="formatNumber(row.work.estimatedMarginPercentual)"
-                      type="text"
-                      inputmode="decimal"
-                      :disabled="Work.configs.estimatedMarginPercentual.showDisabled(row.work)"
-                      :class="{ required: Work.configs.estimatedMarginPercentual.isInvalid(row.work) }"
-                    />
-                  </template>
-                  <template v-else>
-                    {{ formatPercentage(row.work.estimatedMarginPercentual) }}
-                  </template>
-                </td>
-
-                <!-- START DATE -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <input
-                      v-model="row.work.startDate"
-                      type="date"
-                      :disabled="Work.configs.startDate.showDisabled(row.work)"
-                      :class="{ required: Work.configs.startDate.isInvalid(row.work) }"
-                    />
-                  </template>
-                  <template v-else>
-                    {{ row.work.startDate ? row.work.startDate : '-' }}
-                  </template>
-                </td>
-
-                <!-- ESTIMATED END DATE -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <input
-                      v-model="row.work.estimatedEndDate"
-                      type="date"
-                      :disabled="Work.configs.estimatedEndDate.showDisabled(row.work)"
-                      :class="{ required: Work.configs.estimatedEndDate.isInvalid(row.work) }"
-                    />
-                  </template>
-                  <template v-else>
-                    {{ row.work.estimatedEndDate ? row.work.estimatedEndDate : '-' }}
-                  </template>
-                </td>
-
-                <!-- END DATE -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <input
-                      v-model="row.work.endDate"
-                      type="date"
-                      :disabled="Work.configs.endDate.showDisabled(row.work)"
-                      :class="{ required: Work.configs.endDate.isInvalid(row.work) }"
-                    />
-                  </template>
-                  <template v-else>
-                    {{ row.work.endDate ? row.work.endDate : '-' }}
-                  </template>
-                </td>
-
-                <!-- CLIENT -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <SearchSelect
-                      v-model="row.work.client"
-                      :options="clients"
-                      :disabled="Work.configs.clientName.showDisabled(row.work)"
-                      :isValid="Work.configs.clientName.isInvalid(row.work)"
-                    >
-                      <template #selected="{ option }">
-                        {{ option.companyName }}
-                      </template>
-
-                      <template #option="{ option }">
-                        {{ option.companyName }} <br />
-                        {{ option.nif }} <br />
-                        {{ option.code }}
-                      </template>
-                    </SearchSelect>
-                  </template>
-                  <template v-else>
-                    <div class="with-info-tooltip">
-                      <span>{{ row.work.client?.companyName }}</span>
-                      <InfoTooltip
-                        v-if="row.work.client"
-                        :title="row.work.client.companyName"
-                        position="left"
-                        :items="[
-                          { label: Client.configs.code.label, value: row.work.client.code },
-                          { label: Client.configs.companyName.label, value: row.work.client.companyName },
-                          { label: Client.configs.address.label, value: row.work.client.address },
-                          { label: Client.configs.postalCode.label, value: row.work.client.postalCode },
-                          { label: Client.configs.city.label, value: row.work.client.city },
-                          { label: Client.configs.district.label, value: row.work.client.district },
-                          { label: Client.configs.nif.label, value: row.work.client.nif },
-                          { label: Client.configs.contact.label, value: row.work.client.contact },
-                          { label: Client.configs.email.label, value: row.work.client.email },
-                          {
-                            label: Client.configs.phone.label,
-                            value: `${row.work.client.phoneCountryCode ?? ''} ${row.work.client.phone ?? ''}`,
-                          },
-                          { label: Client.configs.status.label, value: Status.getLabel(row.work.client.status) },
-                          { label: Client.configs.note.label, value: row.work.client.note },
-                        ]"
-                      />
-                    </div>
-                  </template>
-                </td>
-
-                <!-- ACTIONS -->
-                <td>
-                  <div v-if="!rowHasChanges(row)" class="action-buttons">
-                    <button :disabled="isEditing" @click="askDelete(row)"><Trash2 :size="16" /></button>
-                    <button :disabled="isEditing" @click="startEditWork(row)">
-                      <Pencil :size="16" />
-                    </button>
-                  </div>
-                  <div v-if="rowHasChanges(row)" class="action-buttons editing">
-                    <button @click="discardRow(row)"><Undo2 :size="16" /></button>
-                    <button :disabled="!isRowValid(row)" @click="saveWork(row)">
-                      <Check :size="16" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
+            <EntityTableBody
+              :rows="works"
+              :configs="Work.configs"
+              :search-select-options="{ client: clients }"
+              :row-is-active="isActive"
+              :is-valid="Work.isValid"
+              :is-editing="isEditing"
+              @row-edit="startEditing"
+              @row-delete="askDelete"
+              @row-save="save"
+              @row-discard="discard"
+            />
           </table>
           <div v-if="apiStatus.isLoading" class="table-loading-overlay">
             <div>
@@ -370,7 +89,7 @@
   <ConfirmDialog
     v-model="showDeleteDialog"
     title="Eliminar obra"
-    :message="`Tem a certeza que quer eliminar definitivamente a obra '${workToDelete?.work.name}'?`"
+    :message="`Tem a certeza que quer eliminar definitivamente a obra '${workToDelete?.entity.name}'?`"
     confirm-text="Apagar"
     cancel-text="Cancelar"
     @confirm="confirmDelete"
@@ -380,24 +99,20 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, nextTick } from 'vue';
 import { ApiResponseStatus } from '@/types/api-response-status';
-import { List, Pencil, Trash2, Check, Undo2, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
+import { List, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
 import Toast from '@/composables/Toast.vue';
 import { SortDirection } from '@/types/sort-direction';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
-import { formatCurrency, formatNumber, formatPercentage } from '@/utils/validation';
 import ConfirmDialog from '@/composables/ConfirmDialog.vue';
 import axios from 'axios';
 import { WorkType, WorkFilters, WorkSortField } from '@/types/work-type';
 import { WorkStatus } from '@/types/work-status';
 import workApi from '@/services/work-api';
-import { handleMoneyInput } from '@/utils/handle-money-input';
 import { ClientType } from '@/types/client-type';
 import clientApi from '@/services/client-api';
-import InfoTooltip from '@/composables/InfoTooltip.vue';
-import SearchSelect from '@/composables/SearchSelect.vue';
-import { Status } from '@/types/status';
 import { Work } from '@/entities/work';
-import { Client } from '@/entities/client';
+import EntityTableBody from '@/composables/EntityTableBody.vue';
+import { TableRow } from '@/types/entity-configs';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
@@ -405,8 +120,8 @@ const tableBody = ref<HTMLTableSectionElement | null>(null);
 
 /******************************************************************************************************** ROW ACTIONS */
 
-interface WorkRow {
-  work: WorkType;
+interface WorkRow extends TableRow<WorkType> {
+  entity: WorkType;
   _key: string;
   _isNew: boolean;
   _isEdited: boolean;
@@ -422,34 +137,18 @@ function nextKey(): string {
   return `row-${++_keyCounter}`;
 }
 
-function rowHasChanges(row: WorkRow) {
-  return row._isNew || row._isEdited;
-}
-
-function discardRow(row: WorkRow) {
+function discard(row: WorkRow) {
   if (row._isNew) {
     works.value = works.value.filter((w) => w._key !== row._key);
   } else {
-    row.work = row._original!;
+    row.entity = row._original!;
     row._isNew = false;
     row._isEdited = false;
   }
 }
 
-function isRowValid(row: WorkRow) {
-  return (
-    row.work.name?.trim() &&
-    row.work.status?.trim() &&
-    row.work.contractedBudget &&
-    row.work.estimatedCostMaterials &&
-    row.work.estimatedCostLabor &&
-    row.work.startDate?.trim() &&
-    row.work.estimatedEndDate?.trim()
-  );
-}
-
-function workIsActive(row: WorkRow) {
-  return row.work.status != WorkStatus.DONE;
+function isActive(row: WorkRow) {
+  return row.entity.status != WorkStatus.DONE;
 }
 
 /**************************************************************************************************************** GET */
@@ -461,7 +160,7 @@ async function fetchWorks() {
     const gotWorks = await workApi.searchWorks(workFilters.value);
 
     works.value = gotWorks.map((work) => ({
-      work: {
+      entity: {
         ...work,
       },
       _key: work.code ?? nextKey(),
@@ -486,16 +185,16 @@ async function fetchClients() {
 
 /*************************************************************************************************************** EDIT */
 
-function startEditWork(row: WorkRow) {
+function startEditing(row: WorkRow) {
   row._isEdited = true;
-  row._original = JSON.parse(JSON.stringify(row.work));
+  row._original = JSON.parse(JSON.stringify(row.entity));
 }
 
 /**************************************************************************************************************** ADD */
 
 async function addWork(): Promise<void> {
   works.value.push({
-    work: {
+    entity: {
       status: WorkStatus.STARTED,
       startDate: new Date().toISOString().split('T')[0],
     },
@@ -517,16 +216,16 @@ async function addWork(): Promise<void> {
 
 /*************************************************************************************************************** SAVE */
 
-async function saveWork(row: WorkRow): Promise<void> {
+async function save(row: WorkRow): Promise<void> {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
 
   try {
     if (row._isNew) {
-      await workApi.addWork(row.work);
+      await workApi.addWork(row.entity);
     }
 
     if (row._isEdited) {
-      await workApi.editWork(row.work);
+      await workApi.editWork(row.entity);
     }
 
     await fetchWorks();
@@ -568,11 +267,11 @@ async function confirmDelete(): Promise<void> {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
 
   try {
-    if (!workToDelete.value?.work.id) {
+    if (!workToDelete.value?.entity.id) {
       return;
     }
 
-    await workApi.deleteWork(workToDelete.value.work.id);
+    await workApi.deleteWork(workToDelete.value.entity.id);
     await fetchWorks();
 
     apiStatus.value = {

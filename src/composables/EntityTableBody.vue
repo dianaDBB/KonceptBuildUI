@@ -1,0 +1,180 @@
+<template>
+  <tbody ref="tableBody">
+    <tr v-for="row in rows" :key="row._key" :class="{ disabled: !isRowActive(row) }" @dblclick="$emit('row-edit', row)">
+      <td
+        v-for="(config, fieldKey) in configs"
+        :key="fieldKey"
+        :style="config.columnStyle"
+        :class="getColumnClasses(fieldKey, row)"
+      >
+        <template v-if="rowHasChanges(row)">
+          <slot :name="`edit-${fieldKey}`" :row="row" :config="config" :field-key="fieldKey">
+            <component
+              :is="getEditableComponent(config.type)"
+              :value="getFieldValue(row, fieldKey)"
+              :entity="row.entity"
+              :field-key="fieldKey"
+              :config="config"
+              :options="props.searchSelectOptions?.[fieldKey] ?? config.options"
+              :is-invalid="config.isInvalid(row.entity)"
+              :is-disabled="config.showDisabled(row.entity)"
+              @update:value="updateFieldValue(row, fieldKey, $event)"
+            />
+          </slot>
+        </template>
+
+        <template v-else>
+          <slot :name="`display-${fieldKey}`" :row="row" :config="config" :field-key="fieldKey">
+            <template v-if="config.type === ColumnType.SEARCH_SELECT">
+              <div class="with-info-tooltip">
+                <span>{{ getFormatedValue(row, fieldKey, config) }}</span>
+
+                <InfoTooltip
+                  v-if="getFieldValue(row, fieldKey)"
+                  position="left"
+                  :title="config.searchSelect!.tooltipTitle!(getFieldValue(row, fieldKey))"
+                  :items="config.searchSelect!.tooltipItems!(getFieldValue(row, fieldKey))"
+                />
+              </div>
+            </template>
+
+            <template v-else>
+              {{ getFormatedValue(row, fieldKey, config) }}
+            </template>
+          </slot>
+        </template>
+      </td>
+
+      <td class="actions-column">
+        <slot name="actions" :row="row" :has-changes="rowHasChanges(row)">
+          <div v-if="!rowHasChanges(row)" class="action-buttons">
+            <button :disabled="isEditing" @click="$emit('row-delete', row)">
+              <Trash2 :size="16" />
+            </button>
+            <button :disabled="isEditing" @click="$emit('row-edit', row)">
+              <Pencil :size="16" />
+            </button>
+          </div>
+          <div v-else class="action-buttons editing">
+            <button @click="$emit('row-discard', row)">
+              <Undo2 :size="16" />
+            </button>
+            <button :disabled="!isRowValid(row.entity)" @click="$emit('row-save', row)">
+              <Check :size="16" />
+            </button>
+          </div>
+        </slot>
+      </td>
+    </tr>
+  </tbody>
+</template>
+
+<script setup lang="ts" generic="TEntity extends Record<string, unknown>, TColumn extends string">
+import { Trash2, Pencil, Undo2, Check } from 'lucide-vue-next';
+import { ColumnType, EntityConfig, TableRow } from '@/types/entity-configs';
+
+import TextInput from './inputs/TextInput.vue';
+import { formatCurrency, formatNumber, formatPercentage } from '@/utils/validation.ts';
+import InfoTooltip from './InfoTooltip.vue';
+import NumberInput from './inputs/NumberInput.vue';
+import MoneyInput from './inputs/MoneyInput.vue';
+import DateInput from './inputs/DateInput.vue';
+import EmailInput from './inputs/EmailInput.vue';
+import PercentageInput from './inputs/PercentageInput.vue';
+import PhoneInput from './inputs/PhoneInput.vue';
+import SelectInput from './inputs/SelectInput.vue';
+import SearchSelectInput from './inputs/SearchSelectInput.vue';
+
+interface Props<T> {
+  rows: TableRow<T>[];
+  configs: Record<string, EntityConfig<T, TColumn>>;
+  rowIsActive: (row: TableRow<T>) => boolean;
+  isValid: (entity: T) => boolean;
+  isEditing?: boolean;
+  searchSelectOptions?: Record<string, any[]>;
+}
+
+const props = withDefaults(defineProps<Props<TEntity>>(), {
+  isEditing: false,
+});
+
+const emit = defineEmits<{
+  'row-edit': [row: TableRow<TEntity>];
+  'row-delete': [row: TableRow<TEntity>];
+  'row-save': [row: TableRow<TEntity>];
+  'row-discard': [row: TableRow<TEntity>];
+}>();
+
+const editableComponentMap: Record<ColumnType, any> = {
+  [ColumnType.TEXT]: TextInput,
+  [ColumnType.NUMBER]: NumberInput,
+  [ColumnType.MONEY]: MoneyInput,
+  [ColumnType.DATE]: DateInput,
+  [ColumnType.SELECT]: SelectInput,
+  [ColumnType.SEARCH_SELECT]: SearchSelectInput,
+  [ColumnType.EMAIL]: EmailInput,
+  [ColumnType.PHONE]: PhoneInput,
+  [ColumnType.PERCENTAGE]: PercentageInput,
+};
+
+function getEditableComponent(type: ColumnType) {
+  return editableComponentMap[type];
+}
+
+function rowHasChanges(row: TableRow<TEntity>): boolean {
+  return row._isNew || row._isEdited;
+}
+
+function isRowValid(entity: TEntity): boolean {
+  return props.isValid(entity);
+}
+
+function isRowActive(row: TableRow<TEntity>): boolean {
+  return props.rowIsActive(row);
+}
+
+function getColumnClasses(fieldKey: string, row: TableRow<TEntity>): any {
+  const config = props.configs[fieldKey];
+
+  return {
+    highlight: props.configs[fieldKey].isHighlight,
+    required: rowHasChanges(row) && config.isInvalid(row.entity),
+  };
+}
+
+function getFieldValue(row: TableRow<TEntity>, fieldKey: string): any {
+  return (row.entity as any)[fieldKey];
+}
+
+function getFormatedValue(row: TableRow<TEntity>, fieldKey: string, config: EntityConfig<TEntity, TColumn>): string {
+  const value = getFieldValue(row, fieldKey);
+
+  switch (config.type) {
+    case ColumnType.NUMBER:
+      return formatNumber(value);
+    case ColumnType.MONEY:
+      return formatCurrency(value);
+    case ColumnType.PERCENTAGE:
+      return formatPercentage(value);
+    case ColumnType.SELECT:
+      return config.options?.find((opt) => opt.value === value)?.label ?? value;
+    case ColumnType.SEARCH_SELECT:
+      return value ? config.searchSelect!.selected(value) : '';
+    case ColumnType.DATE:
+      return value ? new Date(value).toLocaleDateString() : '-';
+    case ColumnType.PHONE:
+      return `${row.entity[config.secondaryField!]} ${row.entity[fieldKey]}`;
+    default:
+      return String(value ?? '');
+  }
+}
+
+function updateFieldValue(row: TableRow<TEntity>, fieldKey: string, value: unknown) {
+  (row.entity as any)[fieldKey] = value;
+  row._isEdited = true;
+
+  props.configs[fieldKey]?.onValueChanged?.(row, value);
+}
+</script>
+
+<style scoped></style>

@@ -1,6 +1,6 @@
 <template>
   <div ref="target" class="search-select">
-    <button type="button" class="select-button" @click="toggle" :disabled="disabled" :class="{ required: isValid }">
+    <button type="button" class="select-button" :disabled="disabled" :class="{ required: isValid }" @click="toggle">
       <span class="selected-value">
         <template v-if="selected">
           <slot name="selected" :option="selected" />

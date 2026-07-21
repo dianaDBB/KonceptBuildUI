@@ -351,6 +351,20 @@ select {
   }
 }
 
+.phone-input {
+  display: flex;
+}
+
+.country-code {
+  width: 40px;
+  border-right: none;
+  border-radius: 4px 0 0 4px;
+}
+
+.phone-number {
+  border-radius: 0 4px 4px 0;
+}
+
 /************************************************************************************************************ ACTIONS */
 
 .actions {

@@ -7,7 +7,7 @@ const formatter = new Intl.NumberFormat('pt-PT', {
   maximumFractionDigits: 2,
 });
 
-export function handleMoneyInput<T extends Record<string, unknown>, K extends NumericKeys<T>>(
+export function handleNumberInput<T extends Record<string, unknown>, K extends NumericKeys<T>>(
   event: Event,
   obj: T,
   field: K,

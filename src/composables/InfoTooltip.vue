@@ -1,3 +1,20 @@
+<template>
+  <div ref="target" class="tooltip">
+    <slot>
+      <Info class="icon" :size="16" @click.stop="toggle" />
+    </slot>
+
+    <div v-if="open" class="content" :class="`content--${position}`">
+      <h4 v-if="title">{{ title }}</h4>
+
+      <div v-for="item in items" :key="item.label" class="row">
+        <span class="label">{{ item.label }}</span>
+        <span class="value">{{ item.value || '-' }}</span>
+      </div>
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts">
 import { ref } from 'vue';
 import { onClickOutside } from '@vueuse/core';
@@ -31,23 +48,6 @@ onClickOutside(target, () => {
   open.value = false;
 });
 </script>
-
-<template>
-  <div ref="target" class="tooltip">
-    <slot>
-      <Info class="icon" :size="16" @click.stop="toggle" />
-    </slot>
-
-    <div v-if="open" class="content" :class="`content--${position}`">
-      <h4 v-if="title">{{ title }}</h4>
-
-      <div v-for="item in items" :key="item.label" class="row">
-        <span class="label">{{ item.label }}</span>
-        <span class="value">{{ item.value || '-' }}</span>
-      </div>
-    </div>
-  </div>
-</template>
 
 <style scoped>
 .tooltip {

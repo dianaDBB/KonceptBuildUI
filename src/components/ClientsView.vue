@@ -14,31 +14,7 @@
         <div class="table">
           <table>
             <colgroup>
-              <!-- code -->
-              <col style="width: 90px" />
-              <!-- name -->
-              <col style="width: 150px" />
-              <!-- address -->
-              <col style="width: 150px" />
-              <!-- postalCode -->
-              <col style="width: 95px" />
-              <!-- city -->
-              <col style="width: 95px" />
-              <!-- district -->
-              <col style="width: 95px" />
-              <!-- nif -->
-              <col style="width: 95px" />
-              <!-- contact -->
-              <col style="width: 150px" />
-              <!-- email -->
-              <col style="width: 150px" />
-              <!-- phone -->
-              <col style="width: 140px" />
-              <!-- status -->
-              <col style="width: 90px" />
-              <!-- note -->
-              <col style="width: 100px" />
-              <!-- ACTIONS -->
+              <col v-for="config in Client.configs" :key="config.label" :style="config.columnStyle" />
               <col style="width: 50px" />
             </colgroup>
             <thead>
@@ -73,229 +49,17 @@
                 </th>
               </tr>
             </thead>
-            <tbody ref="tableBody">
-              <tr
-                v-for="row in clients"
-                :key="row._key"
-                :class="{ disabled: !clientIsActive(row) }"
-                @dblclick="startEditClient(row)"
-              >
-                <!-- CODE -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <input
-                      v-model="row.client.code"
-                      type="text"
-                      :disabled="Client.configs.code.showDisabled(row.client)"
-                      :class="{ required: Client.configs.code.isInvalid(row.client) }"
-                    />
-                  </template>
-                  <template v-else>
-                    {{ row.client.code }}
-                  </template>
-                </td>
-
-                <!-- COMPANY NAME -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <input
-                      v-model="row.client.companyName"
-                      type="text"
-                      :disabled="Client.configs.companyName.showDisabled(row.client)"
-                      :class="{ required: Client.configs.companyName.isInvalid(row.client) }"
-                    />
-                  </template>
-                  <template v-else>
-                    {{ row.client.companyName }}
-                  </template>
-                </td>
-
-                <!-- ADDRESS -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <input
-                      v-model="row.client.address"
-                      type="text"
-                      :disabled="Client.configs.address.showDisabled(row.client)"
-                      :class="{ required: Client.configs.address.isInvalid(row.client) }"
-                    />
-                  </template>
-                  <template v-else>
-                    {{ row.client.address }}
-                  </template>
-                </td>
-
-                <!-- POSTAL CODE -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <input
-                      v-model="row.client.postalCode"
-                      type="text"
-                      :disabled="Client.configs.postalCode.showDisabled(row.client)"
-                      :class="{ required: Client.configs.postalCode.isInvalid(row.client) }"
-                    />
-                  </template>
-                  <template v-else>
-                    {{ row.client.postalCode }}
-                  </template>
-                </td>
-
-                <!-- CITY -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <input
-                      v-model="row.client.city"
-                      type="text"
-                      :disabled="Client.configs.city.showDisabled(row.client)"
-                      :class="{ required: Client.configs.city.isInvalid(row.client) }"
-                    />
-                  </template>
-                  <template v-else>
-                    {{ row.client.city }}
-                  </template>
-                </td>
-
-                <!-- DISTRICT -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <input
-                      v-model="row.client.district"
-                      type="text"
-                      :disabled="Client.configs.district.showDisabled(row.client)"
-                      :class="{ required: Client.configs.district.isInvalid(row.client) }"
-                    />
-                  </template>
-                  <template v-else>
-                    {{ row.client.district }}
-                  </template>
-                </td>
-
-                <!-- NIF -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <input
-                      v-model="row.client.nif"
-                      type="text"
-                      :disabled="Client.configs.nif.showDisabled(row.client)"
-                      :class="{ required: Client.configs.nif.isInvalid(row.client) }"
-                    />
-                  </template>
-                  <template v-else>
-                    {{ row.client.nif }}
-                  </template>
-                </td>
-
-                <!-- CONTACT -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <input
-                      v-model="row.client.contact"
-                      type="text"
-                      :disabled="Client.configs.contact.showDisabled(row.client)"
-                      :class="{ required: Client.configs.contact.isInvalid(row.client) }"
-                    />
-                  </template>
-                  <template v-else>
-                    {{ row.client.contact }}
-                  </template>
-                </td>
-
-                <!-- EMAIL -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <input
-                      v-model="row.client.email"
-                      type="email"
-                      :disabled="Client.configs.email.showDisabled(row.client)"
-                      :class="{ required: Client.configs.email.isInvalid(row.client) }"
-                    />
-                  </template>
-                  <template v-else>
-                    {{ row.client.email }}
-                  </template>
-                </td>
-
-                <!-- PHONE -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <div class="phone-input">
-                      <input
-                        v-model="row.client.phoneCountryCode"
-                        inputmode="text"
-                        pattern="[0-9]{9}"
-                        maxlength="4"
-                        placeholder="+351"
-                        :disabled="Client.configs.phone.showDisabled(row.client)"
-                        :class="{ required: Client.configs.phone.isInvalid(row.client) }"
-                        class="country-code"
-                      />
-                      <input
-                        v-model="row.client.phone"
-                        type="tel"
-                        inputmode="numeric"
-                        pattern="[0-9]{9}"
-                        maxlength="9"
-                        :disabled="Client.configs.phone.showDisabled(row.client)"
-                        :class="{ required: Client.configs.phone.isInvalid(row.client) }"
-                        class="phone-number"
-                      />
-                    </div>
-                  </template>
-                  <template v-else>
-                    {{ `${row.client.phoneCountryCode} ${row.client.phone}` }}
-                  </template>
-                </td>
-
-                <!-- STATUS -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <select
-                      v-model="row.client.status"
-                      :disabled="Client.configs.status.showDisabled(row.client)"
-                      :class="{ required: Client.configs.status.isInvalid(row.client) }"
-                    >
-                      <option v-for="option in Client.configs.status.options" :key="option.value" :value="option.value">
-                        {{ option.label }}
-                      </option>
-                    </select>
-                  </template>
-                  <template v-else>
-                    {{ Status.getLabel(row.client.status) }}
-                  </template>
-                </td>
-
-                <!-- NOTE -->
-                <td>
-                  <template v-if="rowHasChanges(row)">
-                    <input
-                      v-model="row.client.note"
-                      type="text"
-                      :disabled="Client.configs.note.showDisabled(row.client)"
-                      :class="{ required: Client.configs.note.isInvalid(row.client) }"
-                    />
-                  </template>
-                  <template v-else>
-                    {{ row.client.note }}
-                  </template>
-                </td>
-
-                <!-- ACTIONS -->
-                <td>
-                  <div v-if="!rowHasChanges(row)" class="action-buttons">
-                    <button :disabled="isEditing" @click="askDelete(row)"><Trash2 :size="16" /></button>
-                    <button :disabled="isEditing" @click="startEditClient(row)">
-                      <Pencil :size="16" />
-                    </button>
-                  </div>
-                  <div v-if="rowHasChanges(row)" class="action-buttons editing">
-                    <button @click="discardRow(row)"><Undo2 :size="16" /></button>
-                    <button :disabled="!isRowValid(row)" @click="saveClient(row)">
-                      <Check :size="16" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
+            <EntityTableBody
+              :rows="clients"
+              :configs="Client.configs"
+              :row-is-active="isActive"
+              :is-valid="Client.isValid"
+              :is-editing="isEditing"
+              @row-edit="startEditing"
+              @row-delete="askDelete"
+              @row-save="save"
+              @row-discard="discard"
+            />
           </table>
           <div v-if="apiStatus.isLoading" class="table-loading-overlay">
             <div>
@@ -324,7 +88,7 @@
   <ConfirmDialog
     v-model="showDeleteDialog"
     title="Eliminar cliente"
-    :message="`Tem a certeza que quer eliminar definitivamente o cliente '${clientToDelete?.client.companyName}' com o NIF ${clientToDelete?.client.nif}?`"
+    :message="`Tem a certeza que quer eliminar definitivamente o cliente '${clientToDelete?.entity.companyName}' com o NIF ${clientToDelete?.entity.nif}?`"
     confirm-text="Apagar"
     cancel-text="Cancelar"
     @confirm="confirmDelete"
@@ -334,7 +98,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, nextTick } from 'vue';
 import { ApiResponseStatus } from '@/types/api-response-status';
-import { Users, Pencil, Trash2, Check, Undo2, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
+import { Users, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
 import Toast from '@/composables/Toast.vue';
 import { SortDirection } from '@/types/sort-direction';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
@@ -344,6 +108,8 @@ import { Status } from '@/types/status';
 import { ClientType, ClientFilters, ClientSortField } from '@/types/client-type';
 import clientApi from '@/services/client-api';
 import { Client } from '@/entities/client';
+import EntityTableBody from '@/composables/EntityTableBody.vue';
+import { TableRow } from '@/types/entity-configs';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
@@ -351,8 +117,8 @@ const tableBody = ref<HTMLTableSectionElement | null>(null);
 
 /******************************************************************************************************** ROW ACTIONS */
 
-interface ClientRow {
-  client: ClientType;
+interface ClientRow extends TableRow<ClientType> {
+  entity: ClientType;
   _key: string;
   _isNew: boolean;
   _isEdited: boolean;
@@ -367,33 +133,18 @@ function nextKey(): string {
   return `row-${++_keyCounter}`;
 }
 
-function rowHasChanges(row: ClientRow) {
-  return row._isNew || row._isEdited;
-}
-
-function discardRow(row: ClientRow) {
+function discard(row: ClientRow) {
   if (row._isNew) {
     clients.value = clients.value.filter((w) => w._key !== row._key);
   } else {
-    row.client = row._original!;
+    row.entity = row._original!;
     row._isNew = false;
     row._isEdited = false;
   }
 }
 
-function isRowValid(row: ClientRow) {
-  return (
-    row.client.companyName?.trim() &&
-    row.client.nif?.trim() &&
-    row.client.contact?.trim() &&
-    row.client.email?.trim() &&
-    row.client.phone &&
-    row.client.status?.trim()
-  );
-}
-
-function clientIsActive(row: ClientRow) {
-  return row.client.status == Status.ACTIVE;
+function isActive(row: ClientRow) {
+  return row.entity.status == Status.ACTIVE;
 }
 
 /**************************************************************************************************************** GET */
@@ -405,7 +156,7 @@ async function fetchClients() {
     const gotClients = await clientApi.searchClients(clientFilters.value);
 
     clients.value = gotClients.map((client) => ({
-      client: { ...client },
+      entity: { ...client },
       _key: client.code ?? nextKey(),
       _isNew: false,
       _isEdited: false,
@@ -425,17 +176,17 @@ async function fetchClients() {
 
 /*************************************************************************************************************** EDIT */
 
-function startEditClient(row: ClientRow) {
+function startEditing(row: ClientRow) {
   row._isEdited = true;
 
-  row._original = structuredClone({ ...row.client });
+  row._original = structuredClone({ ...row.entity });
 }
 
 /**************************************************************************************************************** ADD */
 
 async function addClient(): Promise<void> {
   clients.value.push({
-    client: {
+    entity: {
       status: Status.ACTIVE,
       phoneCountryCode: '+351',
     },
@@ -457,16 +208,16 @@ async function addClient(): Promise<void> {
 
 /*************************************************************************************************************** SAVE */
 
-async function saveClient(row: ClientRow): Promise<void> {
+async function save(row: ClientRow): Promise<void> {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
 
   try {
     if (row._isNew) {
-      await clientApi.addClient(row.client);
+      await clientApi.addClient(row.entity);
     }
 
     if (row._isEdited) {
-      await clientApi.editClient(row.client);
+      await clientApi.editClient(row.entity);
     }
 
     await fetchClients();
@@ -508,11 +259,11 @@ async function confirmDelete(): Promise<void> {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
 
   try {
-    if (!clientToDelete.value?.client.id) {
+    if (!clientToDelete.value?.entity.id) {
       return;
     }
 
-    await clientApi.deleteClient(clientToDelete.value.client.id);
+    await clientApi.deleteClient(clientToDelete.value.entity.id);
     await fetchClients();
 
     apiStatus.value = {
@@ -579,18 +330,4 @@ function clearAllTableControls(): void {
 
 onMounted(fetchClients);
 </script>
-<style scoped lang="scss">
-.phone-input {
-  display: flex;
-}
-
-.country-code {
-  width: 40px;
-  border-right: none;
-  border-radius: 4px 0 0 4px;
-}
-
-.phone-number {
-  border-radius: 0 4px 4px 0;
-}
-</style>
+<style scoped lang="scss"></style>

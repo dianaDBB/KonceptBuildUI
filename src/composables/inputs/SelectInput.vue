@@ -1,0 +1,29 @@
+<template>
+  <select
+    :value="value"
+    :disabled="isDisabled"
+    :class="{ required: isInvalid }"
+    @input="emit('update:value', ($event.target as HTMLInputElement).value)"
+  >
+    <option v-for="option in options" :key="option.value" :value="option.value">
+      {{ option.label }}
+    </option>
+  </select>
+</template>
+
+<script setup lang="ts" generic="TEntity, TColumn extends string">
+import { SelectOption } from '@/types/select-options';
+
+interface Props {
+  value: any;
+  isInvalid: boolean;
+  isDisabled: boolean;
+  options: SelectOption[];
+}
+
+const props = defineProps<Props>();
+
+const emit = defineEmits<{
+  'update:value': [string];
+}>();
+</script>
