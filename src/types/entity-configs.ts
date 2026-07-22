@@ -1,6 +1,20 @@
 import { StyleValue } from 'vue';
 import { TableFilterKind } from './table-filter';
 import { SelectOption } from './select-options';
+import { UUID } from 'crypto';
+
+export interface EntityType {
+  id?: UUID;
+  code?: string;
+}
+
+export interface TableRow<TEntity extends EntityType = EntityType> {
+  entity: TEntity;
+  _key: string;
+  _isNew: boolean;
+  _isEdited: boolean;
+  _original?: TEntity;
+}
 
 export enum ColumnType {
   TEXT,
@@ -14,47 +28,59 @@ export enum ColumnType {
   PERCENTAGE,
 }
 
-export interface EntityConfig<TEntity, TColumn extends string = string> {
+export interface EntityConfig<TSortField extends string = string, TEntity extends EntityType = EntityType> {
   label: string;
   type: ColumnType;
-  secondaryField?: string;
-  onValueChanged?: (row: TableRow<TEntity>, value: unknown) => void;
+  onValueChanged?: (row: TableRow, value: unknown) => void;
 
-  showDisabled: (entity: TEntity) => boolean;
-  isInvalid: (entity: TEntity) => boolean;
+  selectConfig?: SelectConfig;
+  searchSelectConfig?: SearchSelectConfig<TEntity>;
+  phoneConfig?: PhoneConfig<TEntity>;
+
+  styleConfig: StyleConfig;
+
+  filterConfig: FilterConfig<TSortField>;
+}
+
+export interface StyleConfig {
+  showDisabled: (entity: EntityType) => boolean;
+  isInvalid: (entity: EntityType) => boolean;
   isHighlight?: boolean;
-  enum?: any;
-  options?: SelectOption[];
-  searchSelect?: SearchSelectConfig<any>;
-
-  filter: {
-    column: TColumn;
-    kind: TableFilterKind;
-    valueKey?: string;
-    minKey?: string;
-    maxKey?: string;
-    dropdownAlign?: 'start' | 'end';
-  };
-
   columnStyle: StyleValue;
 }
 
-export interface TableRow<T> {
-  entity: T;
-  _key: string;
-  _isNew: boolean;
-  _isEdited: boolean;
-  _original?: T;
-}
-
-export interface SearchSelectConfig<TOption> {
-  options: TOption[];
-  selected: (option: TOption) => string;
-  optionLines: (option: TOption) => string[];
-  filter?: (option: TOption) => string;
-  tooltipTitle?: (value: any) => string;
-  tooltipItems?: (value: any) => {
+export interface SearchSelectConfig<TEntity extends EntityType = EntityType> {
+  // options: TEntity[];
+  selected: (option: TEntity) => string;
+  optionLines: (option: TEntity) => string[];
+  filter?: (option: TEntity) => string;
+  tooltipTitle?: (value: TEntity) => string;
+  tooltipItems?: (value: TEntity) => {
     label: string;
     value?: string | number | null;
   }[];
+}
+
+export interface SelectConfig {
+  options: SelectOption[];
+}
+
+export interface PhoneConfig<TEntity extends EntityType = EntityType> {
+  secondaryField: keyof TEntity;
+}
+
+export interface FilterConfig<TSortField extends string = string> {
+  column: TSortField;
+  kind: TableFilterKind;
+  valueConfig: SingleFilterConfig | RangeFilterConfig;
+  dropdownAlign?: 'start' | 'end';
+}
+
+export interface SingleFilterConfig {
+  valueKey: string;
+}
+
+export interface RangeFilterConfig {
+  minKey: string;
+  maxKey: string;
 }

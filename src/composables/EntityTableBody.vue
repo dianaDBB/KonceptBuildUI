@@ -4,8 +4,8 @@
       <td
         v-for="(config, fieldKey) in configs"
         :key="fieldKey"
-        :style="config.columnStyle"
-        :class="getColumnClasses(fieldKey, row)"
+        :style="config.styleConfig.columnStyle"
+        :class="getColumnClasses(fieldKey)"
       >
         <template v-if="rowHasChanges(row)">
           <slot :name="`edit-${fieldKey}`" :row="row" :config="config" :field-key="fieldKey">
@@ -15,9 +15,10 @@
               :entity="row.entity"
               :field-key="fieldKey"
               :config="config"
-              :options="props.searchSelectOptions?.[fieldKey] ?? config.options"
-              :is-invalid="config.isInvalid(row.entity)"
-              :is-disabled="config.showDisabled(row.entity)"
+              :select-options="config.selectConfig?.options"
+              :search-select-options="props.searchSelectOptions"
+              :is-invalid="config.styleConfig.isInvalid(row.entity)"
+              :is-disabled="config.styleConfig.showDisabled(row.entity)"
               @update:value="updateFieldValue(row, fieldKey, $event)"
             />
           </slot>
@@ -32,8 +33,8 @@
                 <InfoTooltip
                   v-if="getFieldValue(row, fieldKey)"
                   position="left"
-                  :title="config.searchSelect!.tooltipTitle!(getFieldValue(row, fieldKey))"
-                  :items="config.searchSelect!.tooltipItems!(getFieldValue(row, fieldKey))"
+                  :title="config.searchSelectConfig!.tooltipTitle!(getFieldValue(row, fieldKey))"
+                  :items="config.searchSelectConfig!.tooltipItems!(getFieldValue(row, fieldKey))"
                 />
               </div>
             </template>
@@ -69,9 +70,9 @@
   </tbody>
 </template>
 
-<script setup lang="ts" generic="TEntity extends Record<string, unknown>, TColumn extends string">
+<script setup lang="ts" generic="TSortField extends string, TEntity extends EntityType = EntityType">
 import { Trash2, Pencil, Undo2, Check } from 'lucide-vue-next';
-import { ColumnType, EntityConfig, TableRow } from '@/types/entity-configs';
+import { ColumnType, EntityConfig, EntityType, TableRow } from '@/types/entity-configs';
 
 import TextInput from './inputs/TextInput.vue';
 import { formatCurrency, formatNumber, formatPercentage } from '@/utils/validation.ts';
@@ -85,13 +86,13 @@ import PhoneInput from './inputs/PhoneInput.vue';
 import SelectInput from './inputs/SelectInput.vue';
 import SearchSelectInput from './inputs/SearchSelectInput.vue';
 
-interface Props<T> {
-  rows: TableRow<T>[];
-  configs: Record<string, EntityConfig<T, TColumn>>;
-  rowIsActive: (row: TableRow<T>) => boolean;
-  isValid: (entity: T) => boolean;
+interface Props<TEntity extends EntityType = EntityType> {
+  rows: TableRow<TEntity>[];
+  configs: Record<string, EntityConfig<TSortField, TEntity>>;
+  rowIsActive: (row: TableRow<TEntity>) => boolean;
+  isValid: (entity: TEntity) => boolean;
   isEditing?: boolean;
-  searchSelectOptions?: Record<string, any[]>;
+  searchSelectOptions?: any[];
 }
 
 const props = withDefaults(defineProps<Props<TEntity>>(), {
@@ -133,20 +134,17 @@ function isRowActive(row: TableRow<TEntity>): boolean {
   return props.rowIsActive(row);
 }
 
-function getColumnClasses(fieldKey: string, row: TableRow<TEntity>): any {
-  const config = props.configs[fieldKey];
-
+function getColumnClasses(fieldKey: string): any {
   return {
-    highlight: props.configs[fieldKey].isHighlight,
-    required: rowHasChanges(row) && config.isInvalid(row.entity),
+    highlight: props.configs[fieldKey].styleConfig.isHighlight,
   };
 }
 
 function getFieldValue(row: TableRow<TEntity>, fieldKey: string): any {
-  return (row.entity as any)[fieldKey];
+  return row.entity[fieldKey as keyof TEntity];
 }
 
-function getFormatedValue(row: TableRow<TEntity>, fieldKey: string, config: EntityConfig<TEntity, TColumn>): string {
+function getFormatedValue(row: TableRow<TEntity>, fieldKey: string, config: EntityConfig<TSortField, TEntity>): string {
   const value = getFieldValue(row, fieldKey);
 
   switch (config.type) {
@@ -157,13 +155,13 @@ function getFormatedValue(row: TableRow<TEntity>, fieldKey: string, config: Enti
     case ColumnType.PERCENTAGE:
       return formatPercentage(value);
     case ColumnType.SELECT:
-      return config.options?.find((opt) => opt.value === value)?.label ?? value;
+      return config.selectConfig?.options?.find((opt) => opt.value === value)?.label ?? value;
     case ColumnType.SEARCH_SELECT:
-      return value ? config.searchSelect!.selected(value) : '';
+      return value ? config.searchSelectConfig!.selected(value) : '';
     case ColumnType.DATE:
       return value ? new Date(value).toLocaleDateString() : '-';
     case ColumnType.PHONE:
-      return `${row.entity[config.secondaryField!]} ${row.entity[fieldKey]}`;
+      return `${row.entity[config.phoneConfig!.secondaryField!]} ${row.entity[fieldKey as keyof TEntity]}`;
     default:
       return String(value ?? '');
   }

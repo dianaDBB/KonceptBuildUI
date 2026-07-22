@@ -4,211 +4,254 @@ import { WorkStatus } from '@/types/work-status';
 import { WorkSortField, WorkType } from '@/types/work-type';
 import { Client } from './client';
 import { Status } from '@/types/status';
+import { ClientType } from '@/types/client-type';
 
 export class Work {
-  static readonly configs: Record<string, EntityConfig<WorkType, WorkSortField>> = {
+  static readonly configs: Record<string, EntityConfig<WorkSortField, ClientType>> = {
     code: {
       label: 'ID',
       type: ColumnType.TEXT,
-      showDisabled: (work: WorkType) => true,
-      isInvalid: (work: WorkType) => false,
-      filter: {
+      styleConfig: {
+        showDisabled: () => true,
+        isInvalid: () => false,
+        columnStyle: {
+          width: '90px',
+        },
+      },
+      filterConfig: {
         column: WorkSortField.CODE,
         kind: TableFilterKind.TEXT,
-        valueKey: 'code',
+        valueConfig: {
+          valueKey: 'code',
+        },
         dropdownAlign: 'start',
-      },
-      columnStyle: {
-        width: '90px',
       },
     },
     name: {
       label: 'Nome da Obra',
       type: ColumnType.TEXT,
-      showDisabled: (work: WorkType) => false,
-      isInvalid: (work: WorkType) => !work.name,
-      filter: {
+      styleConfig: {
+        showDisabled: () => false,
+        isInvalid: (work: WorkType) => !work.name,
+        columnStyle: {
+          width: '150px',
+        },
+      },
+      filterConfig: {
         column: WorkSortField.NAME,
         kind: TableFilterKind.TEXT,
-        valueKey: 'name',
+        valueConfig: {
+          valueKey: 'name',
+        },
         dropdownAlign: 'start',
-      },
-      columnStyle: {
-        width: '150px',
       },
     },
     status: {
       label: 'Estado',
       type: ColumnType.SELECT,
-      showDisabled: (work: WorkType) => false,
-      isInvalid: (work: WorkType) => !work.status,
-      options: WorkStatus.OPTIONS,
-      filter: {
+      selectConfig: {
+        options: WorkStatus.OPTIONS,
+      },
+      styleConfig: {
+        showDisabled: () => false,
+        isInvalid: (work: WorkType) => !work.status,
+        columnStyle: {
+          width: '100px',
+        },
+      },
+      filterConfig: {
         column: WorkSortField.STATUS,
         kind: TableFilterKind.SELECT,
-        valueKey: 'status',
+        valueConfig: {
+          valueKey: 'status',
+        },
         dropdownAlign: 'start',
-      },
-      columnStyle: {
-        width: '100px',
       },
     },
     contractedBudget: {
       label: 'Orçamento Adjudicado (€)',
       type: ColumnType.MONEY,
-      showDisabled: (work: WorkType) => false,
-      isInvalid: (work: WorkType) => !work.contractedBudget,
-      filter: {
+      styleConfig: {
+        showDisabled: () => false,
+        isInvalid: (work: WorkType) => !work.contractedBudget,
+        columnStyle: {
+          width: '100px',
+        },
+      },
+      filterConfig: {
         column: WorkSortField.CONTRACTED_BUDGET,
         kind: TableFilterKind.NUMBER_RANGE,
-        minKey: 'contractedBudgetMin',
-        maxKey: 'contractedBudgetMax',
-      },
-      columnStyle: {
-        width: '100px',
+        valueConfig: {
+          minKey: 'contractedBudgetMin',
+          maxKey: 'contractedBudgetMax',
+        },
       },
     },
     estimatedCost: {
       label: 'Custo Previsto (€)',
       type: ColumnType.MONEY,
-      showDisabled: (work: WorkType) => true,
-      isInvalid: (work: WorkType) => false,
-      filter: {
+      styleConfig: {
+        showDisabled: () => true,
+        isInvalid: () => false,
+        isHighlight: true,
+        columnStyle: {
+          width: '100px',
+        },
+      },
+      filterConfig: {
         column: WorkSortField.ESTIMATED_COST,
         kind: TableFilterKind.NUMBER_RANGE,
-        minKey: 'estimatedCostMin',
-        maxKey: 'estimatedCostMax',
-      },
-      columnStyle: {
-        width: '100px',
+        valueConfig: {
+          minKey: 'estimatedCostMin',
+          maxKey: 'estimatedCostMax',
+        },
       },
     },
     estimatedCostMaterials: {
       label: 'Custo Previsto Materiais (€)',
       type: ColumnType.MONEY,
-      showDisabled: (work: WorkType) => false,
-      isInvalid: (work: WorkType) => !work.estimatedCostMaterials,
-      filter: {
+      styleConfig: {
+        showDisabled: () => false,
+        isInvalid: (work: WorkType) => !work.estimatedCostMaterials,
+        columnStyle: {
+          width: '100px',
+        },
+      },
+      filterConfig: {
         column: WorkSortField.ESTIMATED_COST_MATERIALS,
         kind: TableFilterKind.NUMBER_RANGE,
-        minKey: 'estimatedCostMaterialMin',
-        maxKey: 'estimatedCostMaterialMax',
-      },
-      columnStyle: {
-        width: '100px',
+        valueConfig: {
+          minKey: 'estimatedCostMaterialMin',
+          maxKey: 'estimatedCostMaterialMax',
+        },
       },
     },
     estimatedCostLabor: {
       label: 'Custo Previsto Mão-Obra (€)',
       type: ColumnType.MONEY,
-      showDisabled: (work: WorkType) => false,
-      isInvalid: (work: WorkType) => !work.estimatedCostLabor,
-      filter: {
+      styleConfig: {
+        showDisabled: () => false,
+        isInvalid: (work: WorkType) => !work.estimatedCostLabor,
+        columnStyle: {
+          width: '100px',
+        },
+      },
+      filterConfig: {
         column: WorkSortField.ESTIMATED_COST_LABOR,
         kind: TableFilterKind.NUMBER_RANGE,
-        minKey: 'estimatedCostLaborMin',
-        maxKey: 'estimatedCostLaborMax',
-      },
-      columnStyle: {
-        width: '100px',
+        valueConfig: {
+          minKey: 'estimatedCostLaborMin',
+          maxKey: 'estimatedCostLaborMax',
+        },
       },
     },
     estimatedMarginEur: {
       label: 'Margem Prevista (€)',
       type: ColumnType.MONEY,
-      showDisabled: (work: WorkType) => true,
-      isInvalid: (work: WorkType) => false,
-      filter: {
+      styleConfig: {
+        showDisabled: () => true,
+        isInvalid: () => false,
+        isHighlight: true,
+        columnStyle: {
+          width: '100px',
+        },
+      },
+      filterConfig: {
         column: WorkSortField.ESTIMATED_MARGIN_EUR,
         kind: TableFilterKind.NUMBER_RANGE,
-        minKey: 'estimatedMarginEurMin',
-        maxKey: 'estimatedMarginEurMax',
-      },
-      columnStyle: {
-        width: '100px',
+        valueConfig: {
+          minKey: 'estimatedMarginEurMin',
+          maxKey: 'estimatedMarginEurMax',
+        },
       },
     },
     estimatedMarginPercentual: {
       label: 'Margem Prevista (%)',
       type: ColumnType.PERCENTAGE,
-      showDisabled: (work: WorkType) => true,
-      isInvalid: (work: WorkType) => false,
-      filter: {
+      styleConfig: {
+        showDisabled: () => true,
+        isInvalid: () => false,
+        isHighlight: true,
+        columnStyle: {
+          width: '130px',
+        },
+      },
+      filterConfig: {
         column: WorkSortField.ESTIMATED_MARGIN_PERCENTUAL,
         kind: TableFilterKind.NUMBER_RANGE,
-        minKey: 'estimatedMarginPercentualMin',
-        maxKey: 'estimatedMarginPercentualMax',
-      },
-      columnStyle: {
-        width: '130px',
+        valueConfig: {
+          minKey: 'estimatedMarginPercentualMin',
+          maxKey: 'estimatedMarginPercentualMax',
+        },
       },
     },
     startDate: {
       label: 'Data início',
       type: ColumnType.DATE,
-      showDisabled: (work: WorkType) => false,
-      isInvalid: (work: WorkType) => !work.startDate,
-      filter: {
+      styleConfig: {
+        showDisabled: () => false,
+        isInvalid: (work: WorkType) => !work.startDate,
+        columnStyle: {
+          width: '130px',
+        },
+      },
+      filterConfig: {
         column: WorkSortField.START_DATE,
         kind: TableFilterKind.NUMBER_RANGE,
-        minKey: 'startDateMin',
-        maxKey: 'startDateMax',
-      },
-      columnStyle: {
-        width: '130px',
+        valueConfig: {
+          minKey: 'startDateMin',
+          maxKey: 'startDateMax',
+        },
       },
     },
     estimatedEndDate: {
       label: 'Data Fim Prevista',
       type: ColumnType.DATE,
-      showDisabled: (work: WorkType) => false,
-      isInvalid: (work: WorkType) => !work.estimatedEndDate,
-      filter: {
+      styleConfig: {
+        showDisabled: () => false,
+        isInvalid: (work: WorkType) => !work.estimatedEndDate,
+        columnStyle: {
+          width: '130px',
+        },
+      },
+      filterConfig: {
         column: WorkSortField.ESTIMATED_END_DATE,
         kind: TableFilterKind.NUMBER_RANGE,
-        minKey: 'estimatedEndDateMin',
-        maxKey: 'estimatedEndDateMax',
-      },
-      columnStyle: {
-        width: '130px',
+        valueConfig: {
+          minKey: 'estimatedEndDateMin',
+          maxKey: 'estimatedEndDateMax',
+        },
       },
     },
     endDate: {
       label: 'Data Fim',
       type: ColumnType.DATE,
-      showDisabled: (work: WorkType) => false,
-      isInvalid: (work: WorkType) => false,
-      filter: {
+      styleConfig: {
+        showDisabled: () => false,
+        isInvalid: () => false,
+        columnStyle: {
+          width: '130px',
+        },
+      },
+      filterConfig: {
         column: WorkSortField.END_DATE,
         kind: TableFilterKind.NUMBER_RANGE,
-        minKey: 'endDateMin',
-        maxKey: 'endDateMax',
-      },
-      columnStyle: {
-        width: '130px',
+        valueConfig: {
+          minKey: 'endDateMin',
+          maxKey: 'endDateMax',
+        },
       },
     },
     client: {
       label: 'Cliente',
       type: ColumnType.SEARCH_SELECT,
-      showDisabled: (work: WorkType) => false,
-      isInvalid: (work: WorkType) => !work.client,
-      filter: {
-        column: WorkSortField.CLIENT_NAME,
-        kind: TableFilterKind.TEXT,
-        valueKey: 'clientName',
-      },
-      columnStyle: {
-        width: '200px',
-      },
-
-      searchSelect: {
-        options: [],
-        selected: (client) => client.companyName,
-        optionLines: (client) => [client.companyName, client.nif, client.code],
-        filter: (client) => `${client.companyName} ${client.nif} ${client.code}`,
-        tooltipTitle: (client) => client.companyName,
-        tooltipItems: (client) => [
+      searchSelectConfig: {
+        // options: [],
+        selected: (client: ClientType) => client.companyName!,
+        optionLines: (client: ClientType) => [client.companyName!, client.nif!, client.code!],
+        filter: (client: ClientType) => `${client.companyName} ${client.nif} ${client.code}`,
+        tooltipTitle: (client: ClientType) => client.companyName!,
+        tooltipItems: (client: ClientType) => [
           { label: Client.configs.code.label, value: client.code },
           { label: Client.configs.companyName.label, value: client.companyName },
           { label: Client.configs.address.label, value: client.address },
@@ -226,10 +269,24 @@ export class Work {
           { label: Client.configs.note.label, value: client.note },
         ],
       },
+      styleConfig: {
+        showDisabled: () => false,
+        isInvalid: (work: WorkType) => !work.client,
+        columnStyle: {
+          width: '200px',
+        },
+      },
+      filterConfig: {
+        column: WorkSortField.CLIENT_NAME,
+        kind: TableFilterKind.TEXT,
+        valueConfig: {
+          valueKey: 'clientName',
+        },
+      },
     },
   };
 
   static isValid(work: WorkType): boolean {
-    return Object.values(Work.configs).every((config) => !config.isInvalid(work));
+    return Object.values(Work.configs).every((config) => !config.styleConfig.isInvalid(work));
   }
 }

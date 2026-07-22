@@ -14,7 +14,11 @@
         <div class="table">
           <table>
             <colgroup>
-              <col v-for="config in Object.values(Work.configs)" :key="config.label" :style="config.columnStyle" />
+              <col
+                v-for="config in Object.values(Work.configs)"
+                :key="config.label"
+                :style="config.styleConfig.columnStyle"
+              />
               <col style="width: 50px" />
             </colgroup>
             <thead>
@@ -52,7 +56,7 @@
             <EntityTableBody
               :rows="works"
               :configs="Work.configs"
-              :search-select-options="{ client: clients }"
+              :search-select-options="clients"
               :row-is-active="isActive"
               :is-valid="Work.isValid"
               :is-editing="isEditing"

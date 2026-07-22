@@ -5,276 +5,350 @@ import { WorkerType, WorkerContractType, WorkerSortField } from '@/types/worker-
 import { isValidEmail, isValidPhone } from '@/utils/validation';
 
 export class Worker {
-  static readonly configs: Record<string, EntityConfig<WorkerType, WorkerSortField>> = {
+  static readonly configs: Record<string, EntityConfig<WorkerSortField, WorkerType>> = {
     code: {
       label: 'ID',
       type: ColumnType.TEXT,
-      showDisabled: (worker: WorkerType) => true,
-      isInvalid: (worker: WorkerType) => false,
-      filter: {
+      styleConfig: {
+        showDisabled: () => true,
+        isInvalid: () => false,
+        columnStyle: {
+          width: '90px',
+        },
+      },
+      filterConfig: {
         column: WorkerSortField.CODE,
         kind: TableFilterKind.TEXT,
-        valueKey: 'code',
+        valueConfig: {
+          valueKey: 'code',
+        },
         dropdownAlign: 'start',
-      },
-      columnStyle: {
-        width: '90px',
       },
     },
     name: {
       label: 'Nome',
       type: ColumnType.TEXT,
-      showDisabled: (worker: WorkerType) => false,
-      isInvalid: (worker: WorkerType) => !worker.name,
-      isHighlight: true,
-      filter: {
+      styleConfig: {
+        showDisabled: () => false,
+        isInvalid: (worker: WorkerType) => !worker.name,
+        isHighlight: true,
+        columnStyle: {
+          width: '150px',
+        },
+      },
+      filterConfig: {
         column: WorkerSortField.NAME,
         kind: TableFilterKind.TEXT,
-        valueKey: 'name',
+        valueConfig: {
+          valueKey: 'name',
+        },
         dropdownAlign: 'start',
-      },
-      columnStyle: {
-        width: '150px',
       },
     },
     nif: {
       label: 'NIF',
       type: ColumnType.TEXT,
-      showDisabled: (worker: WorkerType) => false,
-      isInvalid: (worker: WorkerType) => !worker.nif,
-      filter: {
+      styleConfig: {
+        showDisabled: () => false,
+        isInvalid: (worker: WorkerType) => !worker.nif,
+        columnStyle: {
+          width: '95px',
+        },
+      },
+      filterConfig: {
         column: WorkerSortField.NIF,
         kind: TableFilterKind.TEXT,
-        valueKey: 'nif',
+        valueConfig: {
+          valueKey: 'nif',
+        },
         dropdownAlign: 'start',
-      },
-      columnStyle: {
-        width: '95px',
       },
     },
     status: {
       label: 'Estado',
       type: ColumnType.SELECT,
-      showDisabled: (worker: WorkerType) => false,
-      isInvalid: (worker: WorkerType) => !worker.status,
-      options: Status.OPTIONS,
-      filter: {
+      selectConfig: {
+        options: Status.OPTIONS,
+      },
+      styleConfig: {
+        showDisabled: () => false,
+        isInvalid: (worker: WorkerType) => !worker.status,
+        columnStyle: {
+          width: '90px',
+        },
+      },
+      filterConfig: {
         column: WorkerSortField.STATUS,
         kind: TableFilterKind.SELECT,
-        valueKey: 'status',
-      },
-      columnStyle: {
-        width: '90px',
+        valueConfig: {
+          valueKey: 'status',
+        },
       },
     },
     phone: {
       label: 'Tlf',
       type: ColumnType.PHONE,
-      secondaryField: 'phoneCountryCode',
-      showDisabled: (worker: WorkerType) => false,
-      isInvalid: (worker: WorkerType) => !isValidPhone(worker.phone),
-      filter: {
+      phoneConfig: {
+        secondaryField: 'phoneCountryCode',
+      },
+      styleConfig: {
+        showDisabled: () => false,
+        isInvalid: (worker: WorkerType) => !isValidPhone(worker.phone),
+        columnStyle: {
+          width: '140px',
+        },
+      },
+      filterConfig: {
         column: WorkerSortField.PHONE,
         kind: TableFilterKind.TEXT,
-        valueKey: 'phone',
-      },
-      columnStyle: {
-        width: '140px',
+        valueConfig: {
+          valueKey: 'phone',
+        },
       },
     },
     email: {
       label: 'E-mail',
       type: ColumnType.EMAIL,
-      showDisabled: (worker: WorkerType) => false,
-      isInvalid: (worker: WorkerType) => !isValidEmail(worker.email),
-      filter: {
+      styleConfig: {
+        showDisabled: () => false,
+        isInvalid: (worker: WorkerType) => !isValidEmail(worker.email),
+        columnStyle: {
+          width: '150px',
+        },
+      },
+      filterConfig: {
         column: WorkerSortField.EMAIL,
         kind: TableFilterKind.TEXT,
-        valueKey: 'email',
-      },
-      columnStyle: {
-        width: '150px',
+        valueConfig: {
+          valueKey: 'email',
+        },
       },
     },
     function: {
       label: 'Função',
       type: ColumnType.TEXT,
-      showDisabled: (worker: WorkerType) => false,
-      isInvalid: (worker: WorkerType) => !worker.function,
-      filter: {
+      styleConfig: {
+        showDisabled: () => false,
+        isInvalid: (worker: WorkerType) => !worker.function,
+        columnStyle: {
+          width: '100px',
+        },
+      },
+      filterConfig: {
         column: WorkerSortField.FUNCTION,
         kind: TableFilterKind.TEXT,
-        valueKey: 'function',
-      },
-      columnStyle: {
-        width: '100px',
+        valueConfig: {
+          valueKey: 'function',
+        },
       },
     },
     hourCost: {
       label: 'Valor/Hora Base (€)',
       type: ColumnType.MONEY,
-      showDisabled: (worker: WorkerType) => true,
-      isInvalid: (worker: WorkerType) => false,
-      isHighlight: true,
-      filter: {
+      styleConfig: {
+        showDisabled: () => true,
+        isInvalid: () => false,
+        isHighlight: true,
+        columnStyle: {
+          width: '100px',
+        },
+      },
+      filterConfig: {
         column: WorkerSortField.HOUR_COST,
         kind: TableFilterKind.NUMBER_RANGE,
-        minKey: 'hourCostMin',
-        maxKey: 'hourCostMax',
-      },
-      columnStyle: {
-        width: '100px',
+        valueConfig: {
+          minKey: 'hourCostMin',
+          maxKey: 'hourCostMax',
+        },
       },
     },
     defaultHours: {
       label: 'Horas Dia (Padrão)',
       type: ColumnType.NUMBER,
-      showDisabled: (worker: WorkerType) => false,
-      isInvalid: (worker: WorkerType) => !worker.defaultHours,
-      filter: {
+      styleConfig: {
+        showDisabled: () => false,
+        isInvalid: (worker: WorkerType) => !worker.defaultHours,
+        columnStyle: {
+          width: '100px',
+        },
+      },
+      filterConfig: {
         column: WorkerSortField.DEFAULT_HOURS,
         kind: TableFilterKind.NUMBER_RANGE,
-        minKey: 'defaultHoursMin',
-        maxKey: 'defaultHoursMax',
-      },
-      columnStyle: {
-        width: '100px',
+        valueConfig: {
+          minKey: 'defaultHoursMin',
+          maxKey: 'defaultHoursMax',
+        },
       },
     },
     workerContractType: {
       label: 'Tipo de Contracto',
       type: ColumnType.SELECT,
       onValueChanged: onContractTypeChanged,
-      showDisabled: (worker: WorkerType) => false,
-      isInvalid: (worker: WorkerType) => !worker.workerContractType,
-      options: WorkerContractType.OPTIONS,
-      filter: {
+      selectConfig: {
+        options: WorkerContractType.OPTIONS,
+      },
+      styleConfig: {
+        showDisabled: () => false,
+        isInvalid: (worker: WorkerType) => !worker.workerContractType,
+        columnStyle: {
+          width: '100px',
+        },
+      },
+      filterConfig: {
         column: WorkerSortField.WORKER_CONTRACT_TYPE,
         kind: TableFilterKind.SELECT,
-        valueKey: 'workerContractType',
-      },
-      columnStyle: {
-        width: '100px',
+        valueConfig: {
+          valueKey: 'workerContractType',
+        },
       },
     },
     hourRate: {
       label: 'Valor Hora (€)',
       type: ColumnType.MONEY,
-      showDisabled: (worker: WorkerType) =>
-        !worker.workerContractType || worker.workerContractType === WorkerContractType.INTERNAL,
-      isInvalid: (worker: WorkerType) =>
-        worker.workerContractType === WorkerContractType.CONTRACTOR && !worker.hourRate,
-      filter: {
+      styleConfig: {
+        showDisabled: (worker: WorkerType) =>
+          !worker.workerContractType || worker.workerContractType === WorkerContractType.INTERNAL,
+        isInvalid: (worker: WorkerType) =>
+          worker.workerContractType === WorkerContractType.CONTRACTOR && !worker.hourRate,
+        columnStyle: {
+          width: '80px',
+        },
+      },
+      filterConfig: {
         column: WorkerSortField.HOUR_RATE,
         kind: TableFilterKind.NUMBER_RANGE,
-        minKey: 'hourRateMin',
-        maxKey: 'hourRateMax',
-      },
-      columnStyle: {
-        width: '80px',
+        valueConfig: {
+          minKey: 'hourRateMin',
+          maxKey: 'hourRateMax',
+        },
       },
     },
     monthlySalary: {
       label: 'Ordenado Base Mensal (€)',
       type: ColumnType.MONEY,
-      showDisabled: (worker: WorkerType) =>
-        !worker.workerContractType || worker.workerContractType === WorkerContractType.CONTRACTOR,
-      isInvalid: (worker: WorkerType) =>
-        worker.workerContractType === WorkerContractType.INTERNAL && !worker.monthlySalary,
-      filter: {
+      styleConfig: {
+        showDisabled: (worker: WorkerType) =>
+          !worker.workerContractType || worker.workerContractType === WorkerContractType.CONTRACTOR,
+        isInvalid: (worker: WorkerType) =>
+          worker.workerContractType === WorkerContractType.INTERNAL && !worker.monthlySalary,
+        columnStyle: {
+          width: '100px',
+        },
+      },
+      filterConfig: {
         column: WorkerSortField.MONTHLY_SALARY,
         kind: TableFilterKind.NUMBER_RANGE,
-        minKey: 'monthlySalaryMin',
-        maxKey: 'monthlySalaryMax',
-      },
-      columnStyle: {
-        width: '100px',
+        valueConfig: {
+          minKey: 'monthlySalaryMin',
+          maxKey: 'monthlySalaryMax',
+        },
       },
     },
     tsu: {
       label: 'TSU Empresa (%)',
       type: ColumnType.PERCENTAGE,
-      showDisabled: (worker: WorkerType) =>
-        !worker.workerContractType || worker.workerContractType === WorkerContractType.CONTRACTOR,
-      isInvalid: (worker: WorkerType) => worker.workerContractType === WorkerContractType.INTERNAL && !worker.tsu,
-      filter: {
+      styleConfig: {
+        showDisabled: (worker: WorkerType) =>
+          !worker.workerContractType || worker.workerContractType === WorkerContractType.CONTRACTOR,
+        isInvalid: (worker: WorkerType) => worker.workerContractType === WorkerContractType.INTERNAL && !worker.tsu,
+        columnStyle: {
+          width: '80px',
+        },
+      },
+      filterConfig: {
         column: WorkerSortField.TSU,
         kind: TableFilterKind.NUMBER_RANGE,
-        minKey: 'tsuMin',
-        maxKey: 'tsuMax',
-      },
-      columnStyle: {
-        width: '80px',
+        valueConfig: {
+          minKey: 'tsuMin',
+          maxKey: 'tsuMax',
+        },
       },
     },
     mealAllowance: {
       label: 'Subsídio Alim. /Dia (€)',
       type: ColumnType.MONEY,
-      showDisabled: (worker: WorkerType) =>
-        !worker.workerContractType || worker.workerContractType === WorkerContractType.CONTRACTOR,
-      isInvalid: (worker: WorkerType) =>
-        worker.workerContractType === WorkerContractType.INTERNAL && !worker.mealAllowance,
-      filter: {
+      styleConfig: {
+        showDisabled: (worker: WorkerType) =>
+          !worker.workerContractType || worker.workerContractType === WorkerContractType.CONTRACTOR,
+        isInvalid: (worker: WorkerType) =>
+          worker.workerContractType === WorkerContractType.INTERNAL && !worker.mealAllowance,
+        columnStyle: {
+          width: '100px',
+        },
+      },
+      filterConfig: {
         column: WorkerSortField.MEAL_ALLOWANCE,
         kind: TableFilterKind.NUMBER_RANGE,
-        minKey: 'mealAllowanceMin',
-        maxKey: 'mealAllowanceMax',
-      },
-      columnStyle: {
-        width: '100px',
+        valueConfig: {
+          minKey: 'mealAllowanceMin',
+          maxKey: 'mealAllowanceMax',
+        },
       },
     },
     accidentInsurance: {
       label: 'Seguro Ac. Trabalho (€/mês)',
       type: ColumnType.MONEY,
-      showDisabled: (worker: WorkerType) =>
-        !worker.workerContractType || worker.workerContractType === WorkerContractType.CONTRACTOR,
-      isInvalid: (worker: WorkerType) =>
-        worker.workerContractType === WorkerContractType.INTERNAL && !worker.accidentInsurance,
-      filter: {
+      styleConfig: {
+        showDisabled: (worker: WorkerType) =>
+          !worker.workerContractType || worker.workerContractType === WorkerContractType.CONTRACTOR,
+        isInvalid: (worker: WorkerType) =>
+          worker.workerContractType === WorkerContractType.INTERNAL && !worker.accidentInsurance,
+        columnStyle: {
+          width: '100px',
+        },
+      },
+      filterConfig: {
         column: WorkerSortField.ACCIDENT_INSURANCE,
         kind: TableFilterKind.NUMBER_RANGE,
-        minKey: 'accidentInsuranceMin',
-        maxKey: 'accidentInsuranceMax',
-      },
-      columnStyle: {
-        width: '100px',
+        valueConfig: {
+          minKey: 'accidentInsuranceMin',
+          maxKey: 'accidentInsuranceMax',
+        },
       },
     },
     startDate: {
       label: 'Data Admissão',
       type: ColumnType.DATE,
-      showDisabled: (worker: WorkerType) => false,
-      isInvalid: (worker: WorkerType) => !worker.startDate,
-      filter: {
+      styleConfig: {
+        showDisabled: () => false,
+        isInvalid: (worker: WorkerType) => !worker.startDate,
+        columnStyle: {
+          width: '130px',
+        },
+      },
+      filterConfig: {
         column: WorkerSortField.START_DATE,
         kind: TableFilterKind.NUMBER_RANGE,
-        minKey: 'startDateMin',
-        maxKey: 'startDateMax',
-      },
-      columnStyle: {
-        width: '130px',
+        valueConfig: {
+          minKey: 'startDateMin',
+          maxKey: 'startDateMax',
+        },
       },
     },
     endDate: {
       label: 'Data Cessação',
       type: ColumnType.DATE,
-      showDisabled: (worker: WorkerType) => false,
-      isInvalid: (worker: WorkerType) => false,
-      filter: {
+      styleConfig: {
+        showDisabled: () => false,
+        isInvalid: () => false,
+        columnStyle: {
+          width: '130px',
+        },
+      },
+      filterConfig: {
         column: WorkerSortField.END_DATE,
         kind: TableFilterKind.NUMBER_RANGE,
-        minKey: 'endDateMin',
-        maxKey: 'endDateMax',
-      },
-      columnStyle: {
-        width: '130px',
+        valueConfig: {
+          minKey: 'endDateMin',
+          maxKey: 'endDateMax',
+        },
       },
     },
   };
 
   static isValid(worker: WorkerType): boolean {
-    return Object.values(Worker.configs).every((config) => !config.isInvalid(worker));
+    return Object.values(Worker.configs).every((config) => !config.styleConfig.isInvalid(worker));
   }
 }
 

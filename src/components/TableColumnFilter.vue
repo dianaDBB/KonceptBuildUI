@@ -15,7 +15,7 @@
     <form
       v-if="isOpen"
       class="filter-dropdown"
-      :class="`align-${config.filter.dropdownAlign ?? 'end'}`"
+      :class="`align-${config.filterConfig.dropdownAlign ?? 'end'}`"
       @submit.prevent="apply"
     >
       <div class="filter-dropdown-header">
@@ -46,23 +46,26 @@
       <hr />
 
       <input
-        v-if="config.filter.kind === TableFilterKind.TEXT"
-        v-model.trim="filterValues[config.filter.valueKey!]"
+        v-if="config.filterConfig.kind === TableFilterKind.TEXT"
+        v-model.trim="filterValues[(config.filterConfig.valueConfig as SingleFilterConfig).valueKey!]"
         type="text"
         :placeholder="`Pesquisar por ${config.label.toLowerCase()}`"
       />
 
-      <select v-else-if="config.filter.kind === TableFilterKind.SELECT" v-model="filterValues[config.filter.valueKey!]">
+      <select
+        v-else-if="config.filterConfig.kind === TableFilterKind.SELECT"
+        v-model="filterValues[(config.filterConfig.valueConfig as SingleFilterConfig).valueKey!]"
+      >
         <option value="">-</option>
 
-        <option v-for="option in config.options" :key="option.value" :value="option.value">
+        <option v-for="option in config.selectConfig!.options" :key="option.value" :value="option.value">
           {{ option.label }}
         </option>
       </select>
 
       <div v-else class="range-fields">
         <input
-          v-model.number="filterValues[config.filter.minKey!]"
+          v-model.number="filterValues[(config.filterConfig.valueConfig as RangeFilterConfig).minKey!]"
           type="number"
           min="0"
           step="0.01"
@@ -72,7 +75,7 @@
         <span>-</span>
 
         <input
-          v-model.number="filterValues[config.filter.maxKey!]"
+          v-model.number="filterValues[(config.filterConfig.valueConfig as RangeFilterConfig).maxKey!]"
           type="number"
           min="0"
           step="0.01"
@@ -89,21 +92,21 @@
   </div>
 </template>
 
-<script setup lang="ts" generic="TColumn extends string, TEntity">
+<script setup lang="ts" generic="TSortField extends string, TEntity extends EntityType = EntityType">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { ArrowUpDown, ChevronDown, ChevronUp, Funnel, X, CircleX } from 'lucide-vue-next';
 
 import { SortDirection } from '@/types/sort-direction';
-import { EntityConfig } from '@/types/entity-configs';
+import { EntityConfig, EntityType, RangeFilterConfig, SingleFilterConfig } from '@/types/entity-configs';
 import { TableFilterKind } from '@/types/table-filter';
 
 type FilterValues = Record<string, unknown>;
 
 const props = withDefaults(
   defineProps<{
-    config: EntityConfig<TEntity, TColumn>;
+    config: EntityConfig<TSortField, TEntity>;
     filters: object;
-    sortBy?: TColumn;
+    sortBy?: TSortField;
     sortDirection?: SortDirection;
     disabled?: boolean;
   }>(),
@@ -119,7 +122,7 @@ const emit = defineEmits<{
   clear: [values: FilterValues];
   sort: [
     {
-      column: TColumn;
+      column: TSortField;
       direction: SortDirection | undefined;
     },
   ];
@@ -133,12 +136,16 @@ const currentFilters = computed(() => props.filters as FilterValues);
 
 const filterKeys = computed(
   () =>
-    [props.config.filter.valueKey, props.config.filter.minKey, props.config.filter.maxKey].filter(Boolean) as string[],
+    [
+      (props.config.filterConfig.valueConfig as SingleFilterConfig).valueKey,
+      (props.config.filterConfig.valueConfig as RangeFilterConfig).minKey,
+      (props.config.filterConfig.valueConfig as RangeFilterConfig).maxKey,
+    ].filter(Boolean) as string[],
 );
 
 const isFilterActive = computed(() => filterKeys.value.some((key) => hasValue(currentFilters.value[key])));
 
-const isSorted = computed(() => props.sortBy === props.config.filter.column);
+const isSorted = computed(() => props.sortBy === props.config.filterConfig.column);
 
 function hasValue(value: unknown): boolean {
   return value !== undefined && value !== null && value !== '';
@@ -161,7 +168,7 @@ function close() {
 
 function emitSort(direction: SortDirection | undefined) {
   emit('sort', {
-    column: props.config.filter.column,
+    column: props.config.filterConfig.column,
     direction,
   });
 

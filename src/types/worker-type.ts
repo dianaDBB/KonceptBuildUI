@@ -1,9 +1,7 @@
-import { UUID } from 'node:crypto';
 import { SortDirection } from './sort-direction';
+import { EntityType } from './entity-configs';
 
-export interface WorkerType {
-  id?: UUID;
-  code?: string;
+export interface WorkerType extends EntityType {
   name?: string;
   nif?: string;
   status?: string;

@@ -14,7 +14,7 @@
         <div class="table">
           <table>
             <colgroup>
-              <col v-for="config in Client.configs" :key="config.label" :style="config.columnStyle" />
+              <col v-for="config in Client.configs" :key="config.label" :style="config.styleConfig.columnStyle" />
               <col style="width: 50px" />
             </colgroup>
             <thead>

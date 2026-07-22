@@ -1,9 +1,7 @@
-import { UUID } from 'node:crypto';
 import { SortDirection } from './sort-direction';
+import { EntityType } from './entity-configs';
 
-export interface ClientType {
-  id?: UUID;
-  code?: string;
+export interface ClientType extends EntityType {
   companyName?: string;
   address?: string;
   postalCode?: string;

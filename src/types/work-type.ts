@@ -1,10 +1,8 @@
-import { UUID } from 'node:crypto';
 import { SortDirection } from './sort-direction';
 import { ClientType } from './client-type';
+import { EntityType } from './entity-configs';
 
-export interface WorkType {
-  id?: UUID;
-  code?: string;
+export interface WorkType extends EntityType {
   name?: string;
   status?: string;
   contractedBudget?: number;
