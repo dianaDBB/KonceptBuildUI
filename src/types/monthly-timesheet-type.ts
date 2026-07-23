@@ -16,14 +16,16 @@ export interface WorkerTimesheetType {
 }
 
 export interface WorkTimesheetType {
+  type: 'WORK' | 'ATTENDANCE_CODE';
   work?: WorkType;
+  attendanceCode?: AttendanceCode;
+
   days: DayEntryType[];
 }
 
 export interface DayEntryType {
   date: string;
   hours: number | null;
-  attendanceCode: AttendanceCode | null;
 }
 
 export class AttendanceCode {

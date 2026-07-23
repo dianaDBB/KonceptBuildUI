@@ -29,20 +29,42 @@
           <table>
             <thead>
               <tr>
-                <th class="worker-column" />
-                <th v-for="day in daysInMonth" :key="day" class="day-column">{{ day }}</th>
-                <th class="total-column">Total Horas</th>
-                <th class="cost-column">Custo (€)</th>
+                <th class="worker-column" rowspan="2" />
+
+                <th
+                  v-for="day in daysInMonth"
+                  :key="`weekday-${day}`"
+                  class="day-column"
+                  :class="{ weekend: isNonWorkingDay(day) }"
+                >
+                  {{ getWeekday(selectedYear, selectedMonth, day) }}
+                </th>
+
+                <th class="total-column" rowspan="2">Total Horas</th>
+                <th class="cost-column" rowspan="2">Custo (€)</th>
+              </tr>
+
+              <tr>
+                <th v-for="day in daysInMonth" :key="day" class="day-column" :class="{ weekend: isNonWorkingDay(day) }">
+                  {{ day }}
+                </th>
               </tr>
             </thead>
 
             <tbody>
               <template v-for="workerTimesheet in timesheet?.workersTimesheet" :key="workerTimesheet.worker.id">
-                <!-- Worker Row -->
+                <!-- Worker -->
 
                 <tr class="worker-row">
                   <td class="worker-name">
-                    {{ `${workerTimesheet.worker.name} [${workerTimesheet.worker.defaultHours}h]` }}
+                    {{ workerTimesheet.worker.name }} <br />
+                    {{
+                      `${WorkerContractType.getLabel(workerTimesheet.worker.workerContractType)} [${
+                        workerTimesheet.worker.defaultHours
+                      }h]`
+                    }}
+                    <br />
+                    {{ formatCurrency(workerTimesheet.worker.hourRate || workerTimesheet.worker.monthlySalary) }} <br />
                   </td>
                   <td v-for="day in daysInMonth" :key="day" />
                   <td class="total-hours">
@@ -53,7 +75,7 @@
                   </td>
                 </tr>
 
-                <!-- Works -->
+                <!-- Timesheet lines -->
 
                 <tr
                   v-for="(workTimesheet, workIndex) in workerTimesheet.worksTimesheet"
@@ -62,6 +84,7 @@
                 >
                   <td class="work-name">
                     <SearchSelect
+                      v-if="isWorkRow(workTimesheet)"
                       :model-value="workTimesheet.work"
                       :options="availableWorks"
                       :filter="workFilter"
@@ -81,6 +104,12 @@
                         </div>
                       </template>
                     </SearchSelect>
+
+                    <select v-else v-model="workTimesheet.attendanceCode">
+                      <option v-for="option in AttendanceCode.OPTIONS" :key="option.value" :value="option.value">
+                        {{ option.label }}
+                      </option>
+                    </select>
                   </td>
 
                   <td
@@ -88,7 +117,7 @@
                     :key="day"
                     class="day-cell"
                     :class="{
-                      weekend: isWeekend(day),
+                      weekend: isNonWorkingDay(day),
                       today: isToday(day),
                     }"
                   >
@@ -104,15 +133,14 @@
                   <td />
                 </tr>
 
-                <!-- Add work row -->
+                <!-- Add new line -->
 
                 <tr class="add-work-row">
                   <td class="add-work-actions">
-                    <button type="button" @click="addWork(workerTimesheet)">+ Obra</button>
+                    <button @click="addWork(workerTimesheet)">+ Obra</button>
+                    <button @click="addAttendance(workerTimesheet)">+ Ausência</button>
                   </td>
-
                   <td v-for="day in daysInMonth" :key="day"></td>
-
                   <td></td>
                   <td></td>
                 </tr>
@@ -157,11 +185,14 @@ import {
   WorkerTimesheetType,
   WorkTimesheetType,
   DayEntryType,
+  AttendanceCode,
 } from '@/types/monthly-timesheet-type';
 import { WorkType } from '@/types/work-type';
 import { formatCurrency, formatNumber } from '@/utils/validation';
 import SearchSelect from '@/composables/SearchSelect.vue';
 import { WorkStatus } from '@/types/work-status';
+import { getDate, getWeekday, isHoliday, monthNames } from '@/utils/date';
+import { WorkerContractType } from '@/types/worker-type';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
@@ -172,52 +203,25 @@ const selectedMonth = ref(today.getMonth() + 1);
 const timesheet = ref<MonthlyTimesheetType>();
 const availableWorks = ref<WorkType[]>([]);
 
-/**********************************************************************************************************************
- * MONTH
- *********************************************************************************************************************/
-
-const monthNames = [
-  'Janeiro',
-  'Fevereiro',
-  'Março',
-  'Abril',
-  'Maio',
-  'Junho',
-  'Julho',
-  'Agosto',
-  'Setembro',
-  'Outubro',
-  'Novembro',
-  'Dexembro',
-];
-
 const monthName = computed(() => monthNames[selectedMonth.value - 1]);
-
 const daysInMonth = computed(() => new Date(selectedYear.value, selectedMonth.value, 0).getDate());
 
-function selectWork(workRow: WorkTimesheetType, work: WorkType) {
-  workRow.work = work;
-}
+/*************************************************************************************************************** LOAD */
 
-/**********************************************************************************************************************
- * LOAD
- *********************************************************************************************************************/
+onMounted(async () => {
+  await fetchWorks();
+  await fetchTimesheet();
+});
 
 async function fetchWorks() {
   availableWorks.value = await workApi.searchWorks();
 }
 
 async function fetchTimesheet() {
-  apiStatus.value = {
-    isLoading: true,
-    isSuccess: false,
-    isError: false,
-  };
+  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
 
   try {
     timesheet.value = await timesheetApi.getMonthlyTimesheet(selectedYear.value, selectedMonth.value);
-
-    recalculateTotals();
 
     apiStatus.value = {
       isLoading: false,
@@ -234,44 +238,7 @@ async function fetchTimesheet() {
   }
 }
 
-/**********************************************************************************************************************
- * SAVE
- *********************************************************************************************************************/
-
-async function save() {
-  if (!timesheet.value) {
-    return;
-  }
-
-  apiStatus.value = {
-    isLoading: true,
-    isSuccess: false,
-    isError: false,
-  };
-
-  try {
-    await timesheetApi.saveMonthlyTimesheet(timesheet.value);
-
-    apiStatus.value = {
-      isLoading: false,
-      isSuccess: true,
-      isError: false,
-      message: 'Timesheet saved successfully.',
-    };
-
-    await fetchTimesheet();
-  } catch (error: unknown) {
-    apiStatus.value = {
-      isLoading: false,
-      isSuccess: false,
-      isError: true,
-      message: error instanceof Error ? error.message : 'Failed to save timesheet.',
-    };
-  }
-}
-/**********************************************************************************************************************
- * MONTH NAVIGATION
- *********************************************************************************************************************/
+/*************************************************************************************************** MONTH NAVIGATION */
 
 async function previousMonth() {
   if (selectedMonth.value === 1) {
@@ -295,103 +262,127 @@ async function nextMonth() {
   await fetchTimesheet();
 }
 
-/**********************************************************************************************************************
- * WORKS
- *********************************************************************************************************************/
+/*************************************************************************************************************** SAVE */
+
+async function save() {
+  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
+
+  try {
+    await timesheetApi.saveMonthlyTimesheet(timesheet.value!);
+
+    apiStatus.value = {
+      isLoading: false,
+      isSuccess: true,
+      isError: false,
+      message: 'Timesheet saved successfully.',
+    };
+
+    await fetchTimesheet();
+  } catch (error: unknown) {
+    apiStatus.value = {
+      isLoading: false,
+      isSuccess: false,
+      isError: true,
+      message: error instanceof Error ? error.message : 'Failed to save timesheet.',
+    };
+  }
+}
+
+/***************************************************************************************************** TIMESHEET LINE */
+
+function isWorkRow(workTimesheet: WorkTimesheetType): boolean {
+  return workTimesheet.work != null || workTimesheet.type == 'WORK';
+}
+
+function selectWork(workRow: WorkTimesheetType, work: WorkType) {
+  workRow.work = work;
+}
 
 function workFilter(work: WorkType): string {
   return `${work.code ?? ''} ${work.name ?? ''}`;
 }
 
 function addWork(workerTimesheet: WorkerTimesheetType) {
-  const isFirstWork = workerTimesheet.worksTimesheet.length === 0;
-
-  const days: DayEntryType[] = [];
-
-  for (let day = 1; day <= daysInMonth.value; day++) {
-    days.push(createDayEntry(day, isFirstWork ? workerTimesheet.worker.defaultHours || 0 : 0));
-  }
+  const isFirstLine = workerTimesheet.worksTimesheet.length === 0;
 
   workerTimesheet.worksTimesheet.push({
+    type: 'WORK',
     work: undefined,
-    days,
+    attendanceCode: undefined,
+    days: createEmptyDays(isFirstLine ? workerTimesheet.worker.defaultHours! : null),
   });
-
-  recalculateTotals();
 }
 
-function createDayEntry(day: number, hours: number): DayEntryType {
+function addAttendance(workerTimesheet: WorkerTimesheetType) {
+  const isFirstLine = workerTimesheet.worksTimesheet.length === 0;
+
+  workerTimesheet.worksTimesheet.push({
+    type: 'ATTENDANCE_CODE',
+    attendanceCode: AttendanceCode.SL,
+    work: undefined,
+    days: createEmptyDays(isFirstLine ? workerTimesheet.worker.defaultHours! : null),
+  });
+}
+
+function createEmptyDays(defaultHours: number | null = null): DayEntryType[] {
+  return Array.from({ length: daysInMonth.value }, (_, index) => {
+    const day = index + 1;
+
+    return {
+      date: createDate(day),
+      hours: isNonWorkingDay(day) ? null : defaultHours,
+    };
+  });
+}
+
+function createDate(day: number): string {
   const month = String(selectedMonth.value).padStart(2, '0');
   const dayString = String(day).padStart(2, '0');
 
-  return {
-    date: `${selectedYear.value}-${month}-${dayString}`,
-    hours,
-    attendanceCode: null,
-  };
+  return `${selectedYear.value}-${month}-${dayString}`;
 }
 
 /**********************************************************************************************************************
  * DAYS
  *********************************************************************************************************************/
 
-function getEntry(work: WorkTimesheetType, day: number): DayEntryType | undefined {
-  const expected = `${selectedYear.value}-${String(selectedMonth.value).padStart(2, '0')}-${String(day).padStart(
-    2,
-    '0',
-  )}`;
-
-  return work.days.find((entry) => entry.date === expected);
+function getDayEntry(work: WorkTimesheetType, day: number): DayEntryType | undefined {
+  const date = getDate(selectedYear.value, selectedMonth.value, day);
+  return work.days.find((entry) => entry.date === date);
 }
 
 function getDayValue(work: WorkTimesheetType, day: number): string {
-  const entry = getEntry(work, day);
-
-  if (!entry) {
-    return '';
-  }
-
-  if (entry.attendanceCode) {
-    return String(entry.attendanceCode);
-  }
-
-  return entry.hours?.toString() ?? '';
+  const dayEntry = getDayEntry(work, day);
+  return dayEntry?.hours?.toString() ?? '';
 }
 
 function updateDay(work: WorkTimesheetType, day: number, event: Event) {
-  const value = (event.target as HTMLInputElement).value.trim();
-
-  let entry = getEntry(work, day);
+  let entry = getDayEntry(work, day);
 
   if (!entry) {
     entry = createDayEntry(day, 0);
     work.days.push(entry);
   }
 
-  if (value === '') {
+  const dayValue = (event.target as HTMLInputElement).value.trim();
+  if (dayValue === '') {
     work.days = work.days.filter((d) => d !== entry);
-
     recalculateTotals();
-
     return;
   }
 
-  const number = Number(value);
-
-  if (!Number.isNaN(number)) {
-    entry.hours = number;
-    entry.attendanceCode = null;
-  } else {
-    entry.hours = null;
-    entry.attendanceCode = value.toUpperCase() as any;
-  }
-
+  entry.hours = Number.isNaN(dayValue) ? null : Number(dayValue);
   recalculateTotals();
 }
 
-/**********************************************************************************************************************
- * TOTALS
- *********************************************************************************************************************/
+function createDayEntry(day: number, hours: number): DayEntryType {
+  return {
+    date: getDate(selectedYear.value, selectedMonth.value, day),
+    hours,
+  };
+}
+
+/************************************************************************************************************* TOTALS */
 
 function recalculateTotals() {
   if (!timesheet.value) {
@@ -408,7 +399,10 @@ function recalculateTotals() {
     });
 
     workerTimesheet.totalHours = totalHours;
-    workerTimesheet.totalCost = totalHours * workerTimesheet.hourCost;
+    workerTimesheet.totalCost =
+      workerTimesheet.worker.workerContractType == WorkerContractType.CONTRACTOR
+        ? totalHours * workerTimesheet.worker.hourRate!
+        : workerTimesheet.worker.monthlySalary!;
   });
 }
 
@@ -416,10 +410,10 @@ function recalculateTotals() {
  * STYLE
  *********************************************************************************************************************/
 
-function isWeekend(day: number): boolean {
+function isNonWorkingDay(day: number): boolean {
   const date = new Date(selectedYear.value, selectedMonth.value - 1, day);
 
-  return date.getDay() === 0 || date.getDay() === 6;
+  return date.getDay() === 0 || date.getDay() === 6 || isHoliday(selectedYear.value, selectedMonth.value, day);
 }
 
 function isToday(day: number): boolean {
@@ -429,15 +423,6 @@ function isToday(day: number): boolean {
     day === today.getDate()
   );
 }
-
-/**********************************************************************************************************************
- * INIT
- *********************************************************************************************************************/
-
-onMounted(async () => {
-  await fetchWorks();
-  await fetchTimesheet();
-});
 </script>
 <style>
 .month-navigation {
@@ -489,6 +474,22 @@ onMounted(async () => {
   }
 }
 
+thead th {
+  height: 35px;
+}
+
+thead tr:first-child th {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+thead tr:nth-child(2) th {
+  position: sticky;
+  top: 35px;
+  z-index: 19;
+}
+
 .worker-column {
   width: 220px;
 }
@@ -505,6 +506,20 @@ onMounted(async () => {
   width: 120px;
 }
 
+thead th.weekend {
+  background: var(--color-background-disabled);
+  color: var(--color-text-disabled);
+}
+
+.day-cell.weekend {
+  background: var(--color-background-disabled);
+
+  input {
+    background: transparent;
+    color: var(--color-text-disabled);
+  }
+}
+
 .worker-name,
 .work-name,
 .add-work-actions {
@@ -514,7 +529,7 @@ onMounted(async () => {
   background: var(--color-background);
 }
 
-.worker-name {
+.table td.worker-name {
   font-size: 13px;
   font-weight: 600;
 }
@@ -546,6 +561,8 @@ onMounted(async () => {
 
 .add-work-actions {
   opacity: 1;
+  display: flex;
+  gap: 8px;
 
   .add-work-content {
     display: inline-flex;
