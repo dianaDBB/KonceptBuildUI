@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { Contact, Users, List, LayoutDashboard, ShoppingCart, Package } from 'lucide-vue-next';
+import { Contact, Users, List, LayoutDashboard, ShoppingCart, Package, ClipboardClock } from 'lucide-vue-next';
 import { ref, computed } from 'vue';
 
 const categories = [
@@ -106,6 +106,12 @@ const categories = [
         description: 'Gerir dados dos colaboradores, custos e remunerações.',
         icon: Contact,
         route: '/hr/workers',
+      },
+      {
+        label: 'Timesheet',
+        description: 'Gerir timesheets.',
+        icon: ClipboardClock,
+        route: '/hr/timsheet',
       },
     ],
   },

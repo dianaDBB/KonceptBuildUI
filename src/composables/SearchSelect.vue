@@ -10,35 +10,36 @@
       <ChevronDown class="chevron" :class="{ open }" :size="16" />
     </button>
 
-    <div v-if="open" class="dropdown">
-      <input
-        ref="searchInput"
-        v-model="search"
-        class="search-input"
-        type="text"
-        placeholder="Search..."
-        @click.stop
-        @keydown.esc="open = false"
-      />
+    <Teleport to="body">
+      <div v-if="open" ref="dropdown" class="dropdown" :style="dropdownStyle">
+        <input
+          ref="searchInput"
+          v-model="search"
+          class="search-input"
+          type="text"
+          placeholder="Search..."
+          @click.stop
+          @keydown.esc="open = false"
+        />
 
-      <button
-        v-for="option in filteredOptions"
-        :key="JSON.stringify(option)"
-        type="button"
-        class="option"
-        @click="select(option)"
-      >
-        <slot name="option" :option="option" />
-      </button>
+        <button
+          v-for="option in filteredOptions"
+          :key="JSON.stringify(option)"
+          type="button"
+          class="option"
+          @click="select(option)"
+        >
+          <slot name="option" :option="option" />
+        </button>
 
-      <div v-if="filteredOptions.length === 0" class="no-results">No results found</div>
-    </div>
+        <div v-if="filteredOptions.length === 0" class="no-results">No results found</div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts" generic="T">
-import { computed, nextTick, ref, watch } from 'vue';
-import { onClickOutside } from '@vueuse/core';
+import { computed, onMounted, onUnmounted, nextTick, ref, watch } from 'vue';
 import { ChevronDown } from 'lucide-vue-next';
 
 const props = withDefaults(
@@ -56,9 +57,16 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: T): void;
 }>();
 
+const dropdown = ref<HTMLElement>();
 const open = ref(false);
 const target = ref<HTMLElement>();
 const searchInput = ref<HTMLInputElement>();
+
+const dropdownStyle = ref({
+  top: '0px',
+  left: '0px',
+  width: '0px',
+});
 
 const search = ref('');
 
@@ -83,15 +91,25 @@ const filteredOptions = computed(() => {
 watch(open, async (isOpen) => {
   if (isOpen) {
     await nextTick();
+
+    updateDropdownPosition();
+
     searchInput.value?.focus();
   } else {
     search.value = '';
   }
 });
 
-onClickOutside(target, () => {
-  open.value = false;
-});
+function handleClick(event: MouseEvent) {
+  const element = event.target as Node;
+
+  const clickedTarget = target.value?.contains(element);
+  const clickedDropdown = dropdown.value?.contains(element);
+
+  if (!clickedTarget && !clickedDropdown) {
+    open.value = false;
+  }
+}
 
 function select(option: T) {
   emit('update:modelValue', option);
@@ -102,6 +120,38 @@ function select(option: T) {
 function toggle() {
   open.value = !open.value;
 }
+
+function updateDropdownPosition() {
+  if (!target.value) {
+    return;
+  }
+
+  const rect = target.value.getBoundingClientRect();
+
+  dropdownStyle.value = {
+    top: `${rect.bottom + window.scrollY + 4}px`,
+    left: `${rect.left + window.scrollX}px`,
+    width: `${rect.width}px`,
+  };
+}
+
+function handleWindowChange() {
+  if (open.value) {
+    updateDropdownPosition();
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('resize', handleWindowChange);
+  window.addEventListener('scroll', handleWindowChange, true);
+  document.addEventListener('mousedown', handleClick);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleWindowChange);
+  window.removeEventListener('scroll', handleWindowChange, true);
+  document.removeEventListener('mousedown', handleClick);
+});
 </script>
 
 <style scoped>
@@ -155,10 +205,6 @@ function toggle() {
 
 .dropdown {
   position: absolute;
-  left: 0;
-  right: 0;
-
-  margin-top: 4px;
 
   max-height: 300px;
   overflow-y: auto;
@@ -169,7 +215,7 @@ function toggle() {
   background: var(--color-background);
   box-shadow: var(--shadow-pop-small);
 
-  z-index: 100;
+  z-index: 99999;
 }
 
 .search-input {

@@ -6,6 +6,7 @@ import WorkersView from '@/components/WorkersView.vue';
 import ClientsView from '@/components/ClientsView.vue';
 import authApi from '@/services/auth-api';
 import WorksView from '@/components/WorksView.vue';
+import TimesheetsView from '@/components/TimesheetsView.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -37,6 +38,12 @@ const router = createRouter({
       path: '/hr/workers',
       name: 'workers',
       component: WorkersView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/hr/timsheet',
+      name: 'timesheet',
+      component: TimesheetsView,
       meta: { requiresAuth: true },
     },
   ],

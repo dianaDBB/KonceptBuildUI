@@ -246,7 +246,6 @@ export class Work {
       label: 'Cliente',
       type: ColumnType.SEARCH_SELECT,
       searchSelectConfig: {
-        // options: [],
         selected: (client: ClientType) => client.companyName!,
         optionLines: (client: ClientType) => [client.companyName!, client.nif!, client.code!],
         filter: (client: ClientType) => `${client.companyName} ${client.nif} ${client.code}`,
