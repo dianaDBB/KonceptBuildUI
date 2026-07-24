@@ -5,7 +5,7 @@
     :class="{ required: isInvalid }"
     @input="emit('update:value', ($event.target as HTMLInputElement).value)"
   >
-    <option v-for="option in selectOptions" :key="option.value" :value="option.value">
+    <option v-for="option in selectOptions" :key="option.code" :value="option.code">
       {{ option.label }}
     </option>
   </select>

@@ -28,6 +28,11 @@ export enum ColumnType {
   PERCENTAGE,
 }
 
+export type Configs<TSortField extends string = string, TEntity extends EntityType = EntityType> = Record<
+  string,
+  EntityConfig<TSortField, TEntity>
+>;
+
 export interface EntityConfig<TSortField extends string = string, TEntity extends EntityType = EntityType> {
   label: string;
   type: ColumnType;

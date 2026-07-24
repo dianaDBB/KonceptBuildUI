@@ -21,7 +21,7 @@
           <table>
             <colgroup>
               <col
-                v-for="config in Object.values(Worker.configs)"
+                v-for="config in Object.values(configs)"
                 :key="config.label"
                 :style="config.styleConfig.columnStyle"
               />
@@ -29,7 +29,7 @@
             </colgroup>
             <thead>
               <tr>
-                <th v-for="config in Object.values(Worker.configs)" :key="config.label">
+                <th v-for="config in Object.values(configs)" :key="config.label">
                   <div class="column-heading">
                     {{ config.label }}
 
@@ -61,9 +61,9 @@
             </thead>
             <EntityTableBody
               :rows="workers"
-              :configs="Worker.configs"
+              :configs="configs"
               :row-is-active="isActive"
-              :is-valid="Worker.isValid"
+              :is-valid="(wroker) => Worker.isValid(wroker, configs)"
               :is-editing="isEditing"
               @row-edit="startEditing"
               @row-delete="askDelete"
@@ -110,48 +110,50 @@ import { SortDirection } from '@/types/sort-direction';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
 import ConfirmDialog from '@/composables/ConfirmDialog.vue';
 import axios from 'axios';
-import { Status } from '@/types/status';
 import { Worker } from '@/entities/worker';
 import { TableRow } from '@/types/entity-configs';
 import EntityTableBody from '@/composables/EntityTableBody.vue';
+import { StatusType } from '@/types/status-type';
+import configsApi from '@/services/configs-api';
+import { WorkerContractType } from '@/types/worker-contract-type';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
 const tableBody = ref<HTMLTableSectionElement | null>(null);
 
-/******************************************************************************************************** ROW ACTIONS */
-
-interface WorkerRow extends TableRow<WorkerType> {
-  entity: WorkerType;
-  _key: string;
-  _isNew: boolean;
-  _isEdited: boolean;
-  _original?: WorkerType;
-}
-
+const status = ref<{ [k: string]: StatusType }>({});
+const workerContractType = ref<{ [k: string]: WorkerContractType }>({});
 const workers = ref<WorkerRow[]>([]);
-const isEditing = computed(() => workers.value.some((row) => row._isNew || row._isEdited));
-let _keyCounter = 0;
 
-function nextKey(): string {
-  return `row-${++_keyCounter}`;
-}
+const configs = computed(() => Worker.getConfigs(status.value, workerContractType.value));
 
-function discard(row: WorkerRow) {
-  if (row._isNew) {
-    workers.value = workers.value.filter((w) => w._key !== row._key);
-  } else {
-    row.entity = row._original!;
-    row._isNew = false;
-    row._isEdited = false;
+/*************************************************************************************************************** LOAD */
+
+onMounted(async () => {
+  await loadConfigs();
+  await fetchWorkers();
+});
+
+async function loadConfigs() {
+  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
+
+  try {
+    const gotStatusValues = await configsApi.getStatusValues();
+    status.value = Object.fromEntries(gotStatusValues.map((e) => [e.code, e]));
+
+    const gotWorkerContractTypeValues = await configsApi.getWorkerContractTypeValues();
+    workerContractType.value = Object.fromEntries(gotWorkerContractTypeValues.map((e) => [e.code, e]));
+
+    apiStatus.value = { isLoading: false, isSuccess: true, isError: false };
+  } catch (error: unknown) {
+    apiStatus.value = {
+      isLoading: false,
+      isSuccess: false,
+      isError: true,
+      message: error instanceof Error ? error.message : 'Could not load config values.',
+    };
   }
 }
-
-function isActive(row: WorkerRow) {
-  return row.entity.status == Status.ACTIVE;
-}
-
-/**************************************************************************************************************** GET */
 
 async function fetchWorkers() {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
@@ -180,6 +182,37 @@ async function fetchWorkers() {
   }
 }
 
+/******************************************************************************************************** ROW ACTIONS */
+
+interface WorkerRow extends TableRow<WorkerType> {
+  entity: WorkerType;
+  _key: string;
+  _isNew: boolean;
+  _isEdited: boolean;
+  _original?: WorkerType;
+}
+
+const isEditing = computed(() => workers.value.some((row) => row._isNew || row._isEdited));
+let _keyCounter = 0;
+
+function nextKey(): string {
+  return `row-${++_keyCounter}`;
+}
+
+function discard(row: WorkerRow) {
+  if (row._isNew) {
+    workers.value = workers.value.filter((w) => w._key !== row._key);
+  } else {
+    row.entity = row._original!;
+    row._isNew = false;
+    row._isEdited = false;
+  }
+}
+
+function isActive(row: WorkerRow) {
+  return row.entity.status == status.value.ACTIVE.code;
+}
+
 /*************************************************************************************************************** EDIT */
 
 function startEditing(row: WorkerRow) {
@@ -193,7 +226,7 @@ function startEditing(row: WorkerRow) {
 async function addWorker(): Promise<void> {
   workers.value.push({
     entity: {
-      status: Status.ACTIVE,
+      status: status.value.ACTIVE.code,
       phoneCountryCode: '+351',
       defaultHours: 8,
       startDate: new Date().toISOString().split('T')[0],
@@ -222,9 +255,7 @@ async function save(row: WorkerRow): Promise<void> {
   try {
     if (row._isNew) {
       await workerApi.addWorker(row.entity);
-    }
-
-    if (row._isEdited) {
+    } else if (row._isEdited) {
       await workerApi.editWorker(row.entity);
     }
 
@@ -335,8 +366,6 @@ function clearAllTableControls(): void {
 
   void fetchWorkers();
 }
-
-onMounted(fetchWorkers);
 </script>
 <style scoped lang="scss">
 .phone-input {

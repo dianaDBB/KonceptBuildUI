@@ -21,7 +21,7 @@
           <table>
             <colgroup>
               <col
-                v-for="config in Object.values(Work.configs)"
+                v-for="config in Object.values(configs)"
                 :key="config.label"
                 :style="config.styleConfig.columnStyle"
               />
@@ -29,7 +29,7 @@
             </colgroup>
             <thead>
               <tr>
-                <th v-for="config in Object.values(Work.configs)" :key="config.label">
+                <th v-for="config in Object.values(configs)" :key="config.label">
                   <div class="column-heading">
                     {{ config.label }}
 
@@ -61,10 +61,10 @@
             </thead>
             <EntityTableBody
               :rows="works"
-              :configs="Work.configs"
+              :configs="configs"
               :search-select-options="clients"
               :row-is-active="isActive"
-              :is-valid="Work.isValid"
+              :is-valid="(wrok) => Work.isValid(wrok, configs)"
               :is-editing="isEditing"
               @row-edit="startEditing"
               @row-delete="askDelete"
@@ -110,53 +110,57 @@ import TableColumnFilter from '@/components/TableColumnFilter.vue';
 import ConfirmDialog from '@/composables/ConfirmDialog.vue';
 import axios from 'axios';
 import { WorkType, WorkFilters, WorkSortField } from '@/types/work-type';
-import { WorkStatus } from '@/types/work-status';
 import workApi from '@/services/work-api';
 import { ClientFilters, ClientSortField, ClientType } from '@/types/client-type';
 import clientApi from '@/services/client-api';
 import { Work } from '@/entities/work';
 import EntityTableBody from '@/composables/EntityTableBody.vue';
 import { TableRow } from '@/types/entity-configs';
-import { Status } from '@/types/status';
+import { StatusType } from '@/types/status-type';
+import { WorkStatusType } from '@/types/work-status-type';
+import configsApi from '@/services/configs-api';
+import { Client } from '@/entities/client';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
-
 const tableBody = ref<HTMLTableSectionElement | null>(null);
 
-/******************************************************************************************************** ROW ACTIONS */
-
-interface WorkRow extends TableRow<WorkType> {
-  entity: WorkType;
-  _key: string;
-  _isNew: boolean;
-  _isEdited: boolean;
-  _original?: WorkType;
-}
-
+const status = ref<{ [k: string]: StatusType }>({});
+const workStatus = ref<{ [k: string]: WorkStatusType }>({});
 const clients = ref<ClientType[]>([]);
 const works = ref<WorkRow[]>([]);
-const isEditing = computed(() => works.value.some((row) => row._isNew || row._isEdited));
-let _keyCounter = 0;
 
-function nextKey(): string {
-  return `row-${++_keyCounter}`;
-}
+const clientConfigs = computed(() => Client.getConfigs(status.value));
 
-function discard(row: WorkRow) {
-  if (row._isNew) {
-    works.value = works.value.filter((w) => w._key !== row._key);
-  } else {
-    row.entity = row._original!;
-    row._isNew = false;
-    row._isEdited = false;
+const configs = computed(() => Work.getConfigs(status.value, workStatus.value, clientConfigs.value));
+
+/*************************************************************************************************************** LOAD */
+
+onMounted(async () => {
+  await loadConfigs();
+  await fetchWorks();
+  await fetchClients();
+});
+
+async function loadConfigs() {
+  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
+
+  try {
+    const gotStatusValues = await configsApi.getStatusValues();
+    status.value = Object.fromEntries(gotStatusValues.map((e) => [e.code, e]));
+
+    const gotWorkStatusValues = await configsApi.getWorkStatusValues();
+    workStatus.value = Object.fromEntries(gotWorkStatusValues.map((e) => [e.code, e]));
+
+    apiStatus.value = { isLoading: false, isSuccess: true, isError: false };
+  } catch (error: unknown) {
+    apiStatus.value = {
+      isLoading: false,
+      isSuccess: false,
+      isError: true,
+      message: error instanceof Error ? error.message : 'Could not load config values.',
+    };
   }
 }
-
-function isActive(row: WorkRow) {
-  return row.entity.status != WorkStatus.DONE;
-}
-
-/**************************************************************************************************************** GET */
 
 async function fetchWorks() {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
@@ -186,11 +190,42 @@ async function fetchWorks() {
 
 async function fetchClients() {
   const clientFilters: ClientFilters = {
-    status: Status.ACTIVE,
+    status: status.value.ACTIVE.code,
     sortBy: ClientSortField.CODE,
   };
 
   clients.value = await clientApi.searchClients(clientFilters);
+}
+
+/******************************************************************************************************** ROW ACTIONS */
+
+interface WorkRow extends TableRow<WorkType> {
+  entity: WorkType;
+  _key: string;
+  _isNew: boolean;
+  _isEdited: boolean;
+  _original?: WorkType;
+}
+
+const isEditing = computed(() => works.value.some((row) => row._isNew || row._isEdited));
+let _keyCounter = 0;
+
+function nextKey(): string {
+  return `row-${++_keyCounter}`;
+}
+
+function discard(row: WorkRow) {
+  if (row._isNew) {
+    works.value = works.value.filter((w) => w._key !== row._key);
+  } else {
+    row.entity = row._original!;
+    row._isNew = false;
+    row._isEdited = false;
+  }
+}
+
+function isActive(row: WorkRow) {
+  return row.entity.status != workStatus.value.DONE.code;
 }
 
 /*************************************************************************************************************** EDIT */
@@ -205,7 +240,7 @@ function startEditing(row: WorkRow) {
 async function addWork(): Promise<void> {
   works.value.push({
     entity: {
-      status: WorkStatus.STARTED,
+      status: workStatus.value.STARTED.code,
       startDate: new Date().toISOString().split('T')[0],
     },
     _key: nextKey(),
@@ -232,9 +267,7 @@ async function save(row: WorkRow): Promise<void> {
   try {
     if (row._isNew) {
       await workApi.addWork(row.entity);
-    }
-
-    if (row._isEdited) {
+    } else if (row._isEdited) {
       await workApi.editWork(row.entity);
     }
 
@@ -345,10 +378,5 @@ function clearAllTableControls(): void {
 
   void fetchWorks();
 }
-
-onMounted(() => {
-  fetchWorks();
-  fetchClients();
-});
 </script>
 <style scoped lang="scss"></style>

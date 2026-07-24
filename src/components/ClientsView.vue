@@ -20,12 +20,12 @@
         <div class="table">
           <table>
             <colgroup>
-              <col v-for="config in Client.configs" :key="config.label" :style="config.styleConfig.columnStyle" />
+              <col v-for="config in configs" :key="config.label" :style="config.styleConfig.columnStyle" />
               <col style="width: 50px" />
             </colgroup>
             <thead>
               <tr>
-                <th v-for="config in Object.values(Client.configs)" :key="config.label">
+                <th v-for="config in Object.values(configs)" :key="config.label">
                   <div class="column-heading">
                     {{ config.label }}
 
@@ -57,9 +57,9 @@
             </thead>
             <EntityTableBody
               :rows="clients"
-              :configs="Client.configs"
+              :configs="configs"
               :row-is-active="isActive"
-              :is-valid="Client.isValid"
+              :is-valid="(client) => Client.isValid(client, configs)"
               :is-editing="isEditing"
               @row-edit="startEditing"
               @row-delete="askDelete"
@@ -104,50 +104,46 @@ import { SortDirection } from '@/types/sort-direction';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
 import ConfirmDialog from '@/composables/ConfirmDialog.vue';
 import axios from 'axios';
-import { Status } from '@/types/status';
 import { ClientType, ClientFilters, ClientSortField } from '@/types/client-type';
 import clientApi from '@/services/client-api';
 import { Client } from '@/entities/client';
 import EntityTableBody from '@/composables/EntityTableBody.vue';
 import { TableRow } from '@/types/entity-configs';
+import configsApi from '@/services/configs-api';
+import { StatusType } from '@/types/status-type';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
-
 const tableBody = ref<HTMLTableSectionElement | null>(null);
 
-/******************************************************************************************************** ROW ACTIONS */
-
-interface ClientRow extends TableRow<ClientType> {
-  entity: ClientType;
-  _key: string;
-  _isNew: boolean;
-  _isEdited: boolean;
-  _original?: ClientType;
-}
-
+const status = ref<{ [k: string]: StatusType }>({});
 const clients = ref<ClientRow[]>([]);
-const isEditing = computed(() => clients.value.some((row) => row._isNew || row._isEdited));
-let _keyCounter = 0;
 
-function nextKey(): string {
-  return `row-${++_keyCounter}`;
-}
+const configs = computed(() => Client.getConfigs(status.value));
 
-function discard(row: ClientRow) {
-  if (row._isNew) {
-    clients.value = clients.value.filter((w) => w._key !== row._key);
-  } else {
-    row.entity = row._original!;
-    row._isNew = false;
-    row._isEdited = false;
+/*************************************************************************************************************** LOAD */
+
+onMounted(async () => {
+  await loadConfigs();
+  await fetchClients();
+});
+
+async function loadConfigs() {
+  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
+
+  try {
+    const gotValues = await configsApi.getStatusValues();
+    status.value = Object.fromEntries(gotValues.map((e) => [e.code, e]));
+
+    apiStatus.value = { isLoading: false, isSuccess: true, isError: false };
+  } catch (error: unknown) {
+    apiStatus.value = {
+      isLoading: false,
+      isSuccess: false,
+      isError: true,
+      message: error instanceof Error ? error.message : 'Could not load config values.',
+    };
   }
 }
-
-function isActive(row: ClientRow) {
-  return row.entity.status == Status.ACTIVE;
-}
-
-/**************************************************************************************************************** GET */
 
 async function fetchClients() {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
@@ -174,6 +170,37 @@ async function fetchClients() {
   }
 }
 
+/******************************************************************************************************** ROW ACTIONS */
+
+interface ClientRow extends TableRow<ClientType> {
+  entity: ClientType;
+  _key: string;
+  _isNew: boolean;
+  _isEdited: boolean;
+  _original?: ClientType;
+}
+
+const isEditing = computed(() => clients.value.some((row) => row._isNew || row._isEdited));
+let _keyCounter = 0;
+
+function nextKey(): string {
+  return `row-${++_keyCounter}`;
+}
+
+function discard(row: ClientRow) {
+  if (row._isNew) {
+    clients.value = clients.value.filter((w) => w._key !== row._key);
+  } else {
+    row.entity = row._original!;
+    row._isNew = false;
+    row._isEdited = false;
+  }
+}
+
+function isActive(row: ClientRow) {
+  return row.entity.status == status.value.ACTIVE.code;
+}
+
 /*************************************************************************************************************** EDIT */
 
 function startEditing(row: ClientRow) {
@@ -187,7 +214,7 @@ function startEditing(row: ClientRow) {
 async function addClient(): Promise<void> {
   clients.value.push({
     entity: {
-      status: Status.ACTIVE,
+      status: status.value.ACTIVE.code,
       phoneCountryCode: '+351',
     },
     _key: nextKey(),
@@ -214,9 +241,7 @@ async function save(row: ClientRow): Promise<void> {
   try {
     if (row._isNew) {
       await clientApi.addClient(row.entity);
-    }
-
-    if (row._isEdited) {
+    } else if (row._isEdited) {
       await clientApi.editClient(row.entity);
     }
 
@@ -327,7 +352,5 @@ function clearAllTableControls(): void {
 
   void fetchClients();
 }
-
-onMounted(fetchClients);
 </script>
 <style scoped lang="scss"></style>

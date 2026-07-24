@@ -72,17 +72,3 @@ export interface WorkerFilters {
   sortBy?: WorkerSortField;
   sortDirection?: SortDirection;
 }
-
-export class WorkerContractType {
-  static readonly INTERNAL = 'INTERNAL';
-  static readonly CONTRACTOR = 'CONTRACTOR';
-
-  static readonly OPTIONS = [
-    { value: WorkerContractType.INTERNAL, label: 'Contracto' },
-    { value: WorkerContractType.CONTRACTOR, label: 'Hora' },
-  ];
-
-  static getLabel(value?: string): string {
-    return WorkerContractType.OPTIONS.find((option) => option.value === value)?.label ?? '';
-  }
-}

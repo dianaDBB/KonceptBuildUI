@@ -58,7 +58,7 @@
       >
         <option value="">-</option>
 
-        <option v-for="option in config.selectConfig!.options" :key="option.value" :value="option.value">
+        <option v-for="option in config.selectConfig!.options" :key="option.code" :value="option.code">
           {{ option.label }}
         </option>
       </select>

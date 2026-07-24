@@ -1,4 +1,6 @@
 export interface SelectOption {
+  code: string;
   label: string;
-  value: string;
 }
+
+export type EnumOptions = { [k: string]: SelectOption };

@@ -1,4 +1,3 @@
-import { Status } from '@/types/status';
 import { UUID } from 'node:crypto';
 
 export type ClientPayload = {
@@ -13,6 +12,6 @@ export type ClientPayload = {
   email: string;
   phoneCountryCode: string;
   phone: string;
-  status: Status;
+  status: string;
   note?: string;
 };

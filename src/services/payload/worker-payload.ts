@@ -1,18 +1,16 @@
-import { Status } from '@/types/status';
-import { WorkerContractType } from '@/types/worker-type';
 import { UUID } from 'node:crypto';
 
 export type WorkerPayload = {
   id?: UUID;
   name: string;
   nif: string;
-  status: Status;
+  status: string;
   phoneCountryCode: string;
   phone: string;
   email: string;
   function: string;
   defaultHours: number;
-  workerContractType: WorkerContractType;
+  workerContractType: string;
   hourRate?: number;
   monthlySalary?: number;
   tsu?: number;

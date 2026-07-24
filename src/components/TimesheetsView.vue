@@ -79,7 +79,7 @@
                   <td class="worker-name">
                     {{ workerTimesheet.worker.name }} <br />
                     {{
-                      `${WorkerContractType.getLabel(workerTimesheet.worker.workerContractType)} [${
+                      `${workerContractType[workerTimesheet.worker.workerContractType!].label} [${
                         workerTimesheet.worker.defaultHours
                       }h]`
                     }}
@@ -120,13 +120,13 @@
                           <br />
                           {{ option.name }}
                           <br />
-                          {{ WorkStatus.getLabel(option.status) }}
+                          {{ workStatus[option.status!]?.label }}
                         </div>
                       </template>
                     </SearchSelect>
 
                     <select v-else v-model="workTimesheet.attendanceCode">
-                      <option v-for="option in AttendanceCode.OPTIONS" :key="option.value" :value="option.value">
+                      <option v-for="option in attendanceCode" :key="option.code" :value="option.code">
                         {{ option.label }}
                       </option>
                     </select>
@@ -199,20 +199,25 @@ import {
   WorkerTimesheetType,
   WorkTimesheetType,
   DayEntryType,
-  AttendanceCode,
 } from '@/types/monthly-timesheet-type';
 import { WorkFilters, WorkType } from '@/types/work-type';
 import { formatCurrency, formatNumber } from '@/utils/validation';
 import SearchSelect from '@/composables/SearchSelect.vue';
-import { WorkStatus } from '@/types/work-status';
+import { WorkStatusType } from '@/types/work-status-type';
 import { getDate, getWeekday, isToday, isHoliday, isWeekend, monthNames } from '@/utils/date';
-import { WorkerContractType } from '@/types/worker-type';
+import { AttendanceCodeType } from '@/types/attendance-code-type';
+import { WorkerContractType } from '@/types/worker-contract-type';
+import configsApi from '@/services/configs-api';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
 const today = new Date();
 const selectedYear = ref(today.getFullYear());
 const selectedMonth = ref(today.getMonth() + 1);
+
+const attendanceCode = ref<{ [k: string]: AttendanceCodeType }>({});
+const workStatus = ref<{ [k: string]: WorkStatusType }>({});
+const workerContractType = ref<{ [k: string]: WorkerContractType }>({});
 
 const timesheet = ref<MonthlyTimesheetType>();
 const availableWorks = ref<WorkType[]>([]);
@@ -223,9 +228,34 @@ const daysInMonth = computed(() => new Date(selectedYear.value, selectedMonth.va
 /*************************************************************************************************************** LOAD */
 
 onMounted(async () => {
+  await loadConfigs();
   await fetchWorks();
   await fetchTimesheet();
 });
+
+async function loadConfigs() {
+  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
+
+  try {
+    const gotAttendanceCodeValues = await configsApi.getAttendanceCodeValues();
+    attendanceCode.value = Object.fromEntries(gotAttendanceCodeValues.map((e) => [e.code, e]));
+
+    const gotWorkStatusValues = await configsApi.getWorkStatusValues();
+    workStatus.value = Object.fromEntries(gotWorkStatusValues.map((e) => [e.code, e]));
+
+    const gotWorkerContractTypeValues = await configsApi.getWorkerContractTypeValues();
+    workerContractType.value = Object.fromEntries(gotWorkerContractTypeValues.map((e) => [e.code, e]));
+
+    apiStatus.value = { isLoading: false, isSuccess: true, isError: false };
+  } catch (error: unknown) {
+    apiStatus.value = {
+      isLoading: false,
+      isSuccess: false,
+      isError: true,
+      message: error instanceof Error ? error.message : 'Could not load config values.',
+    };
+  }
+}
 
 async function fetchWorks() {
   const workFilters: WorkFilters = {
@@ -338,7 +368,7 @@ function addAttendance(workerTimesheet: WorkerTimesheetType) {
 
   workerTimesheet.worksTimesheet.push({
     type: 'ATTENDANCE_CODE',
-    attendanceCode: AttendanceCode.SL,
+    attendanceCode: attendanceCode.value.VACATION.code,
     work: undefined,
     days: createEmptyDays(isFirstLine ? workerTimesheet.worker.defaultHours! : null),
   });

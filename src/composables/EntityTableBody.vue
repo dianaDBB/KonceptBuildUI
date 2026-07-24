@@ -155,7 +155,7 @@ function getFormatedValue(row: TableRow<TEntity>, fieldKey: string, config: Enti
     case ColumnType.PERCENTAGE:
       return formatPercentage(value);
     case ColumnType.SELECT:
-      return config.selectConfig?.options?.find((opt) => opt.value === value)?.label ?? value;
+      return config.selectConfig?.options?.find((opt) => opt.code === value)?.label ?? value;
     case ColumnType.SEARCH_SELECT:
       return value ? config.searchSelectConfig!.selected(value) : '';
     case ColumnType.DATE:
