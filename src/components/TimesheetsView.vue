@@ -20,16 +20,29 @@
       </div>
 
       <div class="section-body">
-        <div class="month-navigation">
-          <button :disabled="apiStatus.isLoading" @click="previousMonth">
-            <ChevronLeft :size="15" />
-          </button>
+        <div class="month-toolbar">
+          <div class="month-navigation">
+            <button class="btn btn-icon" :disabled="apiStatus.isLoading" @click="previousMonth">
+              <ChevronLeft :size="15" />
+            </button>
 
-          <h3>{{ monthName }} {{ selectedYear }}</h3>
+            <h3>{{ monthName }} {{ selectedYear }}</h3>
 
-          <button :disabled="apiStatus.isLoading" @click="nextMonth">
-            <ChevronRight :size="15" />
-          </button>
+            <button class="btn btn-icon" :disabled="apiStatus.isLoading" @click="nextMonth">
+              <ChevronRight :size="15" />
+            </button>
+          </div>
+          <div class="expand-collapse">
+            <button class="btn btn-sm" @click="expandAll">
+              <CopyPlus :size="15" />
+              Expandir tudo
+            </button>
+
+            <button class="btn btn-sm" @click="collapseAll">
+              <CopyMinus :size="15" />
+              Colapsar tudo
+            </button>
+          </div>
         </div>
 
         <div class="table">
@@ -51,8 +64,8 @@
                   {{ getWeekday(selectedYear, selectedMonth, day) }}
                 </th>
 
-                <th class="total-column" rowspan="2">Total Horas</th>
-                <th class="cost-column" rowspan="2">Custo (€)</th>
+                <th class="total-hours-column" rowspan="2">Total Horas</th>
+                <th class="total-cost-column" rowspan="2">Custo (€)</th>
               </tr>
 
               <tr>
@@ -77,19 +90,31 @@
 
                 <tr class="worker-row">
                   <td class="worker-name">
-                    {{ workerTimesheet.worker.name }} <br />
-                    {{
-                      `${workerContractType[workerTimesheet.worker.workerContractType!].label} [${
-                        workerTimesheet.worker.defaultHours
-                      }h]`
-                    }}
-                    <br />
-                    {{ formatCurrency(workerTimesheet.worker.hourRate || workerTimesheet.worker.monthlySalary) }} <br />
+                    <div class="worker-header">
+                      <button class="btn-icon" @click="toggleWorker(workerTimesheet.worker.id!)">
+                        <component :is="isCollapsed(workerTimesheet.worker.id!) ? Plus : Minus" :size="16" />
+                      </button>
+
+                      <span class="worker-title">
+                        {{ workerTimesheet.worker.name }}
+                      </span>
+                    </div>
+
+                    <div class="worker-details">
+                      <div>
+                        {{ workerContractType[workerTimesheet.worker.workerContractType!].label }}
+                        • {{ workerTimesheet.worker.defaultHours }}h •
+                        {{ formatCurrency(workerTimesheet.worker.hourRate || workerTimesheet.worker.monthlySalary) }}
+                      </div>
+                    </div>
                   </td>
+
                   <td v-for="day in daysInMonth" :key="day" />
+
                   <td class="total-hours">
                     {{ formatNumber(workerTimesheet.totalHours) }}
                   </td>
+
                   <td class="total-cost">
                     {{ formatCurrency(workerTimesheet.totalCost) }}
                   </td>
@@ -97,69 +122,79 @@
 
                 <!-- Timesheet lines -->
 
-                <tr
-                  v-for="(workTimesheet, workIndex) in workerTimesheet.worksTimesheet"
-                  :key="workIndex"
-                  class="work-row"
-                >
-                  <td class="work-name">
-                    <SearchSelect
-                      v-if="isWorkRow(workTimesheet)"
-                      :model-value="workTimesheet.work"
-                      :options="availableWorks"
-                      :filter="workFilter"
-                      @update:model-value="selectWork(workTimesheet, $event)"
-                    >
-                      <template #selected="{ option }">
-                        {{ option.code }}
-                      </template>
-
-                      <template #option="{ option }">
-                        <div>
-                          <strong>{{ option.code }}</strong>
-                          <br />
-                          {{ option.name }}
-                          <br />
-                          {{ workStatus[option.status!]?.label }}
-                        </div>
-                      </template>
-                    </SearchSelect>
-
-                    <select v-else v-model="workTimesheet.attendanceCode">
-                      <option v-for="option in attendanceCode" :key="option.code" :value="option.code">
-                        {{ option.label }}
-                      </option>
-                    </select>
-                  </td>
-
-                  <td
-                    v-for="day in daysInMonth"
-                    :key="day"
-                    class="day-cell"
-                    :class="{
-                      today: isToday(selectedYear, selectedMonth, day),
-                      weekend: isWeekend(selectedYear, selectedMonth, day),
-                      holiday: isHoliday(selectedYear, selectedMonth, day),
-                    }"
+                <template v-if="!isCollapsed(workerTimesheet.worker.id!)">
+                  <tr
+                    v-for="(workTimesheet, workIndex) in workerTimesheet.worksTimesheet"
+                    :key="workIndex"
+                    class="work-row"
                   >
-                    <input
-                      class="day-input"
-                      :value="getDayValue(workTimesheet, day)"
-                      @input="updateDay(workerTimesheet, workTimesheet, day, $event)"
-                    />
-                  </td>
+                    <td class="work-name">
+                      <SearchSelect
+                        v-if="isWorkRow(workTimesheet)"
+                        :model-value="workTimesheet.work"
+                        :options="availableWorks"
+                        :filter="workFilter"
+                        @update:model-value="selectWork(workTimesheet, $event)"
+                      >
+                        <template #selected="{ option }">
+                          {{ option.code }}
+                        </template>
 
-                  <td />
+                        <template #option="{ option }">
+                          <div>
+                            <strong>{{ option.code }}</strong>
+                            <br />
+                            {{ option.name }}
+                            <br />
+                            {{ workStatus[option.status!]?.label }}
+                          </div>
+                        </template>
+                      </SearchSelect>
 
-                  <td />
-                </tr>
+                      <select v-else v-model="workTimesheet.attendanceCode">
+                        <option v-for="option in attendanceCode" :key="option.code" :value="option.code">
+                          {{ option.label }}
+                        </option>
+                      </select>
+                    </td>
+
+                    <td
+                      v-for="day in daysInMonth"
+                      :key="day"
+                      class="day-cell"
+                      :class="{
+                        today: isToday(selectedYear, selectedMonth, day),
+                        weekend: isWeekend(selectedYear, selectedMonth, day),
+                        holiday: isHoliday(selectedYear, selectedMonth, day),
+                      }"
+                    >
+                      <input
+                        class="day-input"
+                        :class="{ filled: getDayValue(workTimesheet, day) !== '' }"
+                        :value="getDayValue(workTimesheet, day)"
+                        @input="updateDay(workerTimesheet, workTimesheet, day, $event)"
+                      />
+                    </td>
+
+                    <td />
+
+                    <td />
+                  </tr>
+                </template>
 
                 <!-- Add new line -->
 
-                <tr class="add-work-row">
+                <tr v-if="!isCollapsed(workerTimesheet.worker.id!)" class="add-work-row">
                   <td class="add-work-actions">
-                    <button @click="addWork(workerTimesheet)">+ Obra</button>
-                    <button @click="addAttendance(workerTimesheet)">+ Ausência</button>
+                    <button class="btn btn-work-action" @click="addWork(workerTimesheet)">
+                      <PlusIcon :size="8" />
+                      Obra
+                    </button>
+
+                    <button class="btn btn-work-action" @click="addAttendance(workerTimesheet)">
+                      <PlusIcon :size="8" />
+                      Ausência
+                    </button>
                   </td>
                   <td v-for="day in daysInMonth" :key="day"></td>
                   <td></td>
@@ -171,7 +206,7 @@
         </div>
 
         <div class="actions">
-          <button :disabled="apiStatus.isLoading" @click="save">
+          <button class="btn" :disabled="apiStatus.isLoading || !isTimesheetValid" @click="save">
             <Save :size="18" />
             Guardar
           </button>
@@ -189,7 +224,18 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { ClipboardClock, ChevronLeft, ChevronRight, LoaderCircle, Save } from 'lucide-vue-next';
+import {
+  ClipboardClock,
+  ChevronLeft,
+  ChevronRight,
+  PlusIcon,
+  LoaderCircle,
+  Save,
+  CopyPlus,
+  CopyMinus,
+  Plus,
+  Minus,
+} from 'lucide-vue-next';
 import Toast from '@/composables/Toast.vue';
 import timesheetApi from '@/services/timesheet-api';
 import workApi from '@/services/work-api';
@@ -231,6 +277,8 @@ onMounted(async () => {
   await loadConfigs();
   await fetchWorks();
   await fetchTimesheet();
+
+  collapseAll();
 });
 
 async function loadConfigs() {
@@ -314,6 +362,21 @@ async function nextMonth() {
 
 /*************************************************************************************************************** SAVE */
 
+const isTimesheetValid = computed(() => {
+  if (!timesheet.value) {
+    return false;
+  }
+
+  return timesheet.value.workersTimesheet.every((worker) =>
+    worker.worksTimesheet.every((line) => {
+      const hasWork = line.work != null;
+      const hasAttendance = line.attendanceCode != null;
+
+      return hasWork !== hasAttendance;
+    }),
+  );
+});
+
 async function save() {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
 
@@ -396,6 +459,32 @@ function createDate(day: number): string {
   return `${selectedYear.value}-${month}-${dayString}`;
 }
 
+/************************************************************************************************** COLLPASE / EXPAND */
+
+const collapsedWorkers = ref(new Set<string>());
+
+function isCollapsed(workerId: string): boolean {
+  return collapsedWorkers.value.has(workerId);
+}
+
+function toggleWorker(workerId: string) {
+  if (collapsedWorkers.value.has(workerId)) {
+    collapsedWorkers.value.delete(workerId);
+  } else {
+    collapsedWorkers.value.add(workerId);
+  }
+
+  collapsedWorkers.value = new Set(collapsedWorkers.value);
+}
+
+function collapseAll() {
+  collapsedWorkers.value = new Set(timesheet.value?.workersTimesheet.map((w) => w.worker.id!) ?? []);
+}
+
+function expandAll() {
+  collapsedWorkers.value = new Set();
+}
+
 /*************************************************************************************************************** DAYS */
 
 function getDayEntry(work: WorkTimesheetType, day: number): DayEntryType | undefined {
@@ -437,53 +526,27 @@ function createDayEntry(day: number, hours: number): DayEntryType {
 }
 </script>
 <style>
-.month-navigation {
+.month-toolbar {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  gap: 18px;
 
   padding: 12px 18px;
 
   background: var(--color-background-alt);
   border: 1px solid var(--color-border-light);
   border-radius: 10px;
+}
 
-  flex-shrink: 0;
+.month-navigation,
+.expand-collapse {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-  h3 {
-    margin: 0;
-    color: var(--color-text);
-    font-size: 18px;
-    font-weight: 600;
-  }
-
-  button {
-    width: 20px;
-    height: 20px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border: none;
-
-    background: var(--color-background-alt);
-    color: var(--color-text);
-
-    cursor: pointer;
-    transition: 0.2s;
-
-    &:hover:not(:disabled) {
-      border-color: var(--color-primary);
-      background: var(--color-primary-light);
-      color: var(--color-primary);
-    }
-
-    &:disabled {
-      cursor: not-allowed;
-    }
-  }
+.month-navigation {
+  gap: 18px;
 }
 
 thead th {
@@ -510,12 +573,12 @@ thead tr:nth-child(2) th {
   width: 50px;
 }
 
-.total-column {
-  width: 80px;
+.total-hours-column {
+  width: 50px;
 }
 
-.cost-column {
-  width: 120px;
+.total-cost-column {
+  width: 90px;
 }
 
 thead th.weekend {
@@ -553,6 +616,30 @@ thead th.holiday {
   left: 0;
   z-index: 5;
   background: var(--color-background);
+}
+
+.worker-name {
+  vertical-align: top;
+}
+
+.worker-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.worker-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.worker-details {
+  margin-left: 33px; /* aligns with the title after the icon */
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--color-text-muted);
 }
 
 .table td.worker-name {
@@ -594,28 +681,28 @@ thead th.holiday {
     display: inline-flex;
   }
 
-  button {
-    padding: 5px 9px;
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    background: var(--color-background);
-    color: var(--color-text);
-    cursor: pointer;
-    transition: 0.2s;
-
-    &:hover:not(:disabled) {
-      border-color: var(--color-primary);
-      color: var(--color-primary);
-      background: var(--color-primary-light);
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      background: var(--color-background-disabled);
-      color: var(--color-text-disabled);
-      border-color: var(--color-border-light);
-    }
+  .btn-work-action {
+    padding: 5px 8px;
+    font-size: 10px;
   }
+}
+
+.day-input {
+  width: calc(100% - 4px);
+  margin: 0 auto;
+
+  padding: 4px 6px;
+
+  border-radius: 4px;
+
+  background: transparent;
+  color: var(--color-text);
+
+  font-size: 12px;
+  text-align: center;
+}
+
+.day-input:focus {
+  border-color: var(--color-primary);
 }
 </style>

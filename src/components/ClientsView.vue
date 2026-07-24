@@ -70,7 +70,7 @@
         </div>
 
         <div class="actions">
-          <button :disabled="isEditing || apiStatus.isLoading" @click="addClient">
+          <button class="btn" :disabled="isEditing || apiStatus.isLoading" @click="addClient">
             <Plus :size="18" /> Adicionar Cliente
           </button>
         </div>
