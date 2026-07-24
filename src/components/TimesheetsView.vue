@@ -12,6 +12,13 @@
     </div>
 
     <div class="section">
+      <div v-if="apiStatus.isLoading" class="loading-overlay">
+        <div>
+          <LoaderCircle :size="18" class="spinner" />
+          A carregar timesheet...
+        </div>
+      </div>
+
       <div class="section-body">
         <div class="month-navigation">
           <button :disabled="apiStatus.isLoading" @click="previousMonth">
@@ -35,7 +42,11 @@
                   v-for="day in daysInMonth"
                   :key="`weekday-${day}`"
                   class="day-column"
-                  :class="{ weekend: isNonWorkingDay(day) }"
+                  :class="{
+                    today: isToday(selectedYear, selectedMonth, day),
+                    weekend: isWeekend(selectedYear, selectedMonth, day),
+                    holiday: isHoliday(selectedYear, selectedMonth, day),
+                  }"
                 >
                   {{ getWeekday(selectedYear, selectedMonth, day) }}
                 </th>
@@ -45,7 +56,16 @@
               </tr>
 
               <tr>
-                <th v-for="day in daysInMonth" :key="day" class="day-column" :class="{ weekend: isNonWorkingDay(day) }">
+                <th
+                  v-for="day in daysInMonth"
+                  :key="day"
+                  class="day-column"
+                  :class="{
+                    today: isToday(selectedYear, selectedMonth, day),
+                    weekend: isWeekend(selectedYear, selectedMonth, day),
+                    holiday: isHoliday(selectedYear, selectedMonth, day),
+                  }"
+                >
                   {{ day }}
                 </th>
               </tr>
@@ -117,14 +137,15 @@
                     :key="day"
                     class="day-cell"
                     :class="{
-                      weekend: isNonWorkingDay(day),
-                      today: isToday(day),
+                      today: isToday(selectedYear, selectedMonth, day),
+                      weekend: isWeekend(selectedYear, selectedMonth, day),
+                      holiday: isHoliday(selectedYear, selectedMonth, day),
                     }"
                   >
                     <input
                       class="day-input"
                       :value="getDayValue(workTimesheet, day)"
-                      @input="updateDay(workTimesheet, day, $event)"
+                      @input="updateDay(workerTimesheet, workTimesheet, day, $event)"
                     />
                   </td>
 
@@ -147,13 +168,6 @@
               </template>
             </tbody>
           </table>
-
-          <div v-if="apiStatus.isLoading" class="table-loading-overlay">
-            <div>
-              <LoaderCircle :size="18" class="spinner" />
-              A carregar timesheet...
-            </div>
-          </div>
         </div>
 
         <div class="actions">
@@ -187,11 +201,11 @@ import {
   DayEntryType,
   AttendanceCode,
 } from '@/types/monthly-timesheet-type';
-import { WorkType } from '@/types/work-type';
+import { WorkFilters, WorkType } from '@/types/work-type';
 import { formatCurrency, formatNumber } from '@/utils/validation';
 import SearchSelect from '@/composables/SearchSelect.vue';
 import { WorkStatus } from '@/types/work-status';
-import { getDate, getWeekday, isHoliday, monthNames } from '@/utils/date';
+import { getDate, getWeekday, isToday, isHoliday, isWeekend, monthNames } from '@/utils/date';
 import { WorkerContractType } from '@/types/worker-type';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
@@ -214,7 +228,11 @@ onMounted(async () => {
 });
 
 async function fetchWorks() {
-  availableWorks.value = await workApi.searchWorks();
+  const workFilters: WorkFilters = {
+    startDateMax: getDate(selectedYear.value, selectedMonth.value, daysInMonth.value),
+    endDateMin: getDate(selectedYear.value, selectedMonth.value, 1),
+  };
+  availableWorks.value = await workApi.searchWorks(workFilters);
 }
 
 async function fetchTimesheet() {
@@ -248,6 +266,7 @@ async function previousMonth() {
     selectedMonth.value--;
   }
 
+  await fetchWorks();
   await fetchTimesheet();
 }
 
@@ -259,6 +278,7 @@ async function nextMonth() {
     selectedMonth.value++;
   }
 
+  await fetchWorks();
   await fetchTimesheet();
 }
 
@@ -330,7 +350,11 @@ function createEmptyDays(defaultHours: number | null = null): DayEntryType[] {
 
     return {
       date: createDate(day),
-      hours: isNonWorkingDay(day) ? null : defaultHours,
+      hours:
+        isWeekend(selectedYear.value, selectedMonth.value, day) ||
+        isHoliday(selectedYear.value, selectedMonth.value, day)
+          ? null
+          : defaultHours,
     };
   });
 }
@@ -342,9 +366,7 @@ function createDate(day: number): string {
   return `${selectedYear.value}-${month}-${dayString}`;
 }
 
-/**********************************************************************************************************************
- * DAYS
- *********************************************************************************************************************/
+/*************************************************************************************************************** DAYS */
 
 function getDayEntry(work: WorkTimesheetType, day: number): DayEntryType | undefined {
   const date = getDate(selectedYear.value, selectedMonth.value, day);
@@ -356,7 +378,7 @@ function getDayValue(work: WorkTimesheetType, day: number): string {
   return dayEntry?.hours?.toString() ?? '';
 }
 
-function updateDay(work: WorkTimesheetType, day: number, event: Event) {
+function updateDay(workerTimesheet: WorkerTimesheetType, work: WorkTimesheetType, day: number, event: Event) {
   let entry = getDayEntry(work, day);
 
   if (!entry) {
@@ -367,12 +389,14 @@ function updateDay(work: WorkTimesheetType, day: number, event: Event) {
   const dayValue = (event.target as HTMLInputElement).value.trim();
   if (dayValue === '') {
     work.days = work.days.filter((d) => d !== entry);
-    recalculateTotals();
+    workerTimesheet.totalCost = undefined;
+    workerTimesheet.totalHours = undefined;
     return;
   }
 
   entry.hours = Number.isNaN(dayValue) ? null : Number(dayValue);
-  recalculateTotals();
+  workerTimesheet.totalCost = undefined;
+  workerTimesheet.totalHours = undefined;
 }
 
 function createDayEntry(day: number, hours: number): DayEntryType {
@@ -380,48 +404,6 @@ function createDayEntry(day: number, hours: number): DayEntryType {
     date: getDate(selectedYear.value, selectedMonth.value, day),
     hours,
   };
-}
-
-/************************************************************************************************************* TOTALS */
-
-function recalculateTotals() {
-  if (!timesheet.value) {
-    return;
-  }
-
-  timesheet.value.workersTimesheet.forEach((workerTimesheet) => {
-    let totalHours = 0;
-
-    workerTimesheet.worksTimesheet.forEach((work) => {
-      work.days.forEach((day) => {
-        totalHours += day.hours ?? 0;
-      });
-    });
-
-    workerTimesheet.totalHours = totalHours;
-    workerTimesheet.totalCost =
-      workerTimesheet.worker.workerContractType == WorkerContractType.CONTRACTOR
-        ? totalHours * workerTimesheet.worker.hourRate!
-        : workerTimesheet.worker.monthlySalary!;
-  });
-}
-
-/**********************************************************************************************************************
- * STYLE
- *********************************************************************************************************************/
-
-function isNonWorkingDay(day: number): boolean {
-  const date = new Date(selectedYear.value, selectedMonth.value - 1, day);
-
-  return date.getDay() === 0 || date.getDay() === 6 || isHoliday(selectedYear.value, selectedMonth.value, day);
-}
-
-function isToday(day: number): boolean {
-  return (
-    selectedYear.value === today.getFullYear() &&
-    selectedMonth.value === today.getMonth() + 1 &&
-    day === today.getDate()
-  );
 }
 </script>
 <style>
@@ -517,6 +499,20 @@ thead th.weekend {
   input {
     background: transparent;
     color: var(--color-text-disabled);
+  }
+}
+
+thead th.holiday {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.day-cell.holiday {
+  background: var(--color-danger-bg);
+
+  input {
+    background: transparent;
+    color: var(--color-danger);
   }
 }
 
