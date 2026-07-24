@@ -10,8 +10,8 @@ export interface MonthlyTimesheetType {
 export interface WorkerTimesheetType {
   worker: WorkerType;
   hourCost: number;
-  totalHours: number;
-  totalCost: number;
+  totalHours: number | undefined;
+  totalCost: number | undefined;
   worksTimesheet: WorkTimesheetType[];
 }
 

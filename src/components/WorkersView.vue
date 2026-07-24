@@ -10,6 +10,12 @@
     </div>
 
     <div class="section">
+      <div v-if="apiStatus.isLoading" class="loading-overlay">
+        <div>
+          <LoaderCircle :size="18" class="spinner" />
+          A carregar colaboradores...
+        </div>
+      </div>
       <div class="section-body">
         <div class="table">
           <table>
@@ -65,12 +71,6 @@
               @row-discard="discard"
             />
           </table>
-          <div v-if="apiStatus.isLoading" class="table-loading-overlay">
-            <div>
-              <LoaderCircle :size="18" class="spinner" />
-              A carregar colaboradores...
-            </div>
-          </div>
         </div>
 
         <div class="actions">

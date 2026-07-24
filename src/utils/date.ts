@@ -35,6 +35,18 @@ export function getWeekday(year: number, month: number, day: number): string {
   return weekdayNames[new Date(year, month - 1, day).getDay()];
 }
 
+export function isWeekend(year: number, month: number, day: number): boolean {
+  const date = new Date(year, month - 1, day);
+
+  return date.getDay() === 0 || date.getDay() === 6;
+}
+
 export function isHoliday(year: number, month: number, day: number): boolean {
   return !!holidays.isHoliday(new Date(year, month - 1, day));
+}
+
+export function isToday(year: number, month: number, day: number): boolean {
+  const today = new Date();
+
+  return year === today.getFullYear() && month === today.getMonth() + 1 && day === today.getDate();
 }

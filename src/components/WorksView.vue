@@ -10,6 +10,12 @@
     </div>
 
     <div class="section">
+      <div v-if="apiStatus.isLoading" class="loading-overlay">
+        <div>
+          <LoaderCircle :size="18" class="spinner" />
+          A carregar clientes...
+        </div>
+      </div>
       <div class="section-body">
         <div class="table">
           <table>
@@ -66,12 +72,6 @@
               @row-discard="discard"
             />
           </table>
-          <div v-if="apiStatus.isLoading" class="table-loading-overlay">
-            <div>
-              <LoaderCircle :size="18" class="spinner" />
-              A carregar clientes...
-            </div>
-          </div>
         </div>
 
         <div class="actions">
@@ -112,11 +112,12 @@ import axios from 'axios';
 import { WorkType, WorkFilters, WorkSortField } from '@/types/work-type';
 import { WorkStatus } from '@/types/work-status';
 import workApi from '@/services/work-api';
-import { ClientType } from '@/types/client-type';
+import { ClientFilters, ClientSortField, ClientType } from '@/types/client-type';
 import clientApi from '@/services/client-api';
 import { Work } from '@/entities/work';
 import EntityTableBody from '@/composables/EntityTableBody.vue';
 import { TableRow } from '@/types/entity-configs';
+import { Status } from '@/types/status';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
@@ -184,7 +185,12 @@ async function fetchWorks() {
 }
 
 async function fetchClients() {
-  clients.value = await clientApi.searchClients();
+  const clientFilters: ClientFilters = {
+    status: Status.ACTIVE,
+    sortBy: ClientSortField.CODE,
+  };
+
+  clients.value = await clientApi.searchClients(clientFilters);
 }
 
 /*************************************************************************************************************** EDIT */

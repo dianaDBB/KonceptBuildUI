@@ -148,6 +148,7 @@ body {
 }
 
 .section {
+  position: relative;
   flex: 1;
   padding: 24px;
   min-height: 0;
@@ -164,6 +165,24 @@ body {
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 9999;
+
+  display: grid;
+  place-items: center;
+
+  background: var(--color-background-muted);
+  color: var(--color-text-muted);
+  pointer-events: all;
+
+  svg {
+    margin-right: 0.5rem;
+    vertical-align: middle;
+  }
 }
 
 /************************************************************************************************************** TABLE */
@@ -218,21 +237,6 @@ body {
     .highlight {
       font-weight: 600;
     }
-  }
-}
-
-.table-loading-overlay {
-  position: absolute;
-  inset: 41px 0 0;
-  display: grid;
-  place-items: center;
-  background: var(--color-background-muted);
-  color: var(--color-text-muted);
-  pointer-events: all;
-
-  svg {
-    margin-right: 0.5rem;
-    vertical-align: middle;
   }
 }
 
