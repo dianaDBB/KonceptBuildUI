@@ -64,8 +64,8 @@
                   {{ getWeekday(selectedYear, selectedMonth, day) }}
                 </th>
 
-                <th class="total-hours-column" rowspan="2">Total Horas</th>
-                <th class="total-cost-column" rowspan="2">Custo (€)</th>
+                <th class="total-hours" colspan="4">Horas</th>
+                <th class="total-cost" colspan="3">Custos (€)</th>
               </tr>
 
               <tr>
@@ -81,7 +81,18 @@
                 >
                   {{ day }}
                 </th>
+
+                <th class="total-hours-column">Total</th>
+                <th class="total-hours-column">Extras</th>
+                <th class="total-hours-column">Aus. Pagas</th>
+                <th class="total-hours-column">Aus. Não Pagas</th>
+
+                <th class="total-cost-column">Total</th>
+                <th class="total-cost-column">Extras</th>
+                <th class="total-cost-column">Aus. Não Pagas</th>
               </tr>
+
+              <tr></tr>
             </thead>
 
             <tbody>
@@ -115,8 +126,28 @@
                     {{ formatNumber(workerTimesheet.totalHours) }}
                   </td>
 
+                  <td class="total-hours">
+                    {{ formatNumber(workerTimesheet.totalExtraHours) }}
+                  </td>
+
+                  <td class="total-hours">
+                    {{ formatNumber(workerTimesheet.totalPaidAbsenceHours) }}
+                  </td>
+
+                  <td class="total-hours">
+                    {{ formatNumber(workerTimesheet.totalUnpaidAbsenceHours) }}
+                  </td>
+
                   <td class="total-cost">
                     {{ formatCurrency(workerTimesheet.totalCost) }}
+                  </td>
+
+                  <td class="total-cost">
+                    {{ formatCurrency(workerTimesheet.totalCostExtraHours) }}
+                  </td>
+
+                  <td class="total-cost">
+                    {{ formatCurrency(workerTimesheet.totalCostUnpaidAbsenceHours) }}
                   </td>
                 </tr>
 
@@ -191,7 +222,11 @@
                       Obra
                     </button>
 
-                    <button class="btn btn-work-action" @click="addAttendance(workerTimesheet)">
+                    <button
+                      v-if="workerTimesheet.worker.workerContractType === 'INTERNAL'"
+                      class="btn btn-work-action"
+                      @click="addAttendance(workerTimesheet)"
+                    >
                       <PlusIcon :size="8" />
                       Ausência
                     </button>
@@ -254,6 +289,7 @@ import { getDate, getWeekday, isToday, isHoliday, isWeekend, monthNames } from '
 import { AttendanceCodeType } from '@/types/attendance-code-type';
 import { WorkerContractType } from '@/types/worker-contract-type';
 import configsApi from '@/services/configs-api';
+import { apiError } from '@/services/api';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
@@ -296,12 +332,7 @@ async function loadConfigs() {
 
     apiStatus.value = { isLoading: false, isSuccess: true, isError: false };
   } catch (error: unknown) {
-    apiStatus.value = {
-      isLoading: false,
-      isSuccess: false,
-      isError: true,
-      message: error instanceof Error ? error.message : 'Could not load config values.',
-    };
+    apiStatus.value = apiError(error, 'Failed to load config values.');
   }
 }
 
@@ -325,12 +356,7 @@ async function fetchTimesheet() {
       isError: false,
     };
   } catch (error: unknown) {
-    apiStatus.value = {
-      isLoading: false,
-      isSuccess: false,
-      isError: true,
-      message: error instanceof Error ? error.message : 'Failed to load timesheet.',
-    };
+    apiStatus.value = apiError(error, 'Failed to load timesheet.');
   }
 }
 
@@ -392,12 +418,7 @@ async function save() {
 
     await fetchTimesheet();
   } catch (error: unknown) {
-    apiStatus.value = {
-      isLoading: false,
-      isSuccess: false,
-      isError: true,
-      message: error instanceof Error ? error.message : 'Failed to save timesheet.',
-    };
+    apiStatus.value = apiError(error, 'Failed to save timesheet.');
   }
 }
 
@@ -573,8 +594,16 @@ thead tr:nth-child(2) th {
   width: 50px;
 }
 
+.total-hours {
+  width: 200px;
+}
+
 .total-hours-column {
   width: 50px;
+}
+
+.total-cost {
+  width: 270px;
 }
 
 .total-cost-column {

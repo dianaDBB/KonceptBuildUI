@@ -108,7 +108,6 @@ import Toast from '@/composables/Toast.vue';
 import { SortDirection } from '@/types/sort-direction';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
 import ConfirmDialog from '@/composables/ConfirmDialog.vue';
-import axios from 'axios';
 import { WorkType, WorkFilters, WorkSortField } from '@/types/work-type';
 import workApi from '@/services/work-api';
 import { ClientFilters, ClientSortField, ClientType } from '@/types/client-type';
@@ -120,6 +119,7 @@ import { StatusType } from '@/types/status-type';
 import { WorkStatusType } from '@/types/work-status-type';
 import configsApi from '@/services/configs-api';
 import { Client } from '@/entities/client';
+import { apiError } from '@/services/api';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 const tableBody = ref<HTMLTableSectionElement | null>(null);
@@ -153,12 +153,7 @@ async function loadConfigs() {
 
     apiStatus.value = { isLoading: false, isSuccess: true, isError: false };
   } catch (error: unknown) {
-    apiStatus.value = {
-      isLoading: false,
-      isSuccess: false,
-      isError: true,
-      message: error instanceof Error ? error.message : 'Could not load config values.',
-    };
+    apiStatus.value = apiError(error, 'Failed to load config values.');
   }
 }
 
@@ -179,12 +174,7 @@ async function fetchWorks() {
 
     apiStatus.value = { isLoading: false, isSuccess: true, isError: false };
   } catch (error: unknown) {
-    apiStatus.value = {
-      isLoading: false,
-      isSuccess: false,
-      isError: true,
-      message: error instanceof Error ? error.message : 'Could not load works.',
-    };
+    apiStatus.value = apiError(error, 'Failed to load works.');
   }
 }
 
@@ -280,19 +270,7 @@ async function save(row: WorkRow): Promise<void> {
       message: 'Work saved successfully.',
     };
   } catch (error: unknown) {
-    let message = 'Failed to save work.';
-
-    if (axios.isAxiosError(error)) {
-      message = error.response?.data?.message ?? error.message;
-    } else if (error instanceof Error) {
-      message = error.message;
-    }
-    apiStatus.value = {
-      isLoading: false,
-      isSuccess: false,
-      isError: true,
-      message: message,
-    };
+    apiStatus.value = apiError(error, 'Failed to save work.');
   }
 }
 
@@ -327,19 +305,7 @@ async function confirmDelete(): Promise<void> {
     showDeleteDialog.value = false;
     workToDelete.value = null;
   } catch (error: unknown) {
-    let message = 'Failed to delete work.';
-
-    if (axios.isAxiosError(error)) {
-      message = error.response?.data?.message ?? error.message;
-    } else if (error instanceof Error) {
-      message = error.message;
-    }
-    apiStatus.value = {
-      isLoading: false,
-      isSuccess: false,
-      isError: true,
-      message: message,
-    };
+    apiStatus.value = apiError(error, 'Failed to delete work.');
   }
 }
 

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import AuthApi from './auth-api';
+import { ApiResponseStatus } from '@/types/api-response-status';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -32,5 +33,22 @@ axiosClient.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
+export function apiError(error: unknown, defaultMessage: string): ApiResponseStatus {
+  let message: string = defaultMessage;
+
+  if (axios.isAxiosError(error)) {
+    message = error.response?.data?.message ?? error.message;
+  } else if (error instanceof Error) {
+    message = error.message;
+  }
+
+  return {
+    isLoading: false,
+    isSuccess: false,
+    isError: true,
+    message,
+  };
+}
 
 export default axiosClient;
