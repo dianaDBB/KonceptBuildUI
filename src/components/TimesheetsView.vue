@@ -64,8 +64,8 @@
                   {{ getWeekday(selectedYear, selectedMonth, day) }}
                 </th>
 
-                <th class="total-hours" colspan="4">Horas</th>
-                <th class="total-cost" colspan="3">Custos (€)</th>
+                <th class="total-hours" rowspan="2">Horas</th>
+                <th class="total-cost" rowspan="2">Custos (€)</th>
               </tr>
 
               <tr>
@@ -81,15 +81,6 @@
                 >
                   {{ day }}
                 </th>
-
-                <th class="total-hours-column">Total</th>
-                <th class="total-hours-column">Extras</th>
-                <th class="total-hours-column">Aus. Pagas</th>
-                <th class="total-hours-column">Aus. Não Pagas</th>
-
-                <th class="total-cost-column">Total</th>
-                <th class="total-cost-column">Extras</th>
-                <th class="total-cost-column">Aus. Não Pagas</th>
               </tr>
 
               <tr></tr>
@@ -122,33 +113,48 @@
 
                   <td v-for="day in daysInMonth" :key="day" />
 
-                  <td class="total-hours">
-                    {{ formatNumber(workerTimesheet.totalHours) }}
-                  </td>
+                  <template v-if="isCollapsed(workerTimesheet.worker.id!)">
+                    <td class="total-hours">
+                      {{ formatNumber(workerTimesheet.totalHours) }}
+                    </td>
 
-                  <td class="total-hours">
-                    {{ formatNumber(workerTimesheet.totalExtraHours) }}
-                  </td>
+                    <td class="total-cost">
+                      {{ formatCurrency(workerTimesheet.totalCost) }}
+                    </td>
+                  </template>
+                  <template v-else>
+                    <td>
+                      <div class="summary-grid">
+                        <strong>TOTAL</strong>
+                        <strong>{{ formatNumber(workerTimesheet.totalHours) }}</strong>
 
-                  <td class="total-hours">
-                    {{ formatNumber(workerTimesheet.totalPaidAbsenceHours) }}
-                  </td>
+                        <span>Extras</span>
+                        <span>{{ formatNumber(workerTimesheet.totalExtraHours) }}</span>
 
-                  <td class="total-hours">
-                    {{ formatNumber(workerTimesheet.totalUnpaidAbsenceHours) }}
-                  </td>
+                        <span>Aus. Pagas</span>
+                        <span>{{ formatNumber(workerTimesheet.totalPaidAbsenceHours) }}</span>
 
-                  <td class="total-cost">
-                    {{ formatCurrency(workerTimesheet.totalCost) }}
-                  </td>
+                        <span>Aus. Não Pagas</span>
+                        <span>{{ formatNumber(workerTimesheet.totalUnpaidAbsenceHours) }}</span>
+                      </div>
+                    </td>
 
-                  <td class="total-cost">
-                    {{ formatCurrency(workerTimesheet.totalCostExtraHours) }}
-                  </td>
+                    <td>
+                      <div class="summary-grid summary-grid-reverse">
+                        <strong>{{ formatCurrency(workerTimesheet.totalCost) }}</strong>
+                        <strong>TOTAL</strong>
 
-                  <td class="total-cost">
-                    {{ formatCurrency(workerTimesheet.totalCostUnpaidAbsenceHours) }}
-                  </td>
+                        <span>{{ formatCurrency(workerTimesheet.totalCostExtraHours) }}</span>
+                        <span>Extras</span>
+
+                        <span>-</span>
+                        <span>Aus. Pagas</span>
+
+                        <span>{{ formatCurrency(workerTimesheet.totalCostUnpaidAbsenceHours) }}</span>
+                        <span>Aus. Não Pagas</span>
+                      </div>
+                    </td>
+                  </template>
                 </tr>
 
                 <!-- Timesheet lines -->
@@ -207,7 +213,17 @@
                       />
                     </td>
 
-                    <td />
+                    <td>
+                      <button
+                        class="btn btn-icon"
+                        @click="
+                          lineToDelete = { worker: workerTimesheet, index: workIndex, line: workTimesheet };
+                          showDeleteDialog = true;
+                        "
+                      >
+                        <Trash2 :size="16" />
+                      </button>
+                    </td>
 
                     <td />
                   </tr>
@@ -255,6 +271,15 @@
       </div>
     </div>
   </div>
+
+  <ConfirmDialog
+    v-model="showDeleteDialog"
+    title="Eliminar linha"
+    :message="`Tem a certeza que quer eliminar definitivamente a linha '${lineToDelete?.worker.worker.name}' - '${lineToDelete?.line.work?.code ?? attendanceCode[lineToDelete?.line.attendanceCode!]?.label}'?`"
+    confirm-text="Apagar"
+    cancel-text="Cancelar"
+    @confirm="deleteWorkLine"
+  />
 </template>
 
 <script setup lang="ts">
@@ -270,6 +295,7 @@ import {
   CopyMinus,
   Plus,
   Minus,
+  Trash2,
 } from 'lucide-vue-next';
 import Toast from '@/composables/Toast.vue';
 import timesheetApi from '@/services/timesheet-api';
@@ -290,6 +316,7 @@ import { AttendanceCodeType } from '@/types/attendance-code-type';
 import { WorkerContractType } from '@/types/worker-contract-type';
 import configsApi from '@/services/configs-api';
 import { apiError } from '@/services/api';
+import ConfirmDialog from '@/composables/ConfirmDialog.vue';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
@@ -480,6 +507,28 @@ function createDate(day: number): string {
   return `${selectedYear.value}-${month}-${dayString}`;
 }
 
+/************************************************************************************************************* DELETE */
+
+const showDeleteDialog = ref(false);
+const lineToDelete = ref<{
+  worker: WorkerTimesheetType;
+  index: number;
+  line: WorkTimesheetType;
+} | null>(null);
+
+async function deleteWorkLine() {
+  if (!lineToDelete.value) {
+    return;
+  }
+
+  lineToDelete.value.worker.worksTimesheet.splice(lineToDelete.value.index, 1);
+
+  showDeleteDialog.value = false;
+  lineToDelete.value = null;
+
+  await save();
+}
+
 /************************************************************************************************** COLLPASE / EXPAND */
 
 const collapsedWorkers = ref(new Set<string>());
@@ -598,16 +647,13 @@ thead tr:nth-child(2) th {
   width: 200px;
 }
 
-.total-hours-column {
-  width: 50px;
-}
-
 .total-cost {
-  width: 270px;
+  width: 200px;
 }
 
-.total-cost-column {
-  width: 90px;
+.total-hours,
+.total-cost {
+  text-align: center;
 }
 
 thead th.weekend {
@@ -676,11 +722,6 @@ thead th.holiday {
   font-weight: 600;
 }
 
-.total-hours,
-.total-cost {
-  text-align: center;
-}
-
 .worker-row,
 .worker-row:hover {
   background: var(--color-background-alt);
@@ -733,5 +774,23 @@ thead th.holiday {
 
 .day-input:focus {
   border-color: var(--color-primary);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+}
+
+.summary-grid-reverse {
+  grid-template-columns: auto 1fr;
+}
+
+.summary-grid-reverse > :nth-child(odd) {
+  text-align: left;
+}
+
+.summary-grid-reverse > :nth-child(even) {
+  text-align: right;
 }
 </style>
