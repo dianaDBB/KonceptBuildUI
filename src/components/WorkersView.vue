@@ -33,6 +33,13 @@
                   <div class="column-heading">
                     {{ config.label }}
 
+                    <InfoTooltip
+                      v-if="config.additionalInfo"
+                      :title="config.additionalInfo.tooltipTitle"
+                      :items="config.additionalInfo.tooltipItems"
+                      :info="config.additionalInfo.tooltipInfo"
+                    />
+
                     <TableColumnFilter
                       :config="config"
                       :filters="workerFilters"
@@ -116,6 +123,7 @@ import { StatusType } from '@/types/status-type';
 import configsApi from '@/services/configs-api';
 import { WorkerContractType } from '@/types/worker-contract-type';
 import { apiError } from '@/services/api';
+import InfoTooltip from '@/composables/InfoTooltip.vue';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 

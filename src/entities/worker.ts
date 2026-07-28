@@ -1,4 +1,4 @@
-import { ColumnType, Configs, TableRow } from '@/types/entity-configs';
+import { ColumnType, Configs, RangeFilterValueType, TableRow } from '@/types/entity-configs';
 import { EnumOptions } from '@/types/select-options';
 import { TableFilterKind } from '@/types/table-filter';
 import { WorkerType, WorkerSortField } from '@/types/worker-type';
@@ -147,7 +147,14 @@ export class Worker {
         },
       },
       hourCost: {
-        label: 'Valor/Hora Base (€)',
+        label: 'Custo Hora (€)',
+        additionalInfo: {
+          tooltipTitle: 'Custo à hora para a empresa',
+          tooltipInfo: [
+            'Para colaboradores "Contracto" este valor é calculado com base em 14 meses, tendo em conta o salário, TSU, sub. alimentação e acidentes de trabalho. (média 21 dias úteis)',
+            'Para colaboradores "Hora" este valor é igual ao "Valor Hora"',
+          ],
+        },
         type: ColumnType.MONEY,
         styleConfig: {
           showDisabled: () => true,
@@ -161,6 +168,7 @@ export class Worker {
           column: WorkerSortField.HOUR_COST,
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
             minKey: 'hourCostMin',
             maxKey: 'hourCostMax',
           },
@@ -180,6 +188,7 @@ export class Worker {
           column: WorkerSortField.DEFAULT_HOURS,
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
             minKey: 'defaultHoursMin',
             maxKey: 'defaultHoursMax',
           },
@@ -209,6 +218,11 @@ export class Worker {
       },
       hourRate: {
         label: 'Valor Hora (€)',
+        additionalInfo: {
+          tooltipInfo: [
+            'Para colaboradores "Contracto", este valor é calculado com base em 14 meses, tendo em conta apenas o salário (média 21 dias úteis).',
+          ],
+        },
         type: ColumnType.MONEY,
         styleConfig: {
           showDisabled: (worker: WorkerType) =>
@@ -216,13 +230,14 @@ export class Worker {
           isInvalid: (worker: WorkerType) =>
             worker.workerContractType === workerContractTypeOptions.CONTRACTOR.code && !worker.hourRate,
           columnStyle: {
-            width: '80px',
+            width: '90px',
           },
         },
         filterConfig: {
           column: WorkerSortField.HOUR_RATE,
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
             minKey: 'hourRateMin',
             maxKey: 'hourRateMax',
           },
@@ -244,6 +259,7 @@ export class Worker {
           column: WorkerSortField.MONTHLY_SALARY,
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
             minKey: 'monthlySalaryMin',
             maxKey: 'monthlySalaryMax',
           },
@@ -265,6 +281,7 @@ export class Worker {
           column: WorkerSortField.TSU,
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
             minKey: 'tsuMin',
             maxKey: 'tsuMax',
           },
@@ -276,8 +293,7 @@ export class Worker {
         styleConfig: {
           showDisabled: (worker: WorkerType) =>
             !worker.workerContractType || worker.workerContractType === workerContractTypeOptions.CONTRACTOR.code,
-          isInvalid: (worker: WorkerType) =>
-            worker.workerContractType === workerContractTypeOptions.INTERNAL.code && !worker.mealAllowance,
+          isInvalid: () => false,
           columnStyle: {
             width: '100px',
           },
@@ -286,6 +302,7 @@ export class Worker {
           column: WorkerSortField.MEAL_ALLOWANCE,
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
             minKey: 'mealAllowanceMin',
             maxKey: 'mealAllowanceMax',
           },
@@ -297,8 +314,7 @@ export class Worker {
         styleConfig: {
           showDisabled: (worker: WorkerType) =>
             !worker.workerContractType || worker.workerContractType === workerContractTypeOptions.CONTRACTOR.code,
-          isInvalid: (worker: WorkerType) =>
-            worker.workerContractType === workerContractTypeOptions.INTERNAL.code && !worker.accidentInsurance,
+          isInvalid: () => false,
           columnStyle: {
             width: '100px',
           },
@@ -307,6 +323,7 @@ export class Worker {
           column: WorkerSortField.ACCIDENT_INSURANCE,
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
             minKey: 'accidentInsuranceMin',
             maxKey: 'accidentInsuranceMax',
           },
@@ -326,6 +343,7 @@ export class Worker {
           column: WorkerSortField.START_DATE,
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
+            valueType: RangeFilterValueType.DATE,
             minKey: 'startDateMin',
             maxKey: 'startDateMax',
           },
@@ -345,6 +363,7 @@ export class Worker {
           column: WorkerSortField.END_DATE,
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
+            valueType: RangeFilterValueType.DATE,
             minKey: 'endDateMin',
             maxKey: 'endDateMax',
           },
@@ -363,7 +382,6 @@ function onContractTypeChanged(row: TableRow<WorkerType>) {
 
   if (row.entity.workerContractType === 'INTERNAL' && row.entity.tsu == null) {
     row.entity.tsu = 23.75;
-    row.entity.hourRate = undefined;
   }
 
   if (row.entity.workerContractType === 'CONTRACTOR') {

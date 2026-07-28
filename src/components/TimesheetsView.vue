@@ -49,7 +49,7 @@
           <table>
             <thead>
               <tr>
-                <th class="worker-column" rowspan="2" />
+                <th class="worker-column" />
 
                 <th
                   v-for="day in daysInMonth"
@@ -64,11 +64,13 @@
                   {{ getWeekday(selectedYear, selectedMonth, day) }}
                 </th>
 
-                <th class="total-hours" rowspan="2">Horas</th>
-                <th class="total-cost" rowspan="2">Custos (€)</th>
+                <th class="sticky-hours" rowspan="2">Horas</th>
+                <th class="sticky-cost" rowspan="2">Custos (€)</th>
               </tr>
 
               <tr>
+                <th class="worker-column worker-column-second" />
+
                 <th
                   v-for="day in daysInMonth"
                   :key="day"
@@ -106,7 +108,7 @@
                       <div>
                         {{ workerContractType[workerTimesheet.worker.workerContractType!].label }}
                         • {{ workerTimesheet.worker.defaultHours }}h •
-                        {{ formatCurrency(workerTimesheet.worker.hourRate || workerTimesheet.worker.monthlySalary) }}
+                        {{ formatCurrency(workerTimesheet.worker.monthlySalary || workerTimesheet.worker.hourRate) }}
                       </div>
                     </div>
                   </td>
@@ -114,16 +116,16 @@
                   <td v-for="day in daysInMonth" :key="day" />
 
                   <template v-if="isCollapsed(workerTimesheet.worker.id!)">
-                    <td class="total-hours">
+                    <td class="sticky-hours">
                       {{ formatNumber(workerTimesheet.totalHours) }}
                     </td>
 
-                    <td class="total-cost">
+                    <td class="sticky-cost">
                       {{ formatCurrency(workerTimesheet.totalCost) }}
                     </td>
                   </template>
                   <template v-else>
-                    <td>
+                    <td class="sticky-hours">
                       <div class="summary-grid">
                         <strong>TOTAL</strong>
                         <strong>{{ formatNumber(workerTimesheet.totalHours) }}</strong>
@@ -139,7 +141,7 @@
                       </div>
                     </td>
 
-                    <td>
+                    <td class="sticky-cost">
                       <div class="summary-grid summary-grid-reverse">
                         <strong>{{ formatCurrency(workerTimesheet.totalCost) }}</strong>
                         <strong>TOTAL</strong>
@@ -213,7 +215,7 @@
                       />
                     </td>
 
-                    <td>
+                    <td class="sticky-hours">
                       <button
                         class="btn btn-icon"
                         @click="
@@ -225,7 +227,7 @@
                       </button>
                     </td>
 
-                    <td />
+                    <td class="sticky-cost" />
                   </tr>
                 </template>
 
@@ -639,21 +641,58 @@ thead tr:nth-child(2) th {
   width: 220px;
 }
 
+thead tr:first-child .worker-column {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 30;
+}
+
+thead tr:nth-child(2) .worker-column-second {
+  position: sticky;
+  top: 35px;
+  left: 0;
+  z-index: 29;
+}
+
+thead .worker-column,
+thead .worker-column-second {
+  position: sticky;
+  left: 0;
+  background: var(--color-background);
+}
+
+thead .worker-column {
+  top: 0;
+  z-index: 30;
+  border-bottom: 0;
+}
+
+thead .worker-column-second {
+  top: 35px;
+  z-index: 29;
+  border-top: 0;
+}
+
 .day-column {
   width: 50px;
 }
 
-.total-hours {
+.sticky-hours,
+.sticky-cost {
+  position: sticky;
+  background: var(--color-background);
+  z-index: 8;
+}
+
+.sticky-cost {
+  right: 0;
   width: 200px;
 }
 
-.total-cost {
+.sticky-hours {
+  right: 200px;
   width: 200px;
-}
-
-.total-hours,
-.total-cost {
-  text-align: center;
 }
 
 thead th.weekend {

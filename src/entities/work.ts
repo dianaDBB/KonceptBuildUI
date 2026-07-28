@@ -1,4 +1,4 @@
-import { ColumnType, Configs } from '@/types/entity-configs';
+import { ColumnType, Configs, RangeFilterValueType } from '@/types/entity-configs';
 import { TableFilterKind } from '@/types/table-filter';
 import { WorkSortField, WorkType } from '@/types/work-type';
 import { ClientSortField, ClientType } from '@/types/client-type';
@@ -85,6 +85,7 @@ export class Work {
           column: WorkSortField.CONTRACTED_BUDGET,
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
             minKey: 'contractedBudgetMin',
             maxKey: 'contractedBudgetMax',
           },
@@ -105,6 +106,7 @@ export class Work {
           column: WorkSortField.ESTIMATED_COST,
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
             minKey: 'estimatedCostMin',
             maxKey: 'estimatedCostMax',
           },
@@ -124,6 +126,7 @@ export class Work {
           column: WorkSortField.ESTIMATED_COST_MATERIALS,
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
             minKey: 'estimatedCostMaterialMin',
             maxKey: 'estimatedCostMaterialMax',
           },
@@ -143,6 +146,7 @@ export class Work {
           column: WorkSortField.ESTIMATED_COST_LABOR,
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
             minKey: 'estimatedCostLaborMin',
             maxKey: 'estimatedCostLaborMax',
           },
@@ -163,6 +167,7 @@ export class Work {
           column: WorkSortField.ESTIMATED_MARGIN_EUR,
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
             minKey: 'estimatedMarginEurMin',
             maxKey: 'estimatedMarginEurMax',
           },
@@ -183,6 +188,7 @@ export class Work {
           column: WorkSortField.ESTIMATED_MARGIN_PERCENTUAL,
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
             minKey: 'estimatedMarginPercentualMin',
             maxKey: 'estimatedMarginPercentualMax',
           },
@@ -202,6 +208,7 @@ export class Work {
           column: WorkSortField.START_DATE,
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
+            valueType: RangeFilterValueType.DATE,
             minKey: 'startDateMin',
             maxKey: 'startDateMax',
           },
@@ -221,6 +228,7 @@ export class Work {
           column: WorkSortField.ESTIMATED_END_DATE,
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
+            valueType: RangeFilterValueType.DATE,
             minKey: 'estimatedEndDateMin',
             maxKey: 'estimatedEndDateMax',
           },
@@ -240,6 +248,7 @@ export class Work {
           column: WorkSortField.END_DATE,
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
+            valueType: RangeFilterValueType.DATE,
             minKey: 'endDateMin',
             maxKey: 'endDateMax',
           },

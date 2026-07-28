@@ -1,22 +1,32 @@
 <template>
   <div ref="target" class="tooltip">
     <slot>
-      <Info class="icon" :size="16" @click.stop="toggle" />
+      <Info ref="icon" class="icon" :size="16" @click.stop="toggle" />
     </slot>
 
-    <div v-if="open" class="content" :class="`content--${position}`">
-      <h4 v-if="title">{{ title }}</h4>
+    <Teleport to="body">
+      <div v-if="open" class="content" :style="contentStyle">
+        <h4 v-if="title">{{ title }}</h4>
 
-      <div v-for="item in items" :key="item.label" class="row">
-        <span class="label">{{ item.label }}</span>
-        <span class="value">{{ item.value || '-' }}</span>
+        <template v-if="items">
+          <div v-for="item in items" :key="item.label" class="row">
+            <span class="label">{{ item.label }}</span>
+            <span class="value">{{ item.value || '-' }}</span>
+          </div>
+        </template>
+
+        <template v-if="info">
+          <div v-for="item in info" :key="item" class="row">
+            <span class="info">{{ item }}</span>
+          </div>
+        </template>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted, CSSProperties } from 'vue';
 import { onClickOutside } from '@vueuse/core';
 import { Info } from 'lucide-vue-next';
 
@@ -25,10 +35,11 @@ export interface TooltipItem {
   value?: string | number | null;
 }
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     title?: string;
-    items: TooltipItem[];
+    items?: TooltipItem[];
+    info?: string[];
     position?: 'left' | 'right';
   }>(),
   {
@@ -39,13 +50,51 @@ withDefaults(
 
 const open = ref(false);
 const target = ref<HTMLElement | null>(null);
+const icon = ref<HTMLElement | null>(null);
+
+const contentStyle = ref<CSSProperties>({
+  top: '0px',
+  left: '0px',
+});
 
 function toggle() {
+  if (!icon.value) {
+    return;
+  }
+
+  const rect = icon.value.getBoundingClientRect();
+
+  contentStyle.value = {
+    top: `${rect.bottom + 8}px`,
+    left: `${rect.left}px`,
+    transform: props.position === 'left' ? 'translateX(calc(-100% + 16px))' : 'none',
+  };
+
+  if (props.position === 'left') {
+    contentStyle.value.transform = 'translateX(calc(-100% + 16px))';
+  } else {
+    contentStyle.value.transform = '';
+  }
+
   open.value = !open.value;
 }
 
 onClickOutside(target, () => {
   open.value = false;
+});
+
+function close() {
+  open.value = false;
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', close, true);
+  window.addEventListener('resize', close);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', close, true);
+  window.removeEventListener('resize', close);
 });
 </script>
 
@@ -61,8 +110,7 @@ onClickOutside(target, () => {
 }
 
 .content {
-  position: absolute;
-  top: 24px;
+  position: fixed;
 
   min-width: 280px;
 
@@ -74,15 +122,7 @@ onClickOutside(target, () => {
 
   box-shadow: var(--shadow-pop-small);
 
-  z-index: 100;
-}
-
-.content--right {
-  left: 0;
-}
-
-.content--left {
-  right: 0;
+  z-index: 99999;
 }
 
 h4 {
@@ -103,5 +143,11 @@ h4 {
 
 .value {
   text-align: right;
+}
+
+.info {
+  text-align: left;
+  font-size: 12px;
+  color: var(--color-text-secondary);
 }
 </style>

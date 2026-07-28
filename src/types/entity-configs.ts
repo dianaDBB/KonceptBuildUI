@@ -2,6 +2,7 @@ import { StyleValue } from 'vue';
 import { TableFilterKind } from './table-filter';
 import { SelectOption } from './select-options';
 import { UUID } from 'crypto';
+import { TooltipItem } from '@/composables/InfoTooltip.vue';
 
 export interface EntityType {
   id?: UUID;
@@ -35,6 +36,11 @@ export type Configs<TSortField extends string = string, TEntity extends EntityTy
 
 export interface EntityConfig<TSortField extends string = string, TEntity extends EntityType = EntityType> {
   label: string;
+  additionalInfo?: {
+    tooltipTitle?: string;
+    tooltipItems?: TooltipItem[];
+    tooltipInfo?: string[];
+  };
   type: ColumnType;
   onValueChanged?: (row: TableRow, value: unknown) => void;
 
@@ -55,7 +61,6 @@ export interface StyleConfig {
 }
 
 export interface SearchSelectConfig<TEntity extends EntityType = EntityType> {
-  // options: TEntity[];
   selected: (option: TEntity) => string;
   optionLines: (option: TEntity) => string[];
   filter?: (option: TEntity) => string;
@@ -85,7 +90,13 @@ export interface SingleFilterConfig {
   valueKey: string;
 }
 
+export enum RangeFilterValueType {
+  NUMBER = 'NUMBER',
+  DATE = 'DATE',
+}
+
 export interface RangeFilterConfig {
+  valueType: RangeFilterValueType;
   minKey: string;
   maxKey: string;
 }

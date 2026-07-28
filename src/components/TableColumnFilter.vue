@@ -1,6 +1,7 @@
 <template>
   <div ref="control" class="table-column-filter">
     <button
+      ref="button"
       class="column-button"
       :class="{ active: isSorted || isFilterActive }"
       :disabled="disabled"
@@ -12,92 +13,94 @@
       <ArrowUpDown v-else :size="12" />
     </button>
 
-    <form
-      v-if="isOpen"
-      class="filter-dropdown"
-      :class="`align-${config.filterConfig.dropdownAlign ?? 'end'}`"
-      @submit.prevent="apply"
-    >
-      <div class="filter-dropdown-header">
-        <strong>{{ config.label }}</strong>
+    <Teleport to="body">
+      <form v-if="isOpen" class="filter-dropdown" :style="dropdownStyle" @submit.prevent="apply">
+        <div class="filter-dropdown-header">
+          <strong>{{ config.label }}</strong>
 
-        <button type="button" class="close-button" aria-label="Fechar" @click="close">
-          <X :size="18" />
-        </button>
-      </div>
+          <button type="button" class="close-button" aria-label="Fechar" @click="close">
+            <X :size="18" />
+          </button>
+        </div>
 
-      <div class="sort-actions">
-        <button type="button" class="menu-button" @click="emitSort(SortDirection.ASC)">
-          <ChevronDown :size="14" :class="{ active: isSorted && sortDirection === SortDirection.ASC }" />
-          Crescente
-        </button>
+        <div class="sort-actions">
+          <button type="button" class="menu-button" @click="emitSort(SortDirection.ASC)">
+            <ChevronDown :size="14" :class="{ active: isSorted && sortDirection === SortDirection.ASC }" />
+            Crescente
+          </button>
 
-        <button type="button" class="menu-button" @click="emitSort(SortDirection.DESC)">
-          <ChevronUp :size="14" :class="{ active: isSorted && sortDirection === SortDirection.DESC }" />
-          Decrescente
-        </button>
+          <button type="button" class="menu-button" @click="emitSort(SortDirection.DESC)">
+            <ChevronUp :size="14" :class="{ active: isSorted && sortDirection === SortDirection.DESC }" />
+            Decrescente
+          </button>
 
-        <button v-if="isSorted" type="button" class="menu-button" @click="emitSort(undefined)">
-          <CircleX :size="14" />
-          Remover ordenação
-        </button>
-      </div>
+          <button v-if="isSorted" type="button" class="menu-button" @click="emitSort(undefined)">
+            <CircleX :size="14" />
+            Remover ordenação
+          </button>
+        </div>
 
-      <hr />
-
-      <input
-        v-if="config.filterConfig.kind === TableFilterKind.TEXT"
-        v-model.trim="filterValues[(config.filterConfig.valueConfig as SingleFilterConfig).valueKey!]"
-        type="text"
-        :placeholder="`Pesquisar por ${config.label.toLowerCase()}`"
-      />
-
-      <select
-        v-else-if="config.filterConfig.kind === TableFilterKind.SELECT"
-        v-model="filterValues[(config.filterConfig.valueConfig as SingleFilterConfig).valueKey!]"
-      >
-        <option value="">-</option>
-
-        <option v-for="option in config.selectConfig!.options" :key="option.code" :value="option.code">
-          {{ option.label }}
-        </option>
-      </select>
-
-      <div v-else class="range-fields">
-        <input
-          v-model.number="filterValues[(config.filterConfig.valueConfig as RangeFilterConfig).minKey!]"
-          type="number"
-          min="0"
-          step="0.01"
-          placeholder="Mínimo"
-        />
-
-        <span>-</span>
+        <hr />
 
         <input
-          v-model.number="filterValues[(config.filterConfig.valueConfig as RangeFilterConfig).maxKey!]"
-          type="number"
-          min="0"
-          step="0.01"
-          placeholder="Máximo"
+          v-if="config.filterConfig.kind === TableFilterKind.TEXT"
+          v-model.trim="filterValues[(config.filterConfig.valueConfig as SingleFilterConfig).valueKey!]"
+          type="text"
+          :placeholder="`Pesquisar por ${config.label.toLowerCase()}`"
         />
-      </div>
 
-      <div class="filter-actions">
-        <button type="button" class="clear-button" @click="clear">Limpar</button>
+        <select
+          v-else-if="config.filterConfig.kind === TableFilterKind.SELECT"
+          v-model="filterValues[(config.filterConfig.valueConfig as SingleFilterConfig).valueKey!]"
+        >
+          <option value="">-</option>
 
-        <button type="submit" class="apply-button">Aplicar</button>
-      </div>
-    </form>
+          <option v-for="option in config.selectConfig!.options" :key="option.code" :value="option.code">
+            {{ option.label }}
+          </option>
+        </select>
+
+        <div v-else class="range-fields">
+          <input
+            v-model="filterValues[(config.filterConfig.valueConfig as RangeFilterConfig).minKey!]"
+            :type="rangeInputType"
+            :step="rangeStep"
+            placeholder="Mínimo"
+          />
+
+          <span>-</span>
+
+          <input
+            v-model="filterValues[(config.filterConfig.valueConfig as RangeFilterConfig).maxKey!]"
+            :type="rangeInputType"
+            :step="rangeStep"
+            placeholder="Máximo"
+          />
+        </div>
+
+        <div class="filter-actions">
+          <button type="button" class="clear-button" @click="clear">Limpar</button>
+
+          <button type="submit" class="apply-button">Aplicar</button>
+        </div>
+      </form>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts" generic="TSortField extends string, TEntity extends EntityType = EntityType">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import type { CSSProperties } from 'vue';
 import { ArrowUpDown, ChevronDown, ChevronUp, Funnel, X, CircleX } from 'lucide-vue-next';
 
 import { SortDirection } from '@/types/sort-direction';
-import { EntityConfig, EntityType, RangeFilterConfig, SingleFilterConfig } from '@/types/entity-configs';
+import {
+  EntityConfig,
+  EntityType,
+  RangeFilterConfig,
+  RangeFilterValueType,
+  SingleFilterConfig,
+} from '@/types/entity-configs';
 import { TableFilterKind } from '@/types/table-filter';
 
 type FilterValues = Record<string, unknown>;
@@ -131,6 +134,7 @@ const emit = defineEmits<{
 const control = ref<HTMLElement | null>(null);
 const isOpen = ref(false);
 const filterValues = ref<FilterValues>({});
+const button = ref<HTMLElement | null>(null);
 
 const currentFilters = computed(() => props.filters as FilterValues);
 
@@ -143,9 +147,20 @@ const filterKeys = computed(
     ].filter(Boolean) as string[],
 );
 
+const rangeConfig = computed(() => props.config.filterConfig.valueConfig as RangeFilterConfig);
+
+const rangeInputType = computed(() => (rangeConfig.value.valueType === RangeFilterValueType.DATE ? 'date' : 'number'));
+
+const rangeStep = computed(() => (rangeConfig.value.valueType === RangeFilterValueType.DATE ? undefined : '0.01'));
+
 const isFilterActive = computed(() => filterKeys.value.some((key) => hasValue(currentFilters.value[key])));
 
 const isSorted = computed(() => props.sortBy === props.config.filterConfig.column);
+
+const dropdownStyle = ref<CSSProperties>({
+  top: '0px',
+  left: '0px',
+});
 
 function hasValue(value: unknown): boolean {
   return value !== undefined && value !== null && value !== '';
@@ -159,12 +174,35 @@ function toggleDropdown() {
 
   filterValues.value = Object.fromEntries(filterKeys.value.map((key) => [key, currentFilters.value[key]]));
 
+  if (button.value) {
+    const rect = button.value.getBoundingClientRect();
+
+    dropdownStyle.value = {
+      position: 'fixed',
+      top: `${rect.bottom + 8}px`,
+      left: props.config.filterConfig.dropdownAlign === 'start' ? `${rect.left}px` : `${rect.right - 300}px`,
+      zIndex: '99999',
+    };
+  }
+
   isOpen.value = true;
 }
 
 function close() {
   isOpen.value = false;
 }
+
+onMounted(() => {
+  document.addEventListener('mousedown', closeOnOutsideClick);
+  window.addEventListener('scroll', close, true);
+  window.addEventListener('resize', close);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('mousedown', closeOnOutsideClick);
+  window.removeEventListener('scroll', close, true);
+  window.removeEventListener('resize', close);
+});
 
 function emitSort(direction: SortDirection | undefined) {
   emit('sort', {
@@ -191,10 +229,6 @@ function closeOnOutsideClick(event: MouseEvent) {
     close();
   }
 }
-
-onMounted(() => document.addEventListener('mousedown', closeOnOutsideClick));
-
-onBeforeUnmount(() => document.removeEventListener('mousedown', closeOnOutsideClick));
 </script>
 
 <style scoped lang="scss">
@@ -233,13 +267,12 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', closeOnOutsideCl
 }
 
 .filter-dropdown {
-  position: absolute;
-  z-index: 20;
-  top: calc(100% + 0.5rem);
-  width: 280px;
+  width: 300px;
   padding: 1rem;
+
   border: 1px solid var(--color-border-light);
   border-radius: 10px;
+
   background: var(--color-background);
   box-shadow: var(--shadow-hover);
 
@@ -253,14 +286,6 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', closeOnOutsideCl
     border: 0;
     border-top: 1px solid var(--color-border-light);
   }
-}
-
-.align-start {
-  left: 0;
-}
-
-.align-end {
-  right: 0;
 }
 
 .filter-dropdown-header {
