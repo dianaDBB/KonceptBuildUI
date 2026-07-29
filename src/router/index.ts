@@ -8,6 +8,7 @@ import authApi from '@/services/auth-api';
 import WorksView from '@/components/WorksView.vue';
 import TimesheetsView from '@/components/TimesheetsView.vue';
 import WagesView from '@/components/WagesView.vue';
+import HrDashboardView from '@/components/HrDashboardView.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -33,6 +34,12 @@ const router = createRouter({
       path: '/sales/clients',
       name: 'clients',
       component: ClientsView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/hr/dashboard',
+      name: 'dahsboard',
+      component: HrDashboardView,
       meta: { requiresAuth: true },
     },
     {

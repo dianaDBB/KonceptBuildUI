@@ -2,6 +2,26 @@ import Holidays from 'date-holidays';
 
 const holidays = new Holidays('PT');
 
+export const years = [
+  2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035, 2036, 2037, 2038, 2039, 2040, 2041, 2042, 2043, 2044,
+  2045, 2046, 2047, 2048, 2050,
+];
+
+export const months = [
+  { label: 'Janeiro', value: 1 },
+  { label: 'Fevereiro', value: 2 },
+  { label: 'Março', value: 3 },
+  { label: 'Abril', value: 4 },
+  { label: 'Maio', value: 5 },
+  { label: 'Junho', value: 6 },
+  { label: 'Julho', value: 7 },
+  { label: 'Agosto', value: 8 },
+  { label: 'Setembro', value: 9 },
+  { label: 'Outubro', value: 10 },
+  { label: 'Novembro', value: 11 },
+  { label: 'Dexembro', value: 12 },
+];
+
 export const monthNames = [
   'Janeiro',
   'Fevereiro',

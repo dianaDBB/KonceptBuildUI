@@ -107,8 +107,8 @@ const categories = [
     items: [
       {
         label: 'Dashboard',
-        description: 'Mock - Não faz nada ainda',
-        icon: Package,
+        description: 'Relatório de custos',
+        icon: LayoutDashboard,
         route: '/hr/dashboard',
       },
       {
