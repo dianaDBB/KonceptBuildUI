@@ -8,6 +8,8 @@
 
       <div class="page-nav">
         <RouterLink to="/" class="link"> Página Inicial </RouterLink>
+        <ChevronRight :size="14" class="separator" />
+        <RouterLink :to="{ path: '/', query: { tab: 'hr' } }" class="link"> Recursos Humanos </RouterLink>
       </div>
     </div>
 
@@ -259,6 +261,15 @@
         </div>
 
         <div class="actions">
+          <button
+            class="btn"
+            :disabled="apiStatus.isLoading || !isTimesheetValid"
+            @click="showGenerateWagesDialog = true"
+          >
+            <HandCoins :size="18" />
+            Gerar Salários
+          </button>
+
           <button class="btn" :disabled="apiStatus.isLoading || !isTimesheetValid" @click="save">
             <Save :size="18" />
             Guardar
@@ -274,13 +285,31 @@
     </div>
   </div>
 
+  <!-- delete timesheet line-->
   <ConfirmDialog
     v-model="showDeleteDialog"
     title="Eliminar linha"
-    :message="`Tem a certeza que quer eliminar definitivamente a linha '${lineToDelete?.worker.worker.name}' - '${lineToDelete?.line.work?.code ?? attendanceCode[lineToDelete?.line.attendanceCode!]?.label}'?`"
+    :message="[
+      `${lineToDelete?.worker.worker.name}' - '${lineToDelete?.line.work?.code ?? attendanceCode[lineToDelete?.line.attendanceCode!]?.label}`,
+      'Tem a certeza que quer eliminar definitivamente esta linha?'
+    ]"
     confirm-text="Apagar"
     cancel-text="Cancelar"
     @confirm="deleteWorkLine"
+  />
+
+  <!-- confirm wage-->
+  <ConfirmDialog
+    v-model="showGenerateWagesDialog"
+    title="Gerar salários?"
+    :message="[
+      'Os salários já existentes para este mês serão substituídos pelos valores atuais da folha de horas.',
+      'Esta ação NÃO pode ser revertida.',
+      'Tem a certeza que pretende continuar?',
+    ]"
+    confirm-text="Gerar salários"
+    cancel-text="Cancelar"
+    @confirm="generateWages"
   />
 </template>
 
@@ -298,6 +327,7 @@ import {
   Plus,
   Minus,
   Trash2,
+  HandCoins,
 } from 'lucide-vue-next';
 import Toast from '@/composables/Toast.vue';
 import timesheetApi from '@/services/timesheet-api';
@@ -319,6 +349,7 @@ import { WorkerContractType } from '@/types/worker-contract-type';
 import configsApi from '@/services/configs-api';
 import { apiError } from '@/services/api';
 import ConfirmDialog from '@/composables/ConfirmDialog.vue';
+import wagesApi from '@/services/wages-api';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
@@ -595,6 +626,44 @@ function createDayEntry(day: number, hours: number): DayEntryType {
     date: getDate(selectedYear.value, selectedMonth.value, day),
     hours,
   };
+}
+
+/************************************************************************************************************** WAGES */
+
+const showGenerateWagesDialog = ref(false);
+
+async function generateWages() {
+  if (!timesheet.value) {
+    return;
+  }
+
+  apiStatus.value = {
+    isLoading: true,
+    isSuccess: false,
+    isError: false,
+  };
+
+  try {
+    await Promise.all(
+      timesheet.value.workersTimesheet.map((workerTimesheet) =>
+        wagesApi.addWage({
+          year: timesheet.value!.year,
+          month: timesheet.value!.month,
+          workerId: workerTimesheet.worker.id!,
+          timesheetId: workerTimesheet.timesheetId,
+        }),
+      ),
+    );
+
+    apiStatus.value = {
+      isLoading: false,
+      isSuccess: true,
+      isError: false,
+      message: 'Salários gerados com sucesso.',
+    };
+  } catch (error) {
+    apiStatus.value = apiError(error, 'Falha ao gerar salários.');
+  }
 }
 </script>
 <style>

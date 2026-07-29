@@ -5,7 +5,9 @@
       <h3>Colaboradores</h3>
 
       <div class="page-nav">
-        <RouterLink to="/" class="link">Página Inicial</RouterLink>
+        <RouterLink to="/" class="link"> Página Inicial </RouterLink>
+        <ChevronRight :size="14" class="separator" />
+        <RouterLink :to="{ path: '/', query: { tab: 'hr' } }" class="link"> Recursos Humanos </RouterLink>
       </div>
     </div>
 
@@ -99,7 +101,10 @@
   <ConfirmDialog
     v-model="showDeleteDialog"
     title="Eliminar colaborador"
-    :message="`Tem a certeza que quer eliminar definitivamente o colaborador '${workerToDelete?.entity.name}' com o NIF ${workerToDelete?.entity.nif}?`"
+    :message="[
+      `${workerToDelete?.entity.name}' - NIF ${workerToDelete?.entity.nif}`,
+      'Tem a certeza que quer eliminar definitivamente este colaborador?',
+    ]"
     confirm-text="Apagar"
     cancel-text="Cancelar"
     @confirm="confirmDelete"
@@ -111,7 +116,7 @@ import { ref, onMounted, computed, nextTick } from 'vue';
 import workerApi from '@/services/worker-api';
 import { WorkerType, WorkerFilters, WorkerSortField } from '@/types/worker-type';
 import { ApiResponseStatus } from '@/types/api-response-status';
-import { Contact, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
+import { ChevronRight, Contact, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
 import Toast from '@/composables/Toast.vue';
 import { SortDirection } from '@/types/sort-direction';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';

@@ -30,8 +30,18 @@
 </template>
 
 <script setup lang="ts">
-import { Contact, Users, List, LayoutDashboard, ShoppingCart, Package, ClipboardClock } from 'lucide-vue-next';
+import {
+  Contact,
+  Users,
+  List,
+  LayoutDashboard,
+  ShoppingCart,
+  Package,
+  ClipboardClock,
+  HandCoins,
+} from 'lucide-vue-next';
 import { ref, computed } from 'vue';
+import { useRoute } from 'vue-router';
 
 const categories = [
   {
@@ -113,11 +123,19 @@ const categories = [
         icon: ClipboardClock,
         route: '/hr/timsheet',
       },
+      {
+        label: 'Salários',
+        description: 'Gerir salários.',
+        icon: HandCoins,
+        route: '/hr/wages',
+      },
     ],
   },
 ];
 
-const selectedCategory = ref(categories[0]);
+const route = useRoute();
+
+const selectedCategory = ref(categories.find((c) => c.id === route.query.tab) ?? categories[0]);
 
 const visibleItems = computed(() => selectedCategory.value.items);
 </script>

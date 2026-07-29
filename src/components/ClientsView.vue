@@ -5,7 +5,9 @@
       <h3>Clientes</h3>
 
       <div class="page-nav">
-        <RouterLink to="/" class="link">Página Inicial</RouterLink>
+        <RouterLink to="/" class="link"> Página Inicial </RouterLink>
+        <ChevronRight :size="14" class="separator" />
+        <RouterLink :to="{ path: '/', query: { tab: 'sales' } }" class="link"> Vendas </RouterLink>
       </div>
     </div>
 
@@ -88,7 +90,10 @@
   <ConfirmDialog
     v-model="showDeleteDialog"
     title="Eliminar cliente"
-    :message="`Tem a certeza que quer eliminar definitivamente o cliente '${clientToDelete?.entity.companyName}' com o NIF ${clientToDelete?.entity.nif}?`"
+    :message="[
+      `${clientToDelete?.entity.companyName}' - NIF ${clientToDelete?.entity.nif}`,
+      'Tem a certeza que quer eliminar definitivamente este cliente?',
+    ]"
     confirm-text="Apagar"
     cancel-text="Cancelar"
     @confirm="confirmDelete"
@@ -98,7 +103,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, nextTick } from 'vue';
 import { ApiResponseStatus } from '@/types/api-response-status';
-import { Users, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
+import { ChevronRight, Users, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
 import Toast from '@/composables/Toast.vue';
 import { SortDirection } from '@/types/sort-direction';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';

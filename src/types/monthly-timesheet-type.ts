@@ -1,3 +1,4 @@
+import { UUID } from 'node:crypto';
 import { WorkType } from './work-type';
 import { WorkerType } from './worker-type';
 
@@ -8,6 +9,7 @@ export interface MonthlyTimesheetType {
 }
 
 export interface WorkerTimesheetType {
+  timesheetId: UUID;
   worker: WorkerType;
   hourCost: number;
   totalHours: number | undefined;

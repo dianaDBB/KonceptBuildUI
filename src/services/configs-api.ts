@@ -3,6 +3,7 @@ import axiosClient from './api';
 import { WorkerContractType } from '@/types/worker-contract-type';
 import { WorkStatusType } from '@/types/work-status-type';
 import { AttendanceCodeType } from '@/types/attendance-code-type';
+import { PaymentMethodType } from '@/types/payment-method-type';
 
 class ConfigsApi {
   async getStatusValues(): Promise<StatusType[]> {
@@ -31,6 +32,14 @@ class ConfigsApi {
 
   async getAttendanceCodeValues(): Promise<AttendanceCodeType[]> {
     const response = await axiosClient.get('/configs/attendance-codes', {
+      headers: { Accept: 'application/json' },
+    });
+
+    return response.data;
+  }
+
+  async getPaymentMethodValues(): Promise<PaymentMethodType[]> {
+    const response = await axiosClient.get('/configs/payment-method', {
       headers: { Accept: 'application/json' },
     });
 

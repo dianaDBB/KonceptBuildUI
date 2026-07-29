@@ -91,6 +91,8 @@ body {
 .page-nav {
   margin-left: auto;
   display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .link {
@@ -103,6 +105,11 @@ body {
   &:hover {
     color: var(--color-primary);
   }
+}
+
+.separator {
+  color: var(--color-text-muted);
+  user-select: none;
 }
 
 /******************************************************************************************************* PAGE SECTION */

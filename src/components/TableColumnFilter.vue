@@ -14,7 +14,7 @@
     </button>
 
     <Teleport to="body">
-      <form v-if="isOpen" class="filter-dropdown" :style="dropdownStyle" @submit.prevent="apply">
+      <form v-if="isOpen" ref="dropdown" class="filter-dropdown" :style="dropdownStyle" @submit.prevent="apply">
         <div class="filter-dropdown-header">
           <strong>{{ config.label }}</strong>
 
@@ -135,6 +135,7 @@ const control = ref<HTMLElement | null>(null);
 const isOpen = ref(false);
 const filterValues = ref<FilterValues>({});
 const button = ref<HTMLElement | null>(null);
+const dropdown = ref<HTMLElement | null>(null);
 
 const currentFilters = computed(() => props.filters as FilterValues);
 
@@ -193,13 +194,13 @@ function close() {
 }
 
 onMounted(() => {
-  document.addEventListener('mousedown', closeOnOutsideClick);
+  document.addEventListener('click', closeOnOutsideClick);
   window.addEventListener('scroll', close, true);
   window.addEventListener('resize', close);
 });
 
 onBeforeUnmount(() => {
-  document.removeEventListener('mousedown', closeOnOutsideClick);
+  document.removeEventListener('click', closeOnOutsideClick);
   window.removeEventListener('scroll', close, true);
   window.removeEventListener('resize', close);
 });
@@ -225,7 +226,9 @@ function clear() {
 }
 
 function closeOnOutsideClick(event: MouseEvent) {
-  if (isOpen.value && !control.value?.contains(event.target as Node)) {
+  const target = event.target as Node;
+
+  if (isOpen.value && !control.value?.contains(target) && !dropdown.value?.contains(target)) {
     close();
   }
 }

@@ -5,7 +5,9 @@
       <h3>Obras</h3>
 
       <div class="page-nav">
-        <RouterLink to="/" class="link">Página Inicial</RouterLink>
+        <RouterLink to="/" class="link"> Página Inicial </RouterLink>
+        <ChevronRight :size="14" class="separator" />
+        <RouterLink :to="{ path: '/', query: { tab: 'works' } }" class="link"> Obras </RouterLink>
       </div>
     </div>
 
@@ -93,7 +95,7 @@
   <ConfirmDialog
     v-model="showDeleteDialog"
     title="Eliminar obra"
-    :message="`Tem a certeza que quer eliminar definitivamente a obra '${workToDelete?.entity.name}'?`"
+    :message="[`${workToDelete?.entity.name}`, 'Tem a certeza que quer eliminar definitivamente esta obra?']"
     confirm-text="Apagar"
     cancel-text="Cancelar"
     @confirm="confirmDelete"
@@ -103,7 +105,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, nextTick } from 'vue';
 import { ApiResponseStatus } from '@/types/api-response-status';
-import { List, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
+import { ChevronRight, List, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
 import Toast from '@/composables/Toast.vue';
 import { SortDirection } from '@/types/sort-direction';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';

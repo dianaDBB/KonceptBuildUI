@@ -3,7 +3,9 @@
     <div class="dialog">
       <h2>{{ title }}</h2>
 
-      <p>{{ message }}</p>
+      <div v-for="item in message" :key="item" class="row">
+        <p>{{ item }}</p>
+      </div>
 
       <div class="actions">
         <button class="button" @click="cancel">
@@ -22,7 +24,7 @@
 interface Props {
   modelValue: boolean;
   title: string;
-  message: string;
+  message: string[];
   confirmText?: string;
   cancelText?: string;
 }
