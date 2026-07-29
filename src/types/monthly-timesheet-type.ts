@@ -11,15 +11,11 @@ export interface MonthlyTimesheetType {
 export interface WorkerTimesheetType {
   timesheetId: UUID;
   worker: WorkerType;
-  hourCost: number;
+  expectedHours: number;
   totalHours: number | undefined;
   totalExtraHours: number | undefined;
   totalPaidAbsenceHours: number | undefined;
   totalUnpaidAbsenceHours: number | undefined;
-  totalCost: number | undefined;
-  totalCostExtraHours: number | undefined;
-  totalCostPaidAbsenceHours: number | undefined;
-  totalCostUnpaidAbsenceHours: number | undefined;
   worksTimesheet: WorkTimesheetType[];
 }
 

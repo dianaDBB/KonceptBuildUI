@@ -3,4 +3,5 @@ export interface ApiResponseStatus {
   isSuccess: boolean;
   isError: boolean;
   message?: string;
+  loadingMessage?: string;
 }

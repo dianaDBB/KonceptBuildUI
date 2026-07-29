@@ -9,7 +9,10 @@ export interface WageType extends EntityType {
   workerId?: UUID;
   workerCode?: string;
   workerName?: string;
-  expectedPay?: number;
+  expectedWage?: number;
+  expectedExtraHours?: number;
+  expectedDeductions?: number;
+  expectedInternalCost?: number;
   paidValue?: number;
   paidDate?: string;
   paymentMethod?: PaymentMethodType;
@@ -22,7 +25,10 @@ export enum WageSortField {
   MONTH = 'MONTH',
   WORKER_CODE = 'WORKER_CODE',
   WORKER_NAME = 'WORKER_NAME',
-  EXPECTED_PAY = 'EXPECTED_PAY',
+  EXPECTED_WAGE = 'EXPECTED_WAGE',
+  EXPECTED_EXTRA_HOURS = 'EXPECTED_EXTRA_HOURS',
+  EXPECTED_DEDUCTIONS = 'EXPECTED_DEDUCTIONS',
+  EXPECTED_INTERNAL_COST = 'EXPECTED_INTERNAL_COST',
   PAID_VALUE = 'PAID_VALUE',
   PAID_DATE = 'PAID_DATE',
   PAYMENT_METHOD = 'PAYMENT_METHOD',
@@ -37,8 +43,14 @@ export interface WageFilters {
   monthMax?: number;
   workerCode?: string;
   workerName?: string;
-  expectedPayMin?: number;
-  expectedPayMax?: number;
+  expectedWageMin?: number;
+  expectedWageMax?: number;
+  expectedExtraHoursMin?: number;
+  expectedExtraHoursMax?: number;
+  expectedDeductionsMin?: number;
+  expectedDeductionsMax?: number;
+  expectedInternalCostMin?: number;
+  expectedInternalCostMax?: number;
   paidValueMin?: number;
   paidValueMax?: number;
   paidDateMin?: string;

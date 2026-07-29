@@ -84,7 +84,7 @@ export class Wage {
         },
       },
       workerName: {
-        label: 'Colaborador',
+        label: 'Nome Colaborador',
         type: ColumnType.TEXT,
         styleConfig: {
           showDisabled: () => true,
@@ -101,23 +101,108 @@ export class Wage {
           },
         },
       },
-      expectedPay: {
-        label: 'Valor Estimado',
+      expectedWage: {
+        label: 'Salário Estimado',
         type: ColumnType.MONEY,
+        additionalInfo: {
+          tooltipTitle: 'Salário estimado',
+          tooltipInfo: [
+            'Colaboradores Internos: salário mensal + custo horas extra - custo horas não pagas + sub. alimentação * dias úteis mês',
+            'Colaboradores Externos: total de horas * valor hora',
+          ],
+        },
         styleConfig: {
           showDisabled: () => true,
           isInvalid: () => false,
           columnStyle: {
-            width: '80px',
+            width: '100px',
           },
         },
         filterConfig: {
-          column: WageSortField.EXPECTED_PAY,
+          column: WageSortField.EXPECTED_WAGE,
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'expectedPayMin',
-            maxKey: 'expectedPayMax',
+            minKey: 'expectedWageMin',
+            maxKey: 'expectedWageMax',
+          },
+        },
+      },
+      expectedExtraHours: {
+        label: 'Custo Estimado Horas Extras',
+        type: ColumnType.MONEY,
+        additionalInfo: {
+          tooltipTitle: 'Custo estimado horas extras',
+          tooltipInfo: [
+            'Colaboradores Internos: horas extras * valor hora',
+            'Colaboradores Externos: horas extras * valor hora',
+          ],
+        },
+        styleConfig: {
+          showDisabled: () => true,
+          isInvalid: () => false,
+          columnStyle: {
+            width: '100px',
+          },
+        },
+        filterConfig: {
+          column: WageSortField.EXPECTED_EXTRA_HOURS,
+          kind: TableFilterKind.NUMBER_RANGE,
+          valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
+            minKey: 'expectedExtraHoursMin',
+            maxKey: 'expectedExtraHoursMax',
+          },
+        },
+      },
+      expectedDeductions: {
+        label: 'Custo Estimado Horas Não Pagas',
+        type: ColumnType.MONEY,
+        additionalInfo: {
+          tooltipTitle: 'Custo estimado horas não pagas',
+          tooltipInfo: ['Colaboradores Internos: horas não pagas * valor hora', 'Colaboradores Externos: N/A'],
+        },
+        styleConfig: {
+          showDisabled: () => true,
+          isInvalid: () => false,
+          columnStyle: {
+            width: '100px',
+          },
+        },
+        filterConfig: {
+          column: WageSortField.EXPECTED_DEDUCTIONS,
+          kind: TableFilterKind.NUMBER_RANGE,
+          valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
+            minKey: 'expectedDeductionsMin',
+            maxKey: 'expectedDeductionsMax',
+          },
+        },
+      },
+      expectedInternalCost: {
+        label: 'Custo Interno Estimado',
+        type: ColumnType.MONEY,
+        additionalInfo: {
+          tooltipTitle: 'Custo interno estimado',
+          tooltipInfo: [
+            'Colaboradores Internos: salário estimado + acidentes de trabalho + valor TSU (sobre o salário base)',
+            'Colaboradores Externos: salário estimado',
+          ],
+        },
+        styleConfig: {
+          showDisabled: () => true,
+          isInvalid: () => false,
+          columnStyle: {
+            width: '100px',
+          },
+        },
+        filterConfig: {
+          column: WageSortField.EXPECTED_DEDUCTIONS,
+          kind: TableFilterKind.NUMBER_RANGE,
+          valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
+            minKey: 'expectedInternalCostMin',
+            maxKey: 'expectedInternalCostMax',
           },
         },
       },
@@ -128,7 +213,7 @@ export class Wage {
           showDisabled: () => false,
           isInvalid: (wage: WageType) => !wage.paidValue,
           columnStyle: {
-            width: '80px',
+            width: '100px',
           },
         },
         filterConfig: {

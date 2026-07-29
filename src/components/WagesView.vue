@@ -35,6 +35,13 @@
                   <div class="column-heading">
                     {{ config.label }}
 
+                    <InfoTooltip
+                      v-if="config.additionalInfo"
+                      :title="config.additionalInfo.tooltipTitle"
+                      :items="config.additionalInfo.tooltipItems"
+                      :info="config.additionalInfo.tooltipInfo"
+                    />
+
                     <TableColumnFilter
                       :config="config"
                       :filters="wageFilters"
@@ -62,7 +69,7 @@
               </tr>
             </thead>
             <EntityTableBody
-              :rows="wagws"
+              :rows="wages"
               :configs="configs"
               :row-is-active="() => true"
               :is-valid="(wage) => Wage.isValid(wage, configs)"
@@ -99,11 +106,12 @@ import { Wage } from '@/entities/wage';
 import { PaymentMethodType } from '@/types/payment-method-type';
 import { WageFilters, WageSortField, WageType } from '@/types/wage-type';
 import wagesApi from '@/services/wages-api';
+import InfoTooltip from '@/composables/InfoTooltip.vue';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
 const paymentMethodType = ref<{ [k: string]: PaymentMethodType }>({});
-const wagws = ref<WageRow[]>([]);
+const wages = ref<WageRow[]>([]);
 
 const configs = computed(() => Wage.getConfigs(paymentMethodType.value));
 
@@ -133,7 +141,7 @@ async function fetchWages() {
   try {
     const gotWages = await wagesApi.searchWages(wageFilters.value);
 
-    wagws.value = gotWages.map((wage) => ({
+    wages.value = gotWages.map((wage) => ({
       entity: {
         ...wage,
       },
@@ -158,7 +166,7 @@ interface WageRow extends TableRow<WageType> {
   _original?: WageType;
 }
 
-const isEditing = computed(() => wagws.value.some((row) => row._isNew || row._isEdited));
+const isEditing = computed(() => wages.value.some((row) => row._isNew || row._isEdited));
 let _keyCounter = 0;
 
 function nextKey(): string {
@@ -167,7 +175,7 @@ function nextKey(): string {
 
 function discard(row: WageRow) {
   if (row._isNew) {
-    wagws.value = wagws.value.filter((w) => w._key !== row._key);
+    wages.value = wages.value.filter((w) => w._key !== row._key);
   } else {
     row.entity = row._original!;
     row._isNew = false;

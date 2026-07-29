@@ -17,7 +17,7 @@
       <div v-if="apiStatus.isLoading" class="loading-overlay">
         <div>
           <LoaderCircle :size="18" class="spinner" />
-          A carregar timesheet...
+          {{ apiStatus.loadingMessage ?? 'A carregar timesheet...' }}
         </div>
       </div>
 
@@ -67,7 +67,6 @@
                 </th>
 
                 <th class="sticky-hours" rowspan="2">Horas</th>
-                <th class="sticky-cost" rowspan="2">Custos (€)</th>
               </tr>
 
               <tr>
@@ -121,16 +120,15 @@
                     <td class="sticky-hours">
                       {{ formatNumber(workerTimesheet.totalHours) }}
                     </td>
-
-                    <td class="sticky-cost">
-                      {{ formatCurrency(workerTimesheet.totalCost) }}
-                    </td>
                   </template>
                   <template v-else>
                     <td class="sticky-hours">
                       <div class="summary-grid">
                         <strong>TOTAL</strong>
                         <strong>{{ formatNumber(workerTimesheet.totalHours) }}</strong>
+
+                        <span>Estimadas</span>
+                        <span>{{ formatNumber(workerTimesheet.expectedHours) }}</span>
 
                         <span>Extras</span>
                         <span>{{ formatNumber(workerTimesheet.totalExtraHours) }}</span>
@@ -140,22 +138,6 @@
 
                         <span>Aus. Não Pagas</span>
                         <span>{{ formatNumber(workerTimesheet.totalUnpaidAbsenceHours) }}</span>
-                      </div>
-                    </td>
-
-                    <td class="sticky-cost">
-                      <div class="summary-grid summary-grid-reverse">
-                        <strong>{{ formatCurrency(workerTimesheet.totalCost) }}</strong>
-                        <strong>TOTAL</strong>
-
-                        <span>{{ formatCurrency(workerTimesheet.totalCostExtraHours) }}</span>
-                        <span>Extras</span>
-
-                        <span>-</span>
-                        <span>Aus. Pagas</span>
-
-                        <span>{{ formatCurrency(workerTimesheet.totalCostUnpaidAbsenceHours) }}</span>
-                        <span>Aus. Não Pagas</span>
                       </div>
                     </td>
                   </template>
@@ -228,8 +210,6 @@
                         <Trash2 :size="16" />
                       </button>
                     </td>
-
-                    <td class="sticky-cost" />
                   </tr>
                 </template>
 
@@ -252,7 +232,6 @@
                     </button>
                   </td>
                   <td v-for="day in daysInMonth" :key="day"></td>
-                  <td></td>
                   <td></td>
                 </tr>
               </template>
@@ -311,6 +290,16 @@
     cancel-text="Cancelar"
     @confirm="generateWages"
   />
+
+  <!-- go to wages (after generate)-->
+  <ConfirmDialog
+    v-model="showWagesGeneratedDialog"
+    title="Salários gerados"
+    :message="['Os salários foram gerados com sucesso.', 'Pretende abrir a página de Salários?']"
+    confirm-text="Ir para Salários"
+    cancel-text="Ficar nesta página"
+    @confirm="goToWages"
+  />
 </template>
 
 <script setup lang="ts">
@@ -350,6 +339,7 @@ import configsApi from '@/services/configs-api';
 import { apiError } from '@/services/api';
 import ConfirmDialog from '@/composables/ConfirmDialog.vue';
 import wagesApi from '@/services/wages-api';
+import { useRouter } from 'vue-router';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
@@ -405,7 +395,7 @@ async function fetchWorks() {
 }
 
 async function fetchTimesheet() {
-  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
+  apiStatus.value = { isLoading: true, isSuccess: false, isError: false, loadingMessage: 'A carregar timesheet...' };
 
   try {
     timesheet.value = await timesheetApi.getMonthlyTimesheet(selectedYear.value, selectedMonth.value);
@@ -611,13 +601,11 @@ function updateDay(workerTimesheet: WorkerTimesheetType, work: WorkTimesheetType
   const dayValue = (event.target as HTMLInputElement).value.trim();
   if (dayValue === '') {
     work.days = work.days.filter((d) => d !== entry);
-    workerTimesheet.totalCost = undefined;
     workerTimesheet.totalHours = undefined;
     return;
   }
 
   entry.hours = Number.isNaN(dayValue) ? null : Number(dayValue);
-  workerTimesheet.totalCost = undefined;
   workerTimesheet.totalHours = undefined;
 }
 
@@ -631,17 +619,15 @@ function createDayEntry(day: number, hours: number): DayEntryType {
 /************************************************************************************************************** WAGES */
 
 const showGenerateWagesDialog = ref(false);
+const showWagesGeneratedDialog = ref(false);
+const router = useRouter();
 
 async function generateWages() {
   if (!timesheet.value) {
     return;
   }
 
-  apiStatus.value = {
-    isLoading: true,
-    isSuccess: false,
-    isError: false,
-  };
+  apiStatus.value = { isLoading: true, isSuccess: false, isError: false, loadingMessage: 'A gerar salários...' };
 
   try {
     await Promise.all(
@@ -655,15 +641,16 @@ async function generateWages() {
       ),
     );
 
-    apiStatus.value = {
-      isLoading: false,
-      isSuccess: true,
-      isError: false,
-      message: 'Salários gerados com sucesso.',
-    };
+    apiStatus.value = { isLoading: false, isSuccess: true, isError: false, message: 'Salários gerados com sucesso.' };
+
+    showWagesGeneratedDialog.value = true;
   } catch (error) {
     apiStatus.value = apiError(error, 'Falha ao gerar salários.');
   }
+}
+
+function goToWages() {
+  router.push('/hr/wages');
 }
 </script>
 <style>
@@ -747,20 +734,14 @@ thead .worker-column-second {
   width: 50px;
 }
 
-.sticky-hours,
-.sticky-cost {
+.sticky-hours {
   position: sticky;
   background: var(--color-background);
   z-index: 8;
 }
 
-.sticky-cost {
-  right: 0;
-  width: 200px;
-}
-
 .sticky-hours {
-  right: 200px;
+  right: 0px;
   width: 200px;
 }
 
