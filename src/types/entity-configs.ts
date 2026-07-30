@@ -50,11 +50,11 @@ export interface EntityConfig<TSortField extends string = string, TEntity extend
 
   styleConfig: StyleConfig;
 
-  filterConfig: FilterConfig<TSortField>;
+  filterConfig?: FilterConfig<TSortField>;
 }
 
 export interface StyleConfig {
-  showDisabled: (entity: EntityType) => boolean;
+  showDisabled: (entity: EntityType, row?: TableRow<EntityType>) => boolean;
   isInvalid: (entity: EntityType) => boolean;
   isHighlight?: boolean;
   columnStyle: StyleValue;

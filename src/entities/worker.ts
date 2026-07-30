@@ -178,7 +178,7 @@ export class Worker {
         label: 'Horas Dia (Padrão)',
         type: ColumnType.NUMBER,
         styleConfig: {
-          showDisabled: () => false,
+          showDisabled: (_worker: WorkerType, row) => !row?._isNew,
           isInvalid: (worker: WorkerType) => !worker.currentWorkerCompensation?.defaultHours,
           columnStyle: {
             width: '100px',
@@ -225,8 +225,10 @@ export class Worker {
         },
         type: ColumnType.MONEY,
         styleConfig: {
-          showDisabled: (worker: WorkerType) =>
-            !worker.workerContractType || worker.workerContractType === workerContractTypeOptions.INTERNAL.code,
+          showDisabled: (worker: WorkerType, row) =>
+            row?._isNew
+              ? !worker.workerContractType || worker.workerContractType === workerContractTypeOptions.INTERNAL.code
+              : true,
           isInvalid: (worker: WorkerType) =>
             worker.workerContractType === workerContractTypeOptions.CONTRACTOR.code &&
             !worker.currentWorkerCompensation?.hourRate,
@@ -248,8 +250,10 @@ export class Worker {
         label: 'Ordenado Base Mensal (€)',
         type: ColumnType.MONEY,
         styleConfig: {
-          showDisabled: (worker: WorkerType) =>
-            !worker.workerContractType || worker.workerContractType === workerContractTypeOptions.CONTRACTOR.code,
+          showDisabled: (worker: WorkerType, row) =>
+            row?._isNew
+              ? !worker.workerContractType || worker.workerContractType === workerContractTypeOptions.CONTRACTOR.code
+              : true,
           isInvalid: (worker: WorkerType) =>
             worker.workerContractType === workerContractTypeOptions.INTERNAL.code &&
             !worker.currentWorkerCompensation?.monthlySalary,
@@ -271,8 +275,10 @@ export class Worker {
         label: 'TSU Empresa (%)',
         type: ColumnType.PERCENTAGE,
         styleConfig: {
-          showDisabled: (worker: WorkerType) =>
-            !worker.workerContractType || worker.workerContractType === workerContractTypeOptions.CONTRACTOR.code,
+          showDisabled: (worker: WorkerType, row) =>
+            row?._isNew
+              ? !worker.workerContractType || worker.workerContractType === workerContractTypeOptions.CONTRACTOR.code
+              : true,
           isInvalid: (worker: WorkerType) =>
             worker.workerContractType === workerContractTypeOptions.INTERNAL.code &&
             !worker.currentWorkerCompensation?.tsu,
@@ -294,8 +300,10 @@ export class Worker {
         label: 'Subsídio Alim. /Dia (€)',
         type: ColumnType.MONEY,
         styleConfig: {
-          showDisabled: (worker: WorkerType) =>
-            !worker.workerContractType || worker.workerContractType === workerContractTypeOptions.CONTRACTOR.code,
+          showDisabled: (worker: WorkerType, row) =>
+            row?._isNew
+              ? !worker.workerContractType || worker.workerContractType === workerContractTypeOptions.CONTRACTOR.code
+              : true,
           isInvalid: () => false,
           columnStyle: {
             width: '100px',
@@ -315,8 +323,10 @@ export class Worker {
         label: 'Seguro Ac. Trabalho (€/mês)',
         type: ColumnType.MONEY,
         styleConfig: {
-          showDisabled: (worker: WorkerType) =>
-            !worker.workerContractType || worker.workerContractType === workerContractTypeOptions.CONTRACTOR.code,
+          showDisabled: (worker: WorkerType, row) =>
+            row?._isNew
+              ? !worker.workerContractType || worker.workerContractType === workerContractTypeOptions.CONTRACTOR.code
+              : true,
           isInvalid: () => false,
           columnStyle: {
             width: '100px',

@@ -18,7 +18,7 @@
               :select-options="config.selectConfig?.options"
               :search-select-options="props.searchSelectOptions"
               :is-invalid="config.styleConfig.isInvalid(row.entity)"
-              :is-disabled="config.styleConfig.showDisabled(row.entity)"
+              :is-disabled="config.styleConfig.showDisabled(row.entity, row)"
               @update:value="updateFieldValue(row, fieldKey, $event)"
             />
           </slot>

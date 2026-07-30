@@ -77,7 +77,13 @@
               @row-edit="startEditing"
               @row-save="save"
               @row-discard="discard"
-            />
+            >
+              <template #row-actions="{ row }">
+                <button title="Editar colaborador" @click="startEditing(row)">
+                  <Pencil :size="16" />
+                </button>
+              </template>
+            </EntityTableBody>
           </table>
         </div>
 
@@ -94,7 +100,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { ApiResponseStatus } from '@/types/api-response-status';
-import { ChevronRight, HandCoins, LoaderCircle, FunnelX } from 'lucide-vue-next';
+import { ChevronRight, HandCoins, LoaderCircle, FunnelX, Pencil } from 'lucide-vue-next';
 import Toast from '@/composables/Toast.vue';
 import { SortDirection } from '@/types/sort-direction';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';

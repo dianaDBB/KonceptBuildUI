@@ -9,6 +9,7 @@ export interface WageType extends EntityType {
   workerId?: UUID;
   workerCode?: string;
   workerName?: string;
+  baseSalary?: number;
   expectedWage?: number;
   expectedExtraHours?: number;
   expectedDeductions?: number;

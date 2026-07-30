@@ -1,6 +1,7 @@
 <template>
   <div ref="control" class="table-column-filter">
     <button
+      v-if="config.filterConfig"
       ref="button"
       class="column-button"
       :class="{ active: isSorted || isFilterActive }"
@@ -42,41 +43,43 @@
 
         <hr />
 
-        <input
-          v-if="config.filterConfig.kind === TableFilterKind.TEXT"
-          v-model.trim="filterValues[(config.filterConfig.valueConfig as SingleFilterConfig).valueKey!]"
-          type="text"
-          :placeholder="`Pesquisar por ${config.label.toLowerCase()}`"
-        />
-
-        <select
-          v-else-if="config.filterConfig.kind === TableFilterKind.SELECT"
-          v-model="filterValues[(config.filterConfig.valueConfig as SingleFilterConfig).valueKey!]"
-        >
-          <option value="">-</option>
-
-          <option v-for="option in config.selectConfig!.options" :key="option.code" :value="option.code">
-            {{ option.label }}
-          </option>
-        </select>
-
-        <div v-else class="range-fields">
+        <template v-if="config.filterConfig">
           <input
-            v-model="filterValues[(config.filterConfig.valueConfig as RangeFilterConfig).minKey!]"
-            :type="rangeInputType"
-            :step="rangeStep"
-            placeholder="Mínimo"
+            v-if="config.filterConfig.kind === TableFilterKind.TEXT"
+            v-model.trim="filterValues[(config.filterConfig.valueConfig as SingleFilterConfig).valueKey!]"
+            type="text"
+            :placeholder="`Pesquisar por ${config.label.toLowerCase()}`"
           />
 
-          <span>-</span>
+          <select
+            v-else-if="config.filterConfig.kind === TableFilterKind.SELECT"
+            v-model="filterValues[(config.filterConfig.valueConfig as SingleFilterConfig).valueKey!]"
+          >
+            <option value="">-</option>
 
-          <input
-            v-model="filterValues[(config.filterConfig.valueConfig as RangeFilterConfig).maxKey!]"
-            :type="rangeInputType"
-            :step="rangeStep"
-            placeholder="Máximo"
-          />
-        </div>
+            <option v-for="option in config.selectConfig!.options" :key="option.code" :value="option.code">
+              {{ option.label }}
+            </option>
+          </select>
+
+          <div v-else class="range-fields">
+            <input
+              v-model="filterValues[(config.filterConfig.valueConfig as RangeFilterConfig).minKey!]"
+              :type="rangeInputType"
+              :step="rangeStep"
+              placeholder="Mínimo"
+            />
+
+            <span>-</span>
+
+            <input
+              v-model="filterValues[(config.filterConfig.valueConfig as RangeFilterConfig).maxKey!]"
+              :type="rangeInputType"
+              :step="rangeStep"
+              placeholder="Máximo"
+            />
+          </div>
+        </template>
 
         <div class="filter-actions">
           <button type="button" class="clear-button" @click="clear">Limpar</button>
@@ -120,6 +123,8 @@ const props = withDefaults(
   },
 );
 
+const filterConfig = computed(() => props.config.filterConfig);
+
 const emit = defineEmits<{
   apply: [values: FilterValues];
   clear: [values: FilterValues];
@@ -139,24 +144,27 @@ const dropdown = ref<HTMLElement | null>(null);
 
 const currentFilters = computed(() => props.filters as FilterValues);
 
-const filterKeys = computed(
-  () =>
-    [
-      (props.config.filterConfig.valueConfig as SingleFilterConfig).valueKey,
-      (props.config.filterConfig.valueConfig as RangeFilterConfig).minKey,
-      (props.config.filterConfig.valueConfig as RangeFilterConfig).maxKey,
-    ].filter(Boolean) as string[],
-);
+const filterKeys = computed(() => {
+  if (!filterConfig.value) {
+    return [];
+  }
 
-const rangeConfig = computed(() => props.config.filterConfig.valueConfig as RangeFilterConfig);
+  return [
+    (filterConfig.value.valueConfig as SingleFilterConfig).valueKey,
+    (filterConfig.value.valueConfig as RangeFilterConfig).minKey,
+    (filterConfig.value.valueConfig as RangeFilterConfig).maxKey,
+  ].filter(Boolean) as string[];
+});
 
-const rangeInputType = computed(() => (rangeConfig.value.valueType === RangeFilterValueType.DATE ? 'date' : 'number'));
+const rangeConfig = computed(() => filterConfig.value?.valueConfig as RangeFilterConfig | undefined);
 
-const rangeStep = computed(() => (rangeConfig.value.valueType === RangeFilterValueType.DATE ? undefined : '0.01'));
+const rangeInputType = computed(() => (rangeConfig.value?.valueType === RangeFilterValueType.DATE ? 'date' : 'number'));
+
+const rangeStep = computed(() => (rangeConfig.value?.valueType === RangeFilterValueType.DATE ? undefined : '0.01'));
 
 const isFilterActive = computed(() => filterKeys.value.some((key) => hasValue(currentFilters.value[key])));
 
-const isSorted = computed(() => props.sortBy === props.config.filterConfig.column);
+const isSorted = computed(() => filterConfig.value && props.sortBy === filterConfig.value.column);
 
 const dropdownStyle = ref<CSSProperties>({
   top: '0px',
@@ -181,7 +189,7 @@ function toggleDropdown() {
     dropdownStyle.value = {
       position: 'fixed',
       top: `${rect.bottom + 8}px`,
-      left: props.config.filterConfig.dropdownAlign === 'start' ? `${rect.left}px` : `${rect.right - 300}px`,
+      left: filterConfig.value?.dropdownAlign === 'start' ? `${rect.left}px` : `${rect.right - 300}px`,
       zIndex: '99999',
     };
   }
@@ -207,7 +215,7 @@ onBeforeUnmount(() => {
 
 function emitSort(direction: SortDirection | undefined) {
   emit('sort', {
-    column: props.config.filterConfig.column,
+    column: filterConfig.value!.column,
     direction,
   });
 

@@ -38,9 +38,12 @@ class WageApi {
       code: wage.code,
       year: wage.year,
       month: wage.month,
-      workerId: wage.workerDto.id,
-      workerCode: wage.workerDto.code,
-      workerName: wage.workerDto.name,
+      workerId: wage.workerTimesheetDto.worker.id,
+      workerCode: wage.workerTimesheetDto.worker.code,
+      workerName: wage.workerTimesheetDto.worker.name,
+      baseSalary:
+        wage.workerTimesheetDto.worker.currentWorkerCompensation?.monthlySalary ||
+        wage.workerTimesheetDto.worker.currentWorkerCompensation?.hourRate,
       expectedWage: wage.expectedWage,
       expectedExtraHours: wage.expectedExtraHours,
       expectedDeductions: wage.expectedDeductions,

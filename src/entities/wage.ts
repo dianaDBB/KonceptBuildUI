@@ -101,6 +101,21 @@ export class Wage {
           },
         },
       },
+      baseSalary: {
+        label: 'Valor Base',
+        type: ColumnType.MONEY,
+        additionalInfo: {
+          tooltipTitle: 'Ordenado Base / Valor Hora',
+          tooltipInfo: ['Colaboradores Internos: Ordenado Base Mensal (€)', 'Colaboradores Externos: Valor Hora (€)'],
+        },
+        styleConfig: {
+          showDisabled: () => true,
+          isInvalid: () => false,
+          columnStyle: {
+            width: '80px',
+          },
+        },
+      },
       expectedWage: {
         label: 'Salário Estimado',
         type: ColumnType.MONEY,
@@ -233,7 +248,7 @@ export class Wage {
           showDisabled: () => false,
           isInvalid: (wage: WageType) => !wage.paidDate,
           columnStyle: {
-            width: '80px',
+            width: '110px',
           },
         },
         filterConfig: {
@@ -256,7 +271,7 @@ export class Wage {
           showDisabled: () => false,
           isInvalid: (wage: WageType) => !wage.paymentMethod,
           columnStyle: {
-            width: '90px',
+            width: '100px',
           },
         },
         filterConfig: {

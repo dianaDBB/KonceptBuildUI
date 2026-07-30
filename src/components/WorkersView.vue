@@ -373,26 +373,38 @@ function startEditingCompensation(row: TableRow<WorkerType>) {
 }
 
 async function saveCompensation(worker: WorkerType) {
-  const compensation = worker.currentWorkerCompensation;
+  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
 
-  if (!compensation) {
-    return;
+  try {
+    const compensation = worker.currentWorkerCompensation;
+
+    if (!compensation) {
+      return;
+    }
+
+    if (worker.workerContractType === 'CONTRACTOR') {
+      compensation.monthlySalary = undefined;
+      compensation.tsu = undefined;
+      compensation.mealAllowance = undefined;
+      compensation.accidentInsurance = undefined;
+    } else {
+      compensation.hourRate = undefined;
+    }
+
+    await workerApi.updateCompensation(worker);
+    await fetchWorkers();
+
+    apiStatus.value = {
+      isLoading: false,
+      isSuccess: true,
+      isError: false,
+      message: 'Compensation updated successfully.',
+    };
+
+    showCompensationDialog.value = false;
+  } catch (error: unknown) {
+    apiStatus.value = apiError(error, 'Failed to update compensation.');
   }
-
-  if (worker.workerContractType === 'CONTRACTOR') {
-    compensation.monthlySalary = undefined;
-    compensation.tsu = undefined;
-    compensation.mealAllowance = undefined;
-    compensation.accidentInsurance = undefined;
-  } else {
-    compensation.hourRate = undefined;
-  }
-
-  await workerApi.updateCompensation(worker);
-
-  showCompensationDialog.value = false;
-
-  await fetchWorkers();
 }
 </script>
 <style scoped lang="scss">
