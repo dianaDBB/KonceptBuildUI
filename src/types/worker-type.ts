@@ -1,5 +1,6 @@
 import { SortDirection } from './sort-direction';
 import { EntityType } from './entity-configs';
+import { UUID } from 'node:crypto';
 
 export interface WorkerType extends EntityType {
   name?: string;
@@ -12,24 +13,21 @@ export interface WorkerType extends EntityType {
   workerContractType?: string;
   startDate?: string;
   endDate?: string;
-  hourCost?: number;
-  defaultHours?: number;
-  hourRate?: number;
-  monthlySalary?: number;
-  tsu?: number;
-  mealAllowance?: number;
-  accidentInsurance?: number;
+  currentWorkerCompensation?: WorkerCompensationType;
 }
 
 export interface WorkerCompensationType {
-  worker?: WorkerType;
-  validFrom?: string;
+  id?: UUID;
+  workerId?: string;
+  hourCost?: string;
   defaultHours?: number;
   hourRate?: number;
   monthlySalary?: number;
   tsu?: number;
   mealAllowance?: number;
   accidentInsurance?: number;
+  validFrom?: string;
+  validTo?: string;
 }
 
 export enum WorkerSortField {

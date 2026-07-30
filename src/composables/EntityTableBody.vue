@@ -144,7 +144,9 @@ function getColumnClasses(fieldKey: string): any {
 }
 
 function getFieldValue(row: TableRow<TEntity>, fieldKey: string): any {
-  return row.entity[fieldKey as keyof TEntity];
+  return fieldKey
+    .split('.')
+    .reduce((obj, key) => (obj as Record<string, any>)?.[key], row.entity as Record<string, any>);
 }
 
 function getFormatedValue(row: TableRow<TEntity>, fieldKey: string, config: EntityConfig<TSortField, TEntity>): string {
@@ -171,7 +173,15 @@ function getFormatedValue(row: TableRow<TEntity>, fieldKey: string, config: Enti
 }
 
 function updateFieldValue(row: TableRow<TEntity>, fieldKey: string, value: unknown) {
-  (row.entity as any)[fieldKey] = value;
+  const keys = fieldKey.split('.');
+  const lastKey = keys.pop()!;
+
+  const target = keys.reduce((obj, key) => obj?.[key], row.entity as any);
+
+  if (target) {
+    target[lastKey] = value;
+  }
+
   row._isEdited = true;
 
   props.configs[fieldKey]?.onValueChanged?.(row, value);

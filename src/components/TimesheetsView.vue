@@ -108,8 +108,13 @@
                     <div class="worker-details">
                       <div>
                         {{ workerContractType[workerTimesheet.worker.workerContractType!].label }}
-                        • {{ workerTimesheet.worker.defaultHours }}h •
-                        {{ formatCurrency(workerTimesheet.worker.monthlySalary || workerTimesheet.worker.hourRate) }}
+                        • {{ workerTimesheet.worker.currentWorkerCompensation?.defaultHours }}h •
+                        {{
+                          formatCurrency(
+                            workerTimesheet.worker.currentWorkerCompensation?.monthlySalary ||
+                              workerTimesheet.worker.currentWorkerCompensation?.hourRate,
+                          )
+                        }}
                       </div>
                     </div>
                   </td>
@@ -493,7 +498,7 @@ function addWork(workerTimesheet: WorkerTimesheetType) {
     type: 'WORK',
     work: undefined,
     attendanceCode: undefined,
-    days: createEmptyDays(isFirstLine ? workerTimesheet.worker.defaultHours! : null),
+    days: createEmptyDays(isFirstLine ? workerTimesheet.worker.currentWorkerCompensation!.defaultHours! : null),
   });
 }
 
@@ -504,7 +509,7 @@ function addAttendance(workerTimesheet: WorkerTimesheetType) {
     type: 'ATTENDANCE_CODE',
     attendanceCode: attendanceCode.value.VACATION.code,
     work: undefined,
-    days: createEmptyDays(isFirstLine ? workerTimesheet.worker.defaultHours! : null),
+    days: createEmptyDays(isFirstLine ? workerTimesheet.worker.currentWorkerCompensation!.defaultHours! : null),
   });
 }
 

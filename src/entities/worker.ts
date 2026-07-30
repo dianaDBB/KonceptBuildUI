@@ -146,7 +146,7 @@ export class Worker {
           },
         },
       },
-      hourCost: {
+      'currentWorkerCompensation.hourCost': {
         label: 'Custo Hora (€)',
         additionalInfo: {
           tooltipTitle: 'Custo à hora para a empresa',
@@ -174,12 +174,12 @@ export class Worker {
           },
         },
       },
-      defaultHours: {
+      'currentWorkerCompensation.defaultHours': {
         label: 'Horas Dia (Padrão)',
         type: ColumnType.NUMBER,
         styleConfig: {
           showDisabled: () => false,
-          isInvalid: (worker: WorkerType) => !worker.defaultHours,
+          isInvalid: (worker: WorkerType) => !worker.currentWorkerCompensation?.defaultHours,
           columnStyle: {
             width: '100px',
           },
@@ -216,7 +216,7 @@ export class Worker {
           },
         },
       },
-      hourRate: {
+      'currentWorkerCompensation.hourRate': {
         label: 'Valor Hora (€)',
         additionalInfo: {
           tooltipInfo: [
@@ -228,7 +228,8 @@ export class Worker {
           showDisabled: (worker: WorkerType) =>
             !worker.workerContractType || worker.workerContractType === workerContractTypeOptions.INTERNAL.code,
           isInvalid: (worker: WorkerType) =>
-            worker.workerContractType === workerContractTypeOptions.CONTRACTOR.code && !worker.hourRate,
+            worker.workerContractType === workerContractTypeOptions.CONTRACTOR.code &&
+            !worker.currentWorkerCompensation?.hourRate,
           columnStyle: {
             width: '90px',
           },
@@ -243,14 +244,15 @@ export class Worker {
           },
         },
       },
-      monthlySalary: {
+      'currentWorkerCompensation.monthlySalary': {
         label: 'Ordenado Base Mensal (€)',
         type: ColumnType.MONEY,
         styleConfig: {
           showDisabled: (worker: WorkerType) =>
             !worker.workerContractType || worker.workerContractType === workerContractTypeOptions.CONTRACTOR.code,
           isInvalid: (worker: WorkerType) =>
-            worker.workerContractType === workerContractTypeOptions.INTERNAL.code && !worker.monthlySalary,
+            worker.workerContractType === workerContractTypeOptions.INTERNAL.code &&
+            !worker.currentWorkerCompensation?.monthlySalary,
           columnStyle: {
             width: '100px',
           },
@@ -265,14 +267,15 @@ export class Worker {
           },
         },
       },
-      tsu: {
+      'currentWorkerCompensation.tsu': {
         label: 'TSU Empresa (%)',
         type: ColumnType.PERCENTAGE,
         styleConfig: {
           showDisabled: (worker: WorkerType) =>
             !worker.workerContractType || worker.workerContractType === workerContractTypeOptions.CONTRACTOR.code,
           isInvalid: (worker: WorkerType) =>
-            worker.workerContractType === workerContractTypeOptions.INTERNAL.code && !worker.tsu,
+            worker.workerContractType === workerContractTypeOptions.INTERNAL.code &&
+            !worker.currentWorkerCompensation?.tsu,
           columnStyle: {
             width: '80px',
           },
@@ -287,7 +290,7 @@ export class Worker {
           },
         },
       },
-      mealAllowance: {
+      'currentWorkerCompensation.mealAllowance': {
         label: 'Subsídio Alim. /Dia (€)',
         type: ColumnType.MONEY,
         styleConfig: {
@@ -308,7 +311,7 @@ export class Worker {
           },
         },
       },
-      accidentInsurance: {
+      'currentWorkerCompensation.accidentInsurance': {
         label: 'Seguro Ac. Trabalho (€/mês)',
         type: ColumnType.MONEY,
         styleConfig: {
@@ -380,14 +383,14 @@ export class Worker {
 function onContractTypeChanged(row: TableRow<WorkerType>) {
   row._isEdited = true;
 
-  if (row.entity.workerContractType === 'INTERNAL' && row.entity.tsu == null) {
-    row.entity.tsu = 23.75;
+  if (row.entity.workerContractType === 'INTERNAL' && row.entity.currentWorkerCompensation?.tsu == null) {
+    row.entity.currentWorkerCompensation!.tsu = 23.75;
   }
 
   if (row.entity.workerContractType === 'CONTRACTOR') {
-    row.entity.tsu = undefined;
-    row.entity.monthlySalary = undefined;
-    row.entity.mealAllowance = undefined;
-    row.entity.accidentInsurance = undefined;
+    row.entity.currentWorkerCompensation!.tsu = undefined;
+    row.entity.currentWorkerCompensation!.monthlySalary = undefined;
+    row.entity.currentWorkerCompensation!.mealAllowance = undefined;
+    row.entity.currentWorkerCompensation!.accidentInsurance = undefined;
   }
 }

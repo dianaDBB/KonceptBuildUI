@@ -1,4 +1,4 @@
-import { WorkerType, WorkerFilters, WorkerCompensationType } from '@/types/worker-type';
+import { WorkerType, WorkerFilters } from '@/types/worker-type';
 import axiosClient from './api';
 import { UUID } from 'crypto';
 import { AddWorkerPayload, UpdateWorkerCompensationPayload, UpdateWorkerPayload } from './payload/worker-payload';
@@ -9,31 +9,7 @@ class WorkerApi {
       headers: { Accept: 'application/json' },
     });
 
-    return response.data.map(this.mapWorker);
-  }
-
-  private mapWorker(worker: any): WorkerType {
-    return {
-      id: worker.id,
-      code: worker.code,
-      name: worker.name,
-      nif: worker.nif,
-      status: worker.status,
-      phoneCountryCode: worker.phoneCountryCode,
-      phone: worker.phone,
-      email: worker.email,
-      function: worker.function,
-      workerContractType: worker.workerContractType,
-      startDate: worker.startDate,
-      endDate: worker.currentWorkerHistoryDto.endDate,
-      hourCost: worker.currentWorkerHistoryDto.hourCost,
-      defaultHours: worker.currentWorkerHistoryDto.defaultHours,
-      hourRate: worker.currentWorkerHistoryDto.hourRate,
-      monthlySalary: worker.currentWorkerHistoryDto.monthlySalary,
-      tsu: worker.currentWorkerHistoryDto.tsu,
-      mealAllowance: worker.currentWorkerHistoryDto.mealAllowance,
-      accidentInsurance: worker.currentWorkerHistoryDto.accidentInsurance,
-    };
+    return response.data;
   }
 
   async addWorker(worker: WorkerType): Promise<void> {
@@ -45,13 +21,13 @@ class WorkerApi {
       phone: worker.phone!,
       email: worker.email!,
       function: worker.function!,
-      defaultHours: worker.defaultHours!,
+      defaultHours: worker.currentWorkerCompensation!.defaultHours!,
       workerContractType: worker.workerContractType!,
-      hourRate: worker.hourRate,
-      monthlySalary: worker.monthlySalary,
-      tsu: worker.tsu,
-      mealAllowance: worker.mealAllowance,
-      accidentInsurance: worker.accidentInsurance,
+      hourRate: worker.currentWorkerCompensation!.hourRate,
+      monthlySalary: worker.currentWorkerCompensation!.monthlySalary,
+      tsu: worker.currentWorkerCompensation!.tsu,
+      mealAllowance: worker.currentWorkerCompensation!.mealAllowance,
+      accidentInsurance: worker.currentWorkerCompensation!.accidentInsurance,
       startDate: worker.startDate!,
       endDate: worker.endDate,
     };
@@ -87,16 +63,16 @@ class WorkerApi {
     });
   }
 
-  async updateCompensation(workerCompensationType: WorkerCompensationType): Promise<void> {
+  async updateCompensation(worker: WorkerType): Promise<void> {
     const payload: UpdateWorkerCompensationPayload = {
-      workerId: workerCompensationType.worker!.id!,
-      validFrom: workerCompensationType.validFrom!,
-      defaultHours: workerCompensationType.defaultHours,
-      hourRate: workerCompensationType.hourRate,
-      monthlySalary: workerCompensationType.monthlySalary,
-      tsu: workerCompensationType.tsu,
-      mealAllowance: workerCompensationType.mealAllowance,
-      accidentInsurance: workerCompensationType.accidentInsurance,
+      workerId: worker.id!,
+      validFrom: worker.currentWorkerCompensation!.validFrom!,
+      defaultHours: worker.currentWorkerCompensation!.defaultHours,
+      hourRate: worker.currentWorkerCompensation!.hourRate,
+      monthlySalary: worker.currentWorkerCompensation!.monthlySalary,
+      tsu: worker.currentWorkerCompensation!.tsu,
+      mealAllowance: worker.currentWorkerCompensation!.mealAllowance,
+      accidentInsurance: worker.currentWorkerCompensation!.accidentInsurance,
     };
 
     await axiosClient.put('/worker/compensation', payload, {

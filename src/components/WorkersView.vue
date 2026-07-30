@@ -123,18 +123,13 @@
   />
 
   <!-- edit compensatio -->
-  <EditCompensationDialog
-    v-if="selectedWorker"
-    v-model="showCompensationDialog"
-    :worker="selectedWorker"
-    @save="saveCompensation"
-  />
+  <EditCompensationDialog v-model="showCompensationDialog" :worker="selectedWorker" @save="saveCompensation" />
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, nextTick } from 'vue';
+import { ref, onMounted, computed, nextTick, toRaw } from 'vue';
 import workerApi from '@/services/worker-api';
-import { WorkerType, WorkerFilters, WorkerSortField, WorkerCompensationType } from '@/types/worker-type';
+import { WorkerType, WorkerFilters, WorkerSortField } from '@/types/worker-type';
 import { ApiResponseStatus } from '@/types/api-response-status';
 import { ChevronRight, Contact, Plus, LoaderCircle, FunnelX, Trash2, Pencil, HandCoins } from 'lucide-vue-next';
 import Toast from '@/composables/Toast.vue';
@@ -191,9 +186,7 @@ async function fetchWorkers() {
     const gotWorkers = await workerApi.searchWorkers(workerFilters.value);
 
     workers.value = gotWorkers.map((worker) => ({
-      entity: {
-        ...worker,
-      },
+      entity: structuredClone(worker),
       _key: worker.code ?? nextKey(),
       _isNew: false,
       _isEdited: false,
@@ -242,7 +235,7 @@ function isActive(row: WorkerRow) {
 function startEditing(row: WorkerRow) {
   row._isEdited = true;
 
-  row._original = structuredClone({ ...row.entity });
+  row._original = JSON.parse(JSON.stringify(toRaw(row.entity)));
 }
 
 /**************************************************************************************************************** ADD */
@@ -252,7 +245,9 @@ async function addWorker(): Promise<void> {
     entity: {
       status: status.value.ACTIVE.code,
       phoneCountryCode: '+351',
-      defaultHours: 8,
+      currentWorkerCompensation: {
+        defaultHours: 8,
+      },
       startDate: new Date().toISOString().split('T')[0],
     },
     _key: nextKey(),
@@ -372,22 +367,28 @@ function clearAllTableControls(): void {
 const showCompensationDialog = ref(false);
 const selectedWorker = ref<WorkerType | null>(null);
 
-function startEditingCompensation(row: TableRow<Worker>) {
-  selectedWorker.value = structuredClone({ ...row.entity });
+function startEditingCompensation(row: TableRow<WorkerType>) {
+  selectedWorker.value = JSON.parse(JSON.stringify(toRaw(row.entity)));
   showCompensationDialog.value = true;
 }
 
-async function saveCompensation(workerCompensation: WorkerCompensationType) {
-  if (workerCompensation.worker?.workerContractType === 'CONTRACTOR') {
-    workerCompensation.monthlySalary = undefined;
-    workerCompensation.tsu = undefined;
-    workerCompensation.mealAllowance = undefined;
-    workerCompensation.accidentInsurance = undefined;
-  } else {
-    workerCompensation.hourRate = undefined;
+async function saveCompensation(worker: WorkerType) {
+  const compensation = worker.currentWorkerCompensation;
+
+  if (!compensation) {
+    return;
   }
 
-  await workerApi.updateCompensation(workerCompensation);
+  if (worker.workerContractType === 'CONTRACTOR') {
+    compensation.monthlySalary = undefined;
+    compensation.tsu = undefined;
+    compensation.mealAllowance = undefined;
+    compensation.accidentInsurance = undefined;
+  } else {
+    compensation.hourRate = undefined;
+  }
+
+  await workerApi.updateCompensation(worker);
 
   showCompensationDialog.value = false;
 
