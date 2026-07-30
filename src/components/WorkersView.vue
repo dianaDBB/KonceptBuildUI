@@ -27,7 +27,7 @@
                 :key="config.label"
                 :style="config.styleConfig.columnStyle"
               />
-              <col style="width: 50px" />
+              <col style="width: 80px" />
             </colgroup>
             <thead>
               <tr>
@@ -78,7 +78,19 @@
               @row-delete="askDelete"
               @row-save="save"
               @row-discard="discard"
-            />
+            >
+              <template #row-actions="{ row }">
+                <button title="Eliminar colaborador" @click="askDelete(row)">
+                  <Trash2 :size="16" />
+                </button>
+                <button title="Editar colaborador" @click="startEditing(row)">
+                  <Pencil :size="16" />
+                </button>
+                <button title="Editar compensações" @click="startEditingCompensation(row)">
+                  <HandCoins :size="16" />
+                </button>
+              </template>
+            </EntityTableBody>
           </table>
         </div>
 
@@ -109,14 +121,22 @@
     cancel-text="Cancelar"
     @confirm="confirmDelete"
   />
+
+  <!-- edit compensatio -->
+  <EditCompensationDialog
+    v-if="selectedWorker"
+    v-model="showCompensationDialog"
+    :worker="selectedWorker"
+    @save="saveCompensation"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed, nextTick } from 'vue';
 import workerApi from '@/services/worker-api';
-import { WorkerType, WorkerFilters, WorkerSortField } from '@/types/worker-type';
+import { WorkerType, WorkerFilters, WorkerSortField, WorkerCompensationType } from '@/types/worker-type';
 import { ApiResponseStatus } from '@/types/api-response-status';
-import { ChevronRight, Contact, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
+import { ChevronRight, Contact, Plus, LoaderCircle, FunnelX, Trash2, Pencil, HandCoins } from 'lucide-vue-next';
 import Toast from '@/composables/Toast.vue';
 import { SortDirection } from '@/types/sort-direction';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
@@ -129,6 +149,7 @@ import configsApi from '@/services/configs-api';
 import { WorkerContractType } from '@/types/worker-contract-type';
 import { apiError } from '@/services/api';
 import InfoTooltip from '@/composables/InfoTooltip.vue';
+import EditCompensationDialog from '@/composables/EditCompensationDialog.vue';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
@@ -344,6 +365,33 @@ function clearAllTableControls(): void {
   workerFilters.value = {};
 
   void fetchWorkers();
+}
+
+/******************************************************************************************************* COMPENSATION */
+
+const showCompensationDialog = ref(false);
+const selectedWorker = ref<WorkerType | null>(null);
+
+function startEditingCompensation(row: TableRow<Worker>) {
+  selectedWorker.value = structuredClone({ ...row.entity });
+  showCompensationDialog.value = true;
+}
+
+async function saveCompensation(workerCompensation: WorkerCompensationType) {
+  if (workerCompensation.worker?.workerContractType === 'CONTRACTOR') {
+    workerCompensation.monthlySalary = undefined;
+    workerCompensation.tsu = undefined;
+    workerCompensation.mealAllowance = undefined;
+    workerCompensation.accidentInsurance = undefined;
+  } else {
+    workerCompensation.hourRate = undefined;
+  }
+
+  await workerApi.updateCompensation(workerCompensation);
+
+  showCompensationDialog.value = false;
+
+  await fetchWorkers();
 }
 </script>
 <style scoped lang="scss">

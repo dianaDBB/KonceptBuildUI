@@ -9,16 +9,27 @@ export interface WorkerType extends EntityType {
   phone?: string;
   email?: string;
   function?: string;
+  workerContractType?: string;
+  startDate?: string;
+  endDate?: string;
   hourCost?: number;
   defaultHours?: number;
-  workerContractType?: string;
   hourRate?: number;
   monthlySalary?: number;
   tsu?: number;
   mealAllowance?: number;
   accidentInsurance?: number;
-  startDate?: string;
-  endDate?: string;
+}
+
+export interface WorkerCompensationType {
+  worker?: WorkerType;
+  validFrom?: string;
+  defaultHours?: number;
+  hourRate?: number;
+  monthlySalary?: number;
+  tsu?: number;
+  mealAllowance?: number;
+  accidentInsurance?: number;
 }
 
 export enum WorkerSortField {

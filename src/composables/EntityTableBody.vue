@@ -47,24 +47,27 @@
       </td>
 
       <td class="actions-column">
-        <slot name="actions" :row="row" :has-changes="rowHasChanges(row)">
-          <div v-if="!rowHasChanges(row)" class="action-buttons">
-            <button :disabled="isEditing" @click="$emit('row-delete', row)">
+        <div v-if="!rowHasChanges(row)" class="action-buttons">
+          <slot name="row-actions" :row="row">
+            <button title="Eliminar" :disabled="isEditing" @click="$emit('row-delete', row)">
               <Trash2 :size="16" />
             </button>
-            <button :disabled="isEditing" @click="$emit('row-edit', row)">
+
+            <button title="Editar" :disabled="isEditing" @click="$emit('row-edit', row)">
               <Pencil :size="16" />
             </button>
-          </div>
-          <div v-else class="action-buttons editing">
-            <button @click="$emit('row-discard', row)">
-              <Undo2 :size="16" />
-            </button>
-            <button :disabled="!isRowValid(row.entity)" @click="$emit('row-save', row)">
-              <Check :size="16" />
-            </button>
-          </div>
-        </slot>
+          </slot>
+        </div>
+
+        <div v-else class="action-buttons editing">
+          <button @click="$emit('row-discard', row)">
+            <Undo2 :size="16" />
+          </button>
+
+          <button :disabled="!isRowValid(row.entity)" @click="$emit('row-save', row)">
+            <Check :size="16" />
+          </button>
+        </div>
       </td>
     </tr>
   </tbody>
