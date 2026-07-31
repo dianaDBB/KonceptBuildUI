@@ -1,13 +1,13 @@
 <template>
   <div class="main-section">
     <div class="section-header">
-      <span><List :size="24" /></span>
-      <h3>Obras</h3>
+      <span><FileInput :size="24" /></span>
+      <h3>Faturas e Notas de Crédito - Clientes</h3>
 
       <div class="page-nav">
         <RouterLink to="/" class="link"> Página Inicial </RouterLink>
         <ChevronRight :size="14" class="separator" />
-        <RouterLink :to="{ path: '/', query: { tab: 'works' } }" class="link"> Obras </RouterLink>
+        <RouterLink :to="{ path: '/', query: { tab: 'sales' } }" class="link"> Vendas </RouterLink>
       </div>
     </div>
 
@@ -15,7 +15,7 @@
       <div v-if="apiStatus.isLoading" class="loading-overlay">
         <div>
           <LoaderCircle :size="18" class="spinner" />
-          A carregar clientes...
+          A carregar faturas e notas de crédito...
         </div>
       </div>
       <div class="section-body">
@@ -37,9 +37,9 @@
 
                     <TableColumnFilter
                       :config="config"
-                      :filters="workFilters"
-                      :sort-by="workFilters.sortBy"
-                      :sort-direction="workFilters.sortDirection"
+                      :filters="clientInvoicesFilter"
+                      :sort-by="clientInvoicesFilter.sortBy"
+                      :sort-direction="clientInvoicesFilter.sortDirection"
                       :disabled="isEditing"
                       @sort="setSort"
                       @apply="applyFilterValues"
@@ -62,10 +62,10 @@
               </tr>
             </thead>
             <EntityTableBody
-              :rows="works"
+              :rows="clientInvoices"
               :configs="configs"
-              :row-is-active="isActive"
-              :is-valid="(wrok) => Work.isValid(wrok, configs)"
+              :row-is-active="() => true"
+              :is-valid="(clientInvoice) => ClientInvoice.isValid(clientInvoice, configs)"
               :is-editing="isEditing"
               @row-edit="startEditing"
               @row-delete="askDelete"
@@ -76,8 +76,8 @@
         </div>
 
         <div class="actions">
-          <button class="btn" :disabled="isEditing || apiStatus.isLoading" @click="addWork">
-            <Plus :size="18" /> Adicionar Cliente
+          <button class="btn" :disabled="isEditing || apiStatus.isLoading" @click="add">
+            <Plus :size="18" /> Adicionar Fatura / Nota Crédito
           </button>
         </div>
 
@@ -93,8 +93,11 @@
   <!-- delete dialog-->
   <ConfirmDialog
     v-model="showDeleteDialog"
-    title="Eliminar obra"
-    :message="[`${workToDelete?.entity.name}`, 'Tem a certeza que quer eliminar definitivamente esta obra?']"
+    title="Eliminar fatura / nota crédito"
+    :message="[
+      `${clientInvoiceToDelete?.entity.docNumber}`,
+      'Tem a certeza que quer eliminar definitivamente esta fatura / nota de crédito?',
+    ]"
     confirm-text="Apagar"
     cancel-text="Cancelar"
     @confirm="confirmDelete"
@@ -104,42 +107,55 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, nextTick } from 'vue';
 import { ApiResponseStatus } from '@/types/api-response-status';
-import { ChevronRight, List, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
+import { ChevronRight, FileInput, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
 import Toast from '@/composables/Toast.vue';
 import { SortDirection } from '@/types/sort-direction';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
 import ConfirmDialog from '@/composables/ConfirmDialog.vue';
-import { WorkType, WorkFilters, WorkSortField } from '@/types/work-type';
-import workApi from '@/services/work-api';
 import { ClientFilters, ClientSortField, ClientType } from '@/types/client-type';
 import clientApi from '@/services/client-api';
-import { Work } from '@/entities/work';
 import EntityTableBody from '@/composables/EntityTableBody.vue';
 import { TableRow } from '@/types/entity-configs';
 import { StatusType } from '@/types/status-type';
-import { WorkStatusType } from '@/types/work-status-type';
 import configsApi from '@/services/configs-api';
 import { Client } from '@/entities/client';
 import { apiError } from '@/services/api';
+import { ClientInvoiceFilters, ClientInvoiceSortField, ClientInvoiceType } from '@/types/client-invoice-type';
+import { ClientInvoice } from '@/entities/client-invoice';
+import { Work } from '@/entities/work';
+import { WorkStatusType } from '@/types/work-status-type';
+import { WorkType } from '@/types/work-type';
+import workApi from '@/services/work-api';
+import clientInvoiceApi from '@/services/client-invoice-api';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 const tableBody = ref<HTMLTableSectionElement | null>(null);
 
 const status = ref<{ [k: string]: StatusType }>({});
-const workStatus = ref<{ [k: string]: WorkStatusType }>({});
-const clients = ref<ClientType[]>([]);
-const works = ref<WorkRow[]>([]);
 
+const clients = ref<ClientType[]>([]);
 const clientConfigs = computed(() => Client.getConfigs(status.value));
 
-const configs = computed(() => Work.getConfigs(status.value, workStatus.value, clients.value, clientConfigs.value));
+const works = ref<WorkType[]>([]);
+const workStatus = ref<{ [k: string]: WorkStatusType }>({});
+const workConfigsConfigs = computed(() =>
+  Work.getConfigs(status.value, workStatus.value, clients.value, clientConfigs.value),
+);
+
+const clientInvoices = ref<ClientInvoiceRow[]>([]);
+const configs = computed(() =>
+  ClientInvoice.getConfigs(status.value, clients.value, clientConfigs.value, works.value, workConfigsConfigs.value),
+);
 
 /*************************************************************************************************************** LOAD */
 
 onMounted(async () => {
   await loadConfigs();
-  await fetchWorks();
+  await fetch();
   await fetchClients();
+  await fetchWorks();
+
+  console.log('works', works.value);
 });
 
 async function loadConfigs() {
@@ -158,24 +174,24 @@ async function loadConfigs() {
   }
 }
 
-async function fetchWorks() {
+async function fetch() {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
 
   try {
-    const gotWorks = await workApi.searchWorks(workFilters.value);
+    const gotClientInvoices = await clientInvoiceApi.search(clientInvoicesFilter.value);
 
-    works.value = gotWorks.map((work) => ({
+    clientInvoices.value = gotClientInvoices.map((clientInvoice) => ({
       entity: {
-        ...work,
+        ...clientInvoice,
       },
-      _key: work.code ?? nextKey(),
+      _key: clientInvoice.code ?? nextKey(),
       _isNew: false,
       _isEdited: false,
     }));
 
     apiStatus.value = { isLoading: false, isSuccess: true, isError: false };
   } catch (error: unknown) {
-    apiStatus.value = apiError(error, 'Failed to load works.');
+    apiStatus.value = apiError(error, 'Failed to load client invoices.');
   }
 }
 
@@ -188,26 +204,30 @@ async function fetchClients() {
   clients.value = await clientApi.searchClients(clientFilters);
 }
 
+async function fetchWorks() {
+  works.value = await workApi.searchWorks();
+}
+
 /******************************************************************************************************** ROW ACTIONS */
 
-interface WorkRow extends TableRow<WorkType> {
-  entity: WorkType;
+interface ClientInvoiceRow extends TableRow<ClientInvoiceType> {
+  entity: ClientInvoiceType;
   _key: string;
   _isNew: boolean;
   _isEdited: boolean;
-  _original?: WorkType;
+  _original?: ClientInvoiceType;
 }
 
-const isEditing = computed(() => works.value.some((row) => row._isNew || row._isEdited));
+const isEditing = computed(() => clientInvoices.value.some((row) => row._isNew || row._isEdited));
 let _keyCounter = 0;
 
 function nextKey(): string {
   return `row-${++_keyCounter}`;
 }
 
-function discard(row: WorkRow) {
+function discard(row: ClientInvoiceRow) {
   if (row._isNew) {
-    works.value = works.value.filter((w) => w._key !== row._key);
+    clientInvoices.value = clientInvoices.value.filter((w) => w._key !== row._key);
   } else {
     row.entity = row._original!;
     row._isNew = false;
@@ -215,24 +235,20 @@ function discard(row: WorkRow) {
   }
 }
 
-function isActive(row: WorkRow) {
-  return row.entity.status != workStatus.value.DONE.code;
-}
-
 /*************************************************************************************************************** EDIT */
 
-function startEditing(row: WorkRow) {
+function startEditing(row: ClientInvoiceRow) {
   row._isEdited = true;
   row._original = JSON.parse(JSON.stringify(row.entity));
 }
 
 /**************************************************************************************************************** ADD */
 
-async function addWork(): Promise<void> {
-  works.value.push({
+async function add(): Promise<void> {
+  clientInvoices.value.push({
     entity: {
-      status: workStatus.value.STARTED.code,
-      startDate: new Date().toISOString().split('T')[0],
+      appliedTax: 23,
+      registrationDate: new Date().toISOString().split('T')[0],
     },
     _key: nextKey(),
     _isNew: true,
@@ -252,36 +268,36 @@ async function addWork(): Promise<void> {
 
 /*************************************************************************************************************** SAVE */
 
-async function save(row: WorkRow): Promise<void> {
+async function save(row: ClientInvoiceRow): Promise<void> {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
 
   try {
     if (row._isNew) {
-      await workApi.addWork(row.entity);
+      await clientInvoiceApi.add(row.entity);
     } else if (row._isEdited) {
-      await workApi.editWork(row.entity);
+      await clientInvoiceApi.edit(row.entity);
     }
 
-    await fetchWorks();
+    await fetch();
 
     apiStatus.value = {
       isLoading: false,
       isSuccess: true,
       isError: false,
-      message: 'Work saved successfully.',
+      message: 'Client invoice saved successfully.',
     };
   } catch (error: unknown) {
-    apiStatus.value = apiError(error, 'Failed to save work.');
+    apiStatus.value = apiError(error, 'Failed to save client invoice.');
   }
 }
 
 /************************************************************************************************************* DELETE */
 
 const showDeleteDialog = ref(false);
-const workToDelete = ref<WorkRow | null>(null);
+const clientInvoiceToDelete = ref<ClientInvoiceRow | null>(null);
 
-function askDelete(row: WorkRow) {
-  workToDelete.value = row;
+function askDelete(row: ClientInvoiceRow) {
+  clientInvoiceToDelete.value = row;
   showDeleteDialog.value = true;
 }
 
@@ -289,61 +305,61 @@ async function confirmDelete(): Promise<void> {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
 
   try {
-    if (!workToDelete.value?.entity.id) {
+    if (!clientInvoiceToDelete.value?.entity.id) {
       return;
     }
 
-    await workApi.deleteWork(workToDelete.value.entity.id);
-    await fetchWorks();
+    await clientInvoiceApi.delete(clientInvoiceToDelete.value.entity.id);
+    await fetch();
 
     apiStatus.value = {
       isLoading: false,
       isSuccess: true,
       isError: false,
-      message: 'Work deleted successfully.',
+      message: 'Client invoice deleted successfully.',
     };
 
     showDeleteDialog.value = false;
-    workToDelete.value = null;
+    clientInvoiceToDelete.value = null;
   } catch (error: unknown) {
-    apiStatus.value = apiError(error, 'Failed to delete work.');
+    apiStatus.value = apiError(error, 'Failed to delete client invoice.');
   }
 }
 
 /************************************************************************************************************ FILTERS */
 
-const workFilters = ref<WorkFilters>({});
+const clientInvoicesFilter = ref<ClientInvoiceFilters>({});
 
 const hasActiveTableControls = computed(() =>
-  Object.values(workFilters.value).some((value) => value !== undefined && value !== null && value !== ''),
+  Object.values(clientInvoicesFilter.value).some((value) => value !== undefined && value !== null && value !== ''),
 );
 
-function setSort(event: { column: WorkSortField; direction: SortDirection | undefined }): void {
-  workFilters.value = {
-    ...workFilters.value,
+function setSort(event: { column: ClientInvoiceSortField; direction: SortDirection | undefined }): void {
+  clientInvoicesFilter.value = {
+    ...clientInvoicesFilter.value,
     sortBy: event.direction ? event.column : undefined,
     sortDirection: event.direction,
   };
 
-  fetchWorks();
+  fetch();
 }
 
 function applyFilterValues(values: Record<string, unknown>): void {
-  workFilters.value = { ...workFilters.value, ...(values as Partial<WorkFilters>) };
+  clientInvoicesFilter.value = { ...clientInvoicesFilter.value, ...(values as Partial<ClientInvoiceFilters>) };
 
-  fetchWorks();
+  fetch();
 }
 
 function clearFilterValues(values: Record<string, unknown>): void {
-  workFilters.value = { ...workFilters.value, ...(values as Partial<WorkFilters>) };
+  clientInvoicesFilter.value = { ...clientInvoicesFilter.value, ...(values as Partial<ClientInvoiceFilters>) };
 
-  fetchWorks();
+  fetch();
 }
 
 function clearAllTableControls(): void {
-  workFilters.value = {};
+  clientInvoicesFilter.value = {};
 
-  void fetchWorks();
+  void fetch();
 }
 </script>
 <style scoped lang="scss"></style>

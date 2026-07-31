@@ -8,6 +8,7 @@ export class Work {
   static getConfigs(
     statusOptions: EnumOptions,
     workStatusOptions: EnumOptions,
+    clientOptions: ClientType[],
     clientConfigs: Configs<ClientSortField, ClientType>,
   ): Configs<WorkSortField, ClientType> {
     return {
@@ -259,6 +260,7 @@ export class Work {
         type: ColumnType.SEARCH_SELECT,
         searchSelectConfig: {
           selected: (client: ClientType) => client.companyName!,
+          options: clientOptions,
           optionLines: (client: ClientType) => [client.code!, client.companyName!, client.nif!],
           filter: (client: ClientType) => `${client.companyName} ${client.nif} ${client.code}`,
           tooltipTitle: (client: ClientType) => client.companyName!,

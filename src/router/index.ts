@@ -9,6 +9,7 @@ import WorksView from '@/components/WorksView.vue';
 import TimesheetsView from '@/components/TimesheetsView.vue';
 import WagesView from '@/components/WagesView.vue';
 import HrDashboardView from '@/components/HrDashboardView.vue';
+import ClientInvoicesView from '@/components/ClientInvoicesView.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -34,6 +35,12 @@ const router = createRouter({
       path: '/sales/clients',
       name: 'clients',
       component: ClientsView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/sales/client-invoices',
+      name: 'clients-invoices',
+      component: ClientInvoicesView,
       meta: { requiresAuth: true },
     },
     {

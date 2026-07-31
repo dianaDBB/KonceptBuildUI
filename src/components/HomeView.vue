@@ -39,6 +39,7 @@ import {
   Package,
   ClipboardClock,
   HandCoins,
+  FileInput,
 } from 'lucide-vue-next';
 import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
@@ -97,6 +98,12 @@ const categories = [
         description: 'Gerir dados dos clientes',
         icon: Users,
         route: '/sales/clients',
+      },
+      {
+        label: 'Faturas e Notas de Crédito',
+        description: 'Gerir faturas e notas de crédito dos clientes',
+        icon: FileInput,
+        route: '/sales/client-invoices',
       },
     ],
   },

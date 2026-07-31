@@ -16,7 +16,7 @@
               :field-key="fieldKey"
               :config="config"
               :select-options="config.selectConfig?.options"
-              :search-select-options="props.searchSelectOptions"
+              :search-select-options="config.searchSelectConfig?.options"
               :is-invalid="config.styleConfig.isInvalid(row.entity)"
               :is-disabled="config.styleConfig.showDisabled(row.entity, row)"
               @update:value="updateFieldValue(row, fieldKey, $event)"
@@ -95,7 +95,6 @@ interface Props<TEntity extends EntityType = EntityType> {
   rowIsActive: (row: TableRow<TEntity>) => boolean;
   isValid: (entity: TEntity) => boolean;
   isEditing?: boolean;
-  searchSelectOptions?: any[];
 }
 
 const props = withDefaults(defineProps<Props<TEntity>>(), {

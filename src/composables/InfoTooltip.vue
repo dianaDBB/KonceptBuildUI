@@ -138,11 +138,13 @@ h4 {
 
 .label {
   font-weight: 600;
+  font-size: 12px;
   color: var(--color-text-secondary);
 }
 
 .value {
   text-align: right;
+  font-size: 12px;
 }
 
 .info {
