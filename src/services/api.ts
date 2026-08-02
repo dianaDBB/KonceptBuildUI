@@ -24,12 +24,13 @@ axiosClient.interceptors.request.use((config) => {
 axiosClient.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
-      AuthApi.clearAccessToken();
+    const status = error.response?.status;
+    const isAuthFailure = status === 401 || status === 403;
+    const isNetworkFailure = !error.response || error.code === 'ERR_NETWORK' || error.message === 'Network Error';
 
-      if (window.location.pathname !== RoutePaths.login) {
-        window.location.assign(RoutePaths.login);
-      }
+    if ((isAuthFailure || isNetworkFailure) && window.location.pathname !== RoutePaths.login) {
+      AuthApi.clearAccessToken();
+      window.location.assign(RoutePaths.login);
     }
 
     return Promise.reject(error);
