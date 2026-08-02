@@ -1,6 +1,11 @@
 <template>
   <tbody ref="tableBody">
-    <tr v-for="row in rows" :key="row._key" :class="{ disabled: !isRowActive(row) }" @dblclick="$emit('row-edit', row)">
+    <tr
+      v-for="row in rows"
+      :key="row._key"
+      :class="{ disabled: !isRowActive(row) }"
+      @dblclick="!isEditing && $emit('row-edit', row)"
+    >
       <td
         v-for="(config, fieldKey) in configs"
         :key="fieldKey"
@@ -17,6 +22,8 @@
               :config="config"
               :select-options="config.selectConfig?.options"
               :search-select-options="config.searchSelectConfig?.options"
+              :search-select-multiple-options="config.searchSelectMultipleConfig?.options"
+              :search-select-multiple-option-key="config.searchSelectMultipleConfig?.optionKey"
               :is-invalid="config.styleConfig.isInvalid(row.entity)"
               :is-disabled="config.styleConfig.showDisabled(row.entity, row)"
               @update:value="updateFieldValue(row, fieldKey, $event)"
@@ -88,6 +95,7 @@ import PercentageInput from './inputs/PercentageInput.vue';
 import PhoneInput from './inputs/PhoneInput.vue';
 import SelectInput from './inputs/SelectInput.vue';
 import SearchSelectInput from './inputs/SearchSelectInput.vue';
+import SearchSelectMultipleInput from './inputs/SearchSelectMultipleInput.vue';
 
 interface Props<TEntity extends EntityType = EntityType> {
   rows: TableRow<TEntity>[];
@@ -115,6 +123,7 @@ const editableComponentMap: Record<ColumnType, any> = {
   [ColumnType.DATE]: DateInput,
   [ColumnType.SELECT]: SelectInput,
   [ColumnType.SEARCH_SELECT]: SearchSelectInput,
+  [ColumnType.SEARCH_SELECT_MULTIPLE]: SearchSelectMultipleInput,
   [ColumnType.EMAIL]: EmailInput,
   [ColumnType.PHONE]: PhoneInput,
   [ColumnType.PERCENTAGE]: PercentageInput,
@@ -162,6 +171,8 @@ function getFormatedValue(row: TableRow<TEntity>, fieldKey: string, config: Enti
       return config.selectConfig?.options?.find((opt) => opt.code === value)?.label ?? value;
     case ColumnType.SEARCH_SELECT:
       return value ? config.searchSelectConfig!.selected(value) : '';
+    case ColumnType.SEARCH_SELECT_MULTIPLE:
+      return value ? config.searchSelectMultipleConfig!.selected(value) : '';
     case ColumnType.DATE:
       return value ? new Date(value).toLocaleDateString() : '-';
     case ColumnType.PHONE:

@@ -40,6 +40,7 @@ import {
   ClipboardClock,
   HandCoins,
   FileInput,
+  FileCheck,
 } from 'lucide-vue-next';
 import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
@@ -104,6 +105,12 @@ const categories = [
         description: 'Gerir faturas e notas de crédito dos clientes',
         icon: FileInput,
         route: '/sales/client-invoices',
+      },
+      {
+        label: 'Pagamentos',
+        description: 'Gerir pagamentos dos clientes',
+        icon: FileCheck,
+        route: '/sales/client-payments',
       },
     ],
   },

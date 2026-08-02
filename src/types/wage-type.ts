@@ -1,6 +1,6 @@
 import { SortDirection } from './sort-direction';
 import { EntityType } from './entity-configs';
-import { PaymentMethodType } from './payment-method-type';
+import { PaymentMethodEnum } from './payment-method-enum';
 import { UUID } from 'node:crypto';
 
 export interface WageType extends EntityType {
@@ -16,7 +16,7 @@ export interface WageType extends EntityType {
   expectedInternalCost?: number;
   paidValue?: number;
   paidDate?: string;
-  paymentMethod?: PaymentMethodType;
+  paymentMethod?: PaymentMethodEnum;
   notes?: string;
 }
 
@@ -56,7 +56,7 @@ export interface WageFilters {
   paidValueMax?: number;
   paidDateMin?: string;
   paidDateMax?: string;
-  paymentMethod?: PaymentMethodType;
+  paymentMethod?: PaymentMethodEnum;
   notes?: string;
 
   sortBy?: WageSortField;

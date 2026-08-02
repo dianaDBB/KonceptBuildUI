@@ -114,13 +114,13 @@ import { Client } from '@/entities/client';
 import EntityTableBody from '@/composables/EntityTableBody.vue';
 import { TableRow } from '@/types/entity-configs';
 import configsApi from '@/services/configs-api';
-import { StatusType } from '@/types/status-type';
+import { StatusEnum } from '@/types/status-enum';
 import { apiError } from '@/services/api';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 const tableBody = ref<HTMLTableSectionElement | null>(null);
 
-const status = ref<{ [k: string]: StatusType }>({});
+const status = ref<{ [k: string]: StatusEnum }>({});
 const clients = ref<ClientRow[]>([]);
 
 const configs = computed(() => Client.getConfigs(status.value));

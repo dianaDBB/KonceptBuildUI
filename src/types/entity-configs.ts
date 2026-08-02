@@ -24,6 +24,7 @@ export enum ColumnType {
   DATE,
   SELECT,
   SEARCH_SELECT,
+  SEARCH_SELECT_MULTIPLE,
   EMAIL,
   PHONE,
   PERCENTAGE,
@@ -46,6 +47,7 @@ export interface EntityConfig<TSortField extends string = string, TEntity extend
 
   selectConfig?: SelectConfig;
   searchSelectConfig?: SearchSelectConfig<TEntity>;
+  searchSelectMultipleConfig?: SearchSelectMultipleConfig<TEntity>;
   phoneConfig?: PhoneConfig<TEntity>;
 
   styleConfig: StyleConfig;
@@ -63,6 +65,19 @@ export interface StyleConfig {
 export interface SearchSelectConfig<TEntity extends EntityType = EntityType> {
   selected: (option: TEntity) => string;
   options: TEntity[];
+  optionLines: (option: TEntity) => string[];
+  filter?: (option: TEntity) => string;
+  tooltipTitle?: (value: TEntity) => string;
+  tooltipItems?: (value: TEntity) => {
+    label: string;
+    value?: string | number | null;
+  }[];
+}
+
+export interface SearchSelectMultipleConfig<TEntity extends EntityType = EntityType> {
+  selected: (options: TEntity[]) => string;
+  options: TEntity[];
+  optionKey?: (option: TEntity) => string;
   optionLines: (option: TEntity) => string[];
   filter?: (option: TEntity) => string;
   tooltipTitle?: (value: TEntity) => string;

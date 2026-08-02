@@ -116,8 +116,8 @@ import clientApi from '@/services/client-api';
 import { Work } from '@/entities/work';
 import EntityTableBody from '@/composables/EntityTableBody.vue';
 import { TableRow } from '@/types/entity-configs';
-import { StatusType } from '@/types/status-type';
-import { WorkStatusType } from '@/types/work-status-type';
+import { StatusEnum } from '@/types/status-enum';
+import { WorkStatusEnum } from '@/types/work-status-enum';
 import configsApi from '@/services/configs-api';
 import { Client } from '@/entities/client';
 import { apiError } from '@/services/api';
@@ -125,8 +125,8 @@ import { apiError } from '@/services/api';
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 const tableBody = ref<HTMLTableSectionElement | null>(null);
 
-const status = ref<{ [k: string]: StatusType }>({});
-const workStatus = ref<{ [k: string]: WorkStatusType }>({});
+const status = ref<{ [k: string]: StatusEnum }>({});
+const workStatus = ref<{ [k: string]: WorkStatusEnum }>({});
 const clients = ref<ClientType[]>([]);
 const works = ref<WorkRow[]>([]);
 

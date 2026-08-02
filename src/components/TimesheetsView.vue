@@ -336,10 +336,10 @@ import {
 import { WorkFilters, WorkType } from '@/types/work-type';
 import { formatCurrency, formatNumber } from '@/utils/validation';
 import SearchSelect from '@/composables/SearchSelect.vue';
-import { WorkStatusType } from '@/types/work-status-type';
+import { WorkStatusEnum } from '@/types/work-status-enum';
 import { getDate, getWeekday, isToday, isHoliday, isWeekend, monthNames } from '@/utils/date';
-import { AttendanceCodeType } from '@/types/attendance-code-type';
-import { WorkerContractType } from '@/types/worker-contract-type';
+import { AttendanceCodeEnum } from '@/types/attendance-code-enum';
+import { WorkerContractTypeEnum } from '@/types/worker-contract-type-enum';
 import configsApi from '@/services/configs-api';
 import { apiError } from '@/services/api';
 import ConfirmDialog from '@/composables/ConfirmDialog.vue';
@@ -352,9 +352,9 @@ const today = new Date();
 const selectedYear = ref(today.getFullYear());
 const selectedMonth = ref(today.getMonth() + 1);
 
-const attendanceCode = ref<{ [k: string]: AttendanceCodeType }>({});
-const workStatus = ref<{ [k: string]: WorkStatusType }>({});
-const workerContractType = ref<{ [k: string]: WorkerContractType }>({});
+const attendanceCode = ref<{ [k: string]: AttendanceCodeEnum }>({});
+const workStatus = ref<{ [k: string]: WorkStatusEnum }>({});
+const workerContractType = ref<{ [k: string]: WorkerContractTypeEnum }>({});
 
 const timesheet = ref<MonthlyTimesheetType>();
 const availableWorks = ref<WorkType[]>([]);

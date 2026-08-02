@@ -1,5 +1,5 @@
 import { SelectOption } from './select-options';
 
-export interface AttendanceCodeType extends SelectOption {
+export interface AttendanceCodeEnum extends SelectOption {
   isPaid: boolean;
 }

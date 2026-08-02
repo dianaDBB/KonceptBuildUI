@@ -109,14 +109,14 @@ import { TableRow } from '@/types/entity-configs';
 import configsApi from '@/services/configs-api';
 import { apiError } from '@/services/api';
 import { Wage } from '@/entities/wage';
-import { PaymentMethodType } from '@/types/payment-method-type';
+import { PaymentMethodEnum } from '@/types/payment-method-enum';
 import { WageFilters, WageSortField, WageType } from '@/types/wage-type';
 import wagesApi from '@/services/wages-api';
 import InfoTooltip from '@/composables/InfoTooltip.vue';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
-const paymentMethodType = ref<{ [k: string]: PaymentMethodType }>({});
+const paymentMethodType = ref<{ [k: string]: PaymentMethodEnum }>({});
 const wages = ref<WageRow[]>([]);
 
 const configs = computed(() => Wage.getConfigs(paymentMethodType.value));

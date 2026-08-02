@@ -11,7 +11,7 @@
   </select>
 </template>
 
-<script setup lang="ts" generic="TEntity, TSortField extends string">
+<script setup lang="ts">
 import { SelectOption } from '@/types/select-options';
 
 interface Props {

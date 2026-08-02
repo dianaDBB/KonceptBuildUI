@@ -9,7 +9,7 @@
   />
 </template>
 
-<script setup lang="ts" generic="TEntity, TSortField extends string">
+<script setup lang="ts">
 import { handleMoneyInput } from '@/utils/handle-money-input';
 import { formatNumber } from '@/utils/validation';
 

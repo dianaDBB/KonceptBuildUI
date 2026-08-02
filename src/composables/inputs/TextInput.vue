@@ -8,7 +8,7 @@
   />
 </template>
 
-<script setup lang="ts" generic="TEntity, TSortField extends string">
+<script setup lang="ts">
 interface Props {
   value: any;
   isInvalid: boolean;

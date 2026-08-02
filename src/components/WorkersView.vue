@@ -139,9 +139,9 @@ import ConfirmDialog from '@/composables/ConfirmDialog.vue';
 import { Worker } from '@/entities/worker';
 import { TableRow } from '@/types/entity-configs';
 import EntityTableBody from '@/composables/EntityTableBody.vue';
-import { StatusType } from '@/types/status-type';
+import { StatusEnum } from '@/types/status-enum';
 import configsApi from '@/services/configs-api';
-import { WorkerContractType } from '@/types/worker-contract-type';
+import { WorkerContractTypeEnum } from '@/types/worker-contract-type-enum';
 import { apiError } from '@/services/api';
 import InfoTooltip from '@/composables/InfoTooltip.vue';
 import EditCompensationDialog from '@/composables/EditCompensationDialog.vue';
@@ -150,8 +150,8 @@ const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, i
 
 const tableBody = ref<HTMLTableSectionElement | null>(null);
 
-const status = ref<{ [k: string]: StatusType }>({});
-const workerContractType = ref<{ [k: string]: WorkerContractType }>({});
+const status = ref<{ [k: string]: StatusEnum }>({});
+const workerContractType = ref<{ [k: string]: WorkerContractTypeEnum }>({});
 const workers = ref<WorkerRow[]>([]);
 
 const configs = computed(() => Worker.getConfigs(status.value, workerContractType.value));

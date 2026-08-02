@@ -12,7 +12,7 @@ export class ClientInvoice {
     clientConfigs: Configs<ClientSortField, ClientType>,
     workOptions: WorkType[],
     workConfigs: Configs<WorkSortField, WorkType>,
-  ): Configs<ClientInvoiceSortField, ClientType> {
+  ): Configs<ClientInvoiceSortField, ClientInvoiceType> {
     return {
       docNumber: {
         label: 'Nº Documento',
@@ -76,6 +76,7 @@ export class ClientInvoice {
           valueConfig: {
             valueKey: 'clientName',
           },
+          dropdownAlign: 'start',
         },
       },
       work: {
