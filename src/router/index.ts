@@ -1,90 +1,85 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-import HomeView from '@/components/HomeView.vue';
-import LoginView from '@/components/LoginView.vue';
-import WorkersView from '@/components/WorkersView.vue';
-import ClientsView from '@/components/ClientsView.vue';
 import authApi from '@/services/auth-api';
-import WorksView from '@/components/WorksView.vue';
-import TimesheetsView from '@/components/TimesheetsView.vue';
-import WagesView from '@/components/WagesView.vue';
-import HrDashboardView from '@/components/HrDashboardView.vue';
-import ClientInvoicesView from '@/components/ClientInvoicesView.vue';
-import ClientPaymentsView from '@/components/ClientPaymentsView.vue';
+import { RouteNames, RoutePaths } from '@/constants/routes';
+
+const routes = [
+  {
+    path: RoutePaths.login,
+    name: RouteNames.login,
+    component: () => import('@/components/LoginView.vue'),
+  },
+  {
+    path: RoutePaths.home,
+    name: RouteNames.home,
+    component: () => import('@/components/HomeView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: RoutePaths.works,
+    name: RouteNames.works,
+    component: () => import('@/components/WorksView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: RoutePaths.clients,
+    name: RouteNames.clients,
+    component: () => import('@/components/ClientsView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: RoutePaths.clientInvoices,
+    name: RouteNames.clientInvoices,
+    component: () => import('@/components/ClientInvoicesView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: RoutePaths.clientPayments,
+    name: RouteNames.clientPayments,
+    component: () => import('@/components/ClientPaymentsView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: RoutePaths.dashboard,
+    name: RouteNames.dashboard,
+    component: () => import('@/components/HrDashboardView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: RoutePaths.workers,
+    name: RouteNames.workers,
+    component: () => import('@/components/WorkersView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: RoutePaths.timesheet,
+    name: RouteNames.timesheet,
+    component: () => import('@/components/TimesheetsView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: RoutePaths.wages,
+    name: RouteNames.wages,
+    component: () => import('@/components/WagesView.vue'),
+    meta: { requiresAuth: true },
+  },
+];
 
 const router = createRouter({
   history: createWebHistory(),
-  routes: [
-    {
-      path: '/login',
-      name: 'login',
-      component: LoginView,
-    },
-    {
-      path: '/',
-      name: 'home',
-      component: HomeView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/works/list',
-      name: 'works',
-      component: WorksView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/sales/clients',
-      name: 'clients',
-      component: ClientsView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/sales/client-invoices',
-      name: 'clients-invoices',
-      component: ClientInvoicesView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/sales/client-payments',
-      name: 'clients-payments',
-      component: ClientPaymentsView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/hr/dashboard',
-      name: 'dahsboard',
-      component: HrDashboardView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/hr/workers',
-      name: 'workers',
-      component: WorkersView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/hr/timsheet',
-      name: 'timesheet',
-      component: TimesheetsView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/hr/wages',
-      name: 'wages',
-      component: WagesView,
-      meta: { requiresAuth: true },
-    },
-  ],
+  routes,
 });
 
 router.beforeEach((to) => {
-  if (to.meta.requiresAuth && !authApi.isAuthenticated()) {
-    authApi.logout();
-    return { name: 'login', query: { redirect: to.fullPath } };
+  const isAuthenticated = authApi.isAuthenticated();
+
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    void authApi.logout();
+    return { name: RouteNames.login, query: { redirect: to.fullPath } };
   }
 
-  if (to.name === 'login' && authApi.isAuthenticated()) {
-    return { name: 'home' };
+  if (to.name === RouteNames.login && isAuthenticated) {
+    return { name: RouteNames.home };
   }
 });
 

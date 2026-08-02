@@ -10,12 +10,12 @@
 
 <script setup lang="ts">
 interface Props {
-  value: any;
+  value: string;
   isInvalid: boolean;
   isDisabled: boolean;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 const emit = defineEmits<{
   'update:value': [string];

@@ -53,11 +53,11 @@
               :selected-year="selectedYear"
               :selected-month="selectedMonth"
               :years="years"
-              @update:selectedYear="
+              @update:selected-year="
                 selectedYear = $event;
                 loadPeriod();
               "
-              @update:selectedMonth="
+              @update:selected-month="
                 selectedMonth = $event;
                 loadPeriod();
               "

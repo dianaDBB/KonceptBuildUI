@@ -20,10 +20,18 @@
 <script setup lang="ts">
 import SearchSelect from '../SearchSelect.vue';
 
+interface SearchSelectConfigLike {
+  selected: (option: unknown) => string;
+  optionLines: (option: unknown) => string[];
+  filter?: (option: unknown) => string;
+}
+
 interface Props {
-  value: any;
-  searchSelectOptions: any[];
-  config: any;
+  value: unknown;
+  searchSelectOptions: unknown[];
+  config: {
+    searchSelectConfig?: SearchSelectConfigLike;
+  };
   isInvalid: boolean;
   isDisabled: boolean;
 }

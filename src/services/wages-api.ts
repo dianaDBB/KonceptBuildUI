@@ -1,7 +1,33 @@
-import { WageType } from '@/types/wage-type';
+import type { WageType } from '@/types/wage-type';
 import axiosClient from './api';
-import { AddWagePayload } from './payload/add-wage-payload';
-import { UpdateWagePayload } from './payload/update-wage-payload';
+import type { AddWagePayload } from './payload/add-wage-payload';
+import type { UpdateWagePayload } from './payload/update-wage-payload';
+
+interface WageApiResponse {
+  id?: unknown;
+  code?: unknown;
+  year?: unknown;
+  month?: unknown;
+  workerTimesheetDto?: {
+    worker?: {
+      id?: unknown;
+      code?: unknown;
+      name?: unknown;
+      currentWorkerCompensation?: {
+        monthlySalary?: unknown;
+        hourRate?: unknown;
+      };
+    };
+  };
+  expectedWage?: unknown;
+  expectedExtraHours?: unknown;
+  expectedDeductions?: unknown;
+  expectedInternalCost?: unknown;
+  paidValue?: unknown;
+  paidDate?: unknown;
+  paymentMethod?: unknown;
+  notes?: unknown;
+}
 
 class WageApi {
   async searchWages(filters = {}): Promise<WageType[]> {
@@ -32,26 +58,32 @@ class WageApi {
     });
   }
 
-  private mapWage(wage: any): WageType {
+  private mapWage(wage: WageApiResponse): WageType {
+    const worker = wage.workerTimesheetDto?.worker;
+    const compensation = worker?.currentWorkerCompensation;
+
     return {
-      id: wage.id,
-      code: wage.code,
-      year: wage.year,
-      month: wage.month,
-      workerId: wage.workerTimesheetDto.worker.id,
-      workerCode: wage.workerTimesheetDto.worker.code,
-      workerName: wage.workerTimesheetDto.worker.name,
+      id: typeof wage.id === 'string' ? (wage.id as WageType['id']) : undefined,
+      code: typeof wage.code === 'string' ? wage.code : undefined,
+      year: typeof wage.year === 'number' ? wage.year : undefined,
+      month: typeof wage.month === 'number' ? wage.month : undefined,
+      workerId: typeof worker?.id === 'string' ? (worker.id as WageType['workerId']) : undefined,
+      workerCode: typeof worker?.code === 'string' ? worker.code : undefined,
+      workerName: typeof worker?.name === 'string' ? worker.name : undefined,
       baseSalary:
-        wage.workerTimesheetDto.worker.currentWorkerCompensation?.monthlySalary ||
-        wage.workerTimesheetDto.worker.currentWorkerCompensation?.hourRate,
-      expectedWage: wage.expectedWage,
-      expectedExtraHours: wage.expectedExtraHours,
-      expectedDeductions: wage.expectedDeductions,
-      expectedInternalCost: wage.expectedInternalCost,
-      paidValue: wage.paidValue,
-      paidDate: wage.paidDate,
-      paymentMethod: wage.paymentMethod,
-      notes: wage.notes,
+        typeof compensation?.monthlySalary === 'number'
+          ? compensation.monthlySalary
+          : typeof compensation?.hourRate === 'number'
+          ? compensation.hourRate
+          : undefined,
+      expectedWage: typeof wage.expectedWage === 'number' ? wage.expectedWage : undefined,
+      expectedExtraHours: typeof wage.expectedExtraHours === 'number' ? wage.expectedExtraHours : undefined,
+      expectedDeductions: typeof wage.expectedDeductions === 'number' ? wage.expectedDeductions : undefined,
+      expectedInternalCost: typeof wage.expectedInternalCost === 'number' ? wage.expectedInternalCost : undefined,
+      paidValue: typeof wage.paidValue === 'number' ? wage.paidValue : undefined,
+      paidDate: typeof wage.paidDate === 'string' ? wage.paidDate : undefined,
+      paymentMethod: wage.paymentMethod as WageType['paymentMethod'],
+      notes: typeof wage.notes === 'string' ? wage.notes : undefined,
     };
   }
 }

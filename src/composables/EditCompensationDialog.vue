@@ -6,9 +6,9 @@
       <div class="form-group">
         <label>Desde</label>
         <input
+          v-model="worker.currentWorkerCompensation.validFrom"
           type="date"
           :class="{ required: !worker.currentWorkerCompensation.validFrom }"
-          v-model="worker.currentWorkerCompensation.validFrom"
         />
       </div>
 

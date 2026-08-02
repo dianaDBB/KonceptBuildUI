@@ -1,7 +1,7 @@
 <template>
   <div class="phone-input">
     <input
-      v-model="entity[secondaryField]"
+      :value="secondaryValue"
       inputmode="text"
       pattern="[0-9]{9}"
       maxlength="4"
@@ -9,10 +9,11 @@
       :disabled="isDisabled"
       :class="{ required: isInvalid }"
       class="country-code"
+      @input="emit('update:secondaryValue', ($event.target as HTMLInputElement).value)"
     />
 
     <input
-      v-model="entity[fieldKey]"
+      :value="value"
       type="tel"
       inputmode="numeric"
       pattern="[0-9]{9}"
@@ -20,18 +21,23 @@
       :disabled="isDisabled"
       :class="{ required: isInvalid }"
       class="phone-number"
+      @input="emit('update:value', ($event.target as HTMLInputElement).value)"
     />
   </div>
 </template>
 
-<script setup lang="ts" generic="TEntity extends Record<string, unknown>">
+<script setup lang="ts">
 interface Props {
-  entity: TEntity;
-  fieldKey: string;
-  secondaryField: string;
+  value: string | number | null | undefined;
+  secondaryValue: string | number | null | undefined;
   isDisabled: boolean;
   isInvalid: boolean;
 }
 
 defineProps<Props>();
+
+const emit = defineEmits<{
+  'update:value': [value: string];
+  'update:secondaryValue': [value: string];
+}>();
 </script>

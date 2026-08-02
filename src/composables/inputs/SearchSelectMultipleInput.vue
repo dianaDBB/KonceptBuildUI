@@ -23,11 +23,19 @@
 <script setup lang="ts">
 import SearchSelectMultiple from '../SearchSelectMultiple.vue';
 
+interface SearchSelectConfigLike {
+  selected: (options: unknown[]) => string;
+  optionLines: (option: unknown) => string[];
+  filter?: (option: unknown) => string;
+}
+
 interface Props {
-  value: any[];
-  searchSelectMultipleOptions: any[];
-  searchSelectMultipleOptionKey: (option: any) => string;
-  config: any;
+  value: unknown[];
+  searchSelectMultipleOptions: unknown[];
+  searchSelectMultipleOptionKey: (option: unknown) => string;
+  config: {
+    searchSelectMultipleConfig?: SearchSelectConfigLike;
+  };
   isInvalid: boolean;
   isDisabled: boolean;
 }

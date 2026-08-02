@@ -9,6 +9,30 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('vue-router')) {
+              return 'vendor-router';
+            }
+
+            if (id.includes('axios')) {
+              return 'vendor-axios';
+            }
+
+            if (id.includes('@vueuse')) {
+              return 'vendor-vueuse';
+            }
+
+            return 'vendor';
+          }
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     open: true,

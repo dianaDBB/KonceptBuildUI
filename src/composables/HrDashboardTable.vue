@@ -73,7 +73,7 @@
 
           <tr
             v-for="worker in row.workerDtoList"
-            v-if="!isCollapsed(row.workDto!.id!)"
+            v-show="!isCollapsed(row.workDto!.id!)"
             :key="worker.workerDto.id"
             class="sub-row"
           >
@@ -113,7 +113,7 @@ const props = defineProps<{
   years?: number[];
 }>();
 
-const emit = defineEmits<{
+defineEmits<{
   toggleWork: [id: string];
   expandAll: [];
   collapseAll: [];

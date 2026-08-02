@@ -1,3 +1,3 @@
-import { SelectOption } from './select-options';
+import type { SelectOption } from './select-options';
 
-export interface WorkStatusEnum extends SelectOption {}
+export type WorkStatusEnum = SelectOption;

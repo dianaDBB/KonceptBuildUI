@@ -12,16 +12,16 @@
 </template>
 
 <script setup lang="ts">
-import { SelectOption } from '@/types/select-options';
+import type { SelectOption } from '@/types/select-options';
 
 interface Props {
-  value: any;
+  value: string;
   isInvalid: boolean;
   isDisabled: boolean;
   selectOptions: SelectOption[];
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 const emit = defineEmits<{
   'update:value': [string];

@@ -1,3 +1,3 @@
-import { SelectOption } from './select-options';
+import type { SelectOption } from './select-options';
 
-export interface PaymentMethodEnum extends SelectOption {}
+export type PaymentMethodEnum = SelectOption;

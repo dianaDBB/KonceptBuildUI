@@ -19,6 +19,9 @@
               :value="getFieldValue(row, fieldKey)"
               :entity="row.entity"
               :field-key="fieldKey"
+              :secondary-value="
+                config.phoneConfig?.secondaryField ? getFieldValue(row, String(config.phoneConfig.secondaryField)) : ''
+              "
               :config="config"
               :select-options="config.selectConfig?.options"
               :search-select-options="config.searchSelectConfig?.options"
@@ -27,6 +30,11 @@
               :is-invalid="config.styleConfig.isInvalid(row.entity)"
               :is-disabled="config.styleConfig.showDisabled(row.entity, row)"
               @update:value="updateFieldValue(row, fieldKey, $event)"
+              @update:secondary-value="
+                config.phoneConfig?.secondaryField
+                  ? updateFieldValue(row, String(config.phoneConfig.secondaryField), $event)
+                  : undefined
+              "
             />
           </slot>
         </template>
@@ -40,8 +48,8 @@
                 <InfoTooltip
                   v-if="getFieldValue(row, fieldKey)"
                   position="left"
-                  :title="config.searchSelectConfig!.tooltipTitle!(getFieldValue(row, fieldKey))"
-                  :items="config.searchSelectConfig!.tooltipItems!(getFieldValue(row, fieldKey))"
+                  :title="config.searchSelectConfig?.tooltipTitle?.(getFieldValue(row, fieldKey) as TEntity)"
+                  :items="config.searchSelectConfig?.tooltipItems?.(getFieldValue(row, fieldKey) as TEntity)"
                 />
               </div>
             </template>
@@ -82,6 +90,7 @@
 
 <script setup lang="ts" generic="TSortField extends string, TEntity extends EntityType = EntityType">
 import { Trash2, Pencil, Undo2, Check } from 'lucide-vue-next';
+import type { Component } from 'vue';
 import { ColumnType, EntityConfig, EntityType, TableRow } from '@/types/entity-configs';
 
 import TextInput from './inputs/TextInput.vue';
@@ -109,14 +118,14 @@ const props = withDefaults(defineProps<Props<TEntity>>(), {
   isEditing: false,
 });
 
-const emit = defineEmits<{
+defineEmits<{
   'row-edit': [row: TableRow<TEntity>];
   'row-delete': [row: TableRow<TEntity>];
   'row-save': [row: TableRow<TEntity>];
   'row-discard': [row: TableRow<TEntity>];
 }>();
 
-const editableComponentMap: Record<ColumnType, any> = {
+const editableComponentMap: Record<ColumnType, Component | undefined> = {
   [ColumnType.TEXT]: TextInput,
   [ColumnType.NUMBER]: NumberInput,
   [ColumnType.MONEY]: MoneyInput,
@@ -129,7 +138,7 @@ const editableComponentMap: Record<ColumnType, any> = {
   [ColumnType.PERCENTAGE]: PercentageInput,
 };
 
-function getEditableComponent(type: ColumnType) {
+function getEditableComponent(type: ColumnType): Component | undefined {
   return editableComponentMap[type];
 }
 
@@ -145,16 +154,26 @@ function isRowActive(row: TableRow<TEntity>): boolean {
   return props.rowIsActive(row);
 }
 
-function getColumnClasses(fieldKey: string): any {
+function getColumnClasses(fieldKey: string): Record<string, boolean> {
   return {
-    highlight: props.configs[fieldKey].styleConfig.isHighlight,
+    highlight: props.configs[fieldKey].styleConfig.isHighlight ?? false,
   };
 }
 
-function getFieldValue(row: TableRow<TEntity>, fieldKey: string): any {
-  return fieldKey
-    .split('.')
-    .reduce((obj, key) => (obj as Record<string, any>)?.[key], row.entity as Record<string, any>);
+function getFieldValue(row: TableRow<TEntity>, fieldKey: string | number | symbol): unknown {
+  const path = String(fieldKey);
+
+  return path.split('.').reduce<unknown>((obj, key) => {
+    if (typeof obj === 'object' && obj !== null && key in obj) {
+      return (obj as Record<string, unknown>)[key];
+    }
+
+    return undefined;
+  }, row.entity as Record<string, unknown>);
+}
+
+function toDisplayString(value: unknown): string {
+  return value == null ? '' : String(value);
 }
 
 function getFormatedValue(row: TableRow<TEntity>, fieldKey: string, config: EntityConfig<TSortField, TEntity>): string {
@@ -162,23 +181,53 @@ function getFormatedValue(row: TableRow<TEntity>, fieldKey: string, config: Enti
 
   switch (config.type) {
     case ColumnType.NUMBER:
-      return formatNumber(value);
     case ColumnType.MONEY:
-      return formatCurrency(value);
-    case ColumnType.PERCENTAGE:
-      return formatPercentage(value);
-    case ColumnType.SELECT:
-      return config.selectConfig?.options?.find((opt) => opt.code === value)?.label ?? value;
-    case ColumnType.SEARCH_SELECT:
-      return value ? config.searchSelectConfig!.selected(value) : '';
-    case ColumnType.SEARCH_SELECT_MULTIPLE:
-      return value ? config.searchSelectMultipleConfig!.selected(value) : '';
-    case ColumnType.DATE:
-      return value ? new Date(value).toLocaleDateString() : '-';
-    case ColumnType.PHONE:
-      return `${row.entity[config.phoneConfig!.secondaryField!]} ${row.entity[fieldKey as keyof TEntity]}`;
+    case ColumnType.PERCENTAGE: {
+      const numericValue = typeof value === 'number' ? value : Number(value);
+
+      if (Number.isNaN(numericValue)) {
+        return '';
+      }
+
+      if (config.type === ColumnType.NUMBER) {
+        return formatNumber(numericValue);
+      }
+
+      if (config.type === ColumnType.MONEY) {
+        return formatCurrency(numericValue);
+      }
+
+      return formatPercentage(numericValue);
+    }
+    case ColumnType.SELECT: {
+      const selectedValue = typeof value === 'string' || typeof value === 'number' ? value : undefined;
+
+      return config.selectConfig?.options?.find((opt) => opt.code === selectedValue)?.label ?? toDisplayString(value);
+    }
+    case ColumnType.SEARCH_SELECT: {
+      const selectedEntity = value as TEntity | undefined;
+
+      return selectedEntity ? config.searchSelectConfig?.selected(selectedEntity) ?? '' : '';
+    }
+    case ColumnType.SEARCH_SELECT_MULTIPLE: {
+      const selectedEntities = value as TEntity[] | undefined;
+
+      return selectedEntities ? config.searchSelectMultipleConfig?.selected(selectedEntities) ?? '' : '';
+    }
+    case ColumnType.DATE: {
+      const dateValue = value instanceof Date ? value : value ? new Date(value as string | number | Date) : null;
+
+      return dateValue && !Number.isNaN(dateValue.getTime()) ? dateValue.toLocaleDateString() : '-';
+    }
+    case ColumnType.PHONE: {
+      const secondaryField = config.phoneConfig?.secondaryField;
+      const secondaryValue = secondaryField ? getFieldValue(row, secondaryField) : undefined;
+      const primaryValue = getFieldValue(row, fieldKey);
+
+      return `${toDisplayString(secondaryValue)} ${toDisplayString(primaryValue)}`.trim();
+    }
     default:
-      return String(value ?? '');
+      return toDisplayString(value);
   }
 }
 
@@ -186,10 +235,16 @@ function updateFieldValue(row: TableRow<TEntity>, fieldKey: string, value: unkno
   const keys = fieldKey.split('.');
   const lastKey = keys.pop()!;
 
-  const target = keys.reduce((obj, key) => obj?.[key], row.entity as any);
+  const target = keys.reduce<Record<string, unknown> | null>((obj, key) => {
+    if (obj && typeof obj === 'object' && key in obj) {
+      return obj[key] as Record<string, unknown>;
+    }
 
-  if (target) {
-    target[lastKey] = value;
+    return null;
+  }, row.entity as Record<string, unknown>);
+
+  if (target && typeof target === 'object') {
+    (target as Record<string, unknown>)[lastKey] = value;
   }
 
   row._isEdited = true;

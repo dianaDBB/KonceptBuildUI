@@ -7,24 +7,24 @@
         <label>Tipo</label>
         <SelectInput
           :value="form.type"
-          :isInvalid="!form.type"
-          :isDisabled="false"
-          :selectOptions="Object.values(paymentTypes)"
+          :is-invalid="!form.type"
+          :is-disabled="false"
+          :select-options="Object.values(paymentTypes)"
           @update:value="form.type = $event"
         />
       </div>
 
       <div class="form-group">
         <label>Nº Documento Relacionado</label>
-        <TextInput :value="invoice?.docNumber" :isDisabled="true" :isInvalid="false" />
+        <TextInput :value="invoice?.docNumber" :is-disabled="true" :is-invalid="false" />
       </div>
 
       <div class="form-group">
         <label>Data Pagamento</label>
         <DateInput
           :value="form.paymentDate"
-          :isInvalid="!form.paymentDate"
-          :isDisabled="isLoading"
+          :is-invalid="!form.paymentDate"
+          :is-disabled="isLoading"
           @update:value="form.paymentDate = $event"
         />
       </div>
@@ -34,8 +34,8 @@
         <MoneyInput
           :entity="form"
           :value="form.paidValue!"
-          :isInvalid="!form.paidValue"
-          :isDisabled="isLoading"
+          :is-invalid="!form.paidValue"
+          :is-disabled="isLoading"
           field-key="paidValue"
         />
       </div>
@@ -44,16 +44,21 @@
         <label>Método Pagamento</label>
         <SelectInput
           :value="form.paymentMethod"
-          :isInvalid="!form.paymentMethod"
-          :selectOptions="Object.values(paymentMethods)"
-          :isDisabled="isLoading"
+          :is-invalid="!form.paymentMethod"
+          :select-options="Object.values(paymentMethods)"
+          :is-disabled="isLoading"
           @update:value="form.paymentMethod = $event"
         />
       </div>
 
       <div class="form-group">
         <label>Notas</label>
-        <TextInput :value="form.notes" :isDisabled="isLoading" :isInvalid="false" @update:value="form.notes = $event" />
+        <TextInput
+          :value="form.notes"
+          :is-disabled="isLoading"
+          :is-invalid="false"
+          @update:value="form.notes = $event"
+        />
       </div>
     </form>
 

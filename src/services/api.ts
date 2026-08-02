@@ -1,8 +1,9 @@
 import axios from 'axios';
 import AuthApi from './auth-api';
 import { ApiResponseStatus } from '@/types/api-response-status';
+import { RoutePaths } from '@/constants/routes';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
 const axiosClient = axios.create({
   baseURL: API_BASE_URL,
@@ -13,6 +14,7 @@ axiosClient.interceptors.request.use((config) => {
   const token = AuthApi.getAccessToken();
 
   if (token && config.url !== '/auth/login') {
+    config.headers.set?.('Authorization', `Bearer ${token}`);
     config.headers.Authorization = `Bearer ${token}`;
   }
 
@@ -25,8 +27,8 @@ axiosClient.interceptors.response.use(
     if (error.response?.status === 401) {
       AuthApi.clearAccessToken();
 
-      if (window.location.pathname !== '/login') {
-        window.location.assign('/login');
+      if (window.location.pathname !== RoutePaths.login) {
+        window.location.assign(RoutePaths.login);
       }
     }
 
@@ -35,7 +37,7 @@ axiosClient.interceptors.response.use(
 );
 
 export function apiError(error: unknown, defaultMessage: string): ApiResponseStatus {
-  let message: string = defaultMessage;
+  let message = defaultMessage;
 
   if (axios.isAxiosError(error)) {
     message = error.response?.data?.message ?? error.message;
