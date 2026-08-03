@@ -393,8 +393,10 @@ async function loadConfigs() {
 
 async function fetchWorks() {
   const workFilters: WorkFilters = {
-    startDateMax: getDate(selectedYear.value, selectedMonth.value, daysInMonth.value),
-    endDateMin: getDate(selectedYear.value, selectedMonth.value, 1),
+    startDate: {
+      min: getDate(selectedYear.value, selectedMonth.value, 1),
+      max: getDate(selectedYear.value, selectedMonth.value, daysInMonth.value),
+    },
   };
   availableWorks.value = await workApi.searchWorks(workFilters);
 }

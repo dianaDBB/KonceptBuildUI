@@ -1,5 +1,5 @@
 import { SortDirection } from './sort-direction';
-import { EntityType } from './entity-configs';
+import { EntityType, RangeFilter } from './entity-configs';
 import { PaymentMethodEnum } from './payment-method-enum';
 import { UUID } from 'node:crypto';
 
@@ -38,24 +38,16 @@ export enum WageSortField {
 
 export interface WageFilters {
   code?: string;
-  yearMin?: number;
-  yearMax?: number;
-  monthMin?: number;
-  monthMax?: number;
-  workerCode?: string;
+  year?: RangeFilter;
+  month?: RangeFilter;
   workerName?: string;
-  expectedWageMin?: number;
-  expectedWageMax?: number;
-  expectedExtraHoursMin?: number;
-  expectedExtraHoursMax?: number;
-  expectedDeductionsMin?: number;
-  expectedDeductionsMax?: number;
-  expectedInternalCostMin?: number;
-  expectedInternalCostMax?: number;
-  paidValueMin?: number;
-  paidValueMax?: number;
-  paidDateMin?: string;
-  paidDateMax?: string;
+  workerCode?: string;
+  expectedWage?: RangeFilter;
+  expectedExtraHours?: RangeFilter;
+  expectedDeductions?: RangeFilter;
+  expectedInternalCost?: RangeFilter;
+  paidValue?: RangeFilter;
+  paidDate?: RangeFilter;
   paymentMethod?: PaymentMethodEnum;
   notes?: string;
 

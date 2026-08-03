@@ -24,7 +24,7 @@ export class ClientInvoice {
           showDisabled: () => false,
           isInvalid: (clientInvoice: ClientInvoiceType) => !clientInvoice.docNumber,
           columnStyle: {
-            width: '90px',
+            width: '100px',
           },
         },
         filterConfig: {
@@ -41,7 +41,7 @@ export class ClientInvoice {
         label: 'Cliente',
         type: ColumnType.SEARCH_SELECT,
         searchSelectConfig: {
-          selected: (client: ClientType) => client.companyName!,
+          selected: (client: ClientType) => `${client.code!}\n${client.companyName!}`,
           options: clientOptions,
           optionLines: (client: ClientType) => [client.code!, client.companyName!, client.nif!],
           filter: (client: ClientType) => `${client.companyName} ${client.nif} ${client.code}`,
@@ -56,24 +56,26 @@ export class ClientInvoice {
           },
         },
         filterConfig: {
-          column: ClientInvoiceSortField.CLIENT_NAME,
+          column: ClientInvoiceSortField.CLIENT,
           kind: TableFilterKind.TEXT,
+          info: 'Pode pesquisar por: ID | Nome/Empresa | NIF | Contacto | E-mail | Tlf',
           valueConfig: {
-            valueKey: 'clientName',
+            valueKey: 'client',
           },
           dropdownAlign: 'start',
         },
-        displayValue: (clientInvoice: ClientInvoiceType) => clientInvoice.client?.companyName,
+        displayValue: (clientInvoice: ClientInvoiceType) =>
+          clientInvoice.client ? `${clientInvoice.client?.code} - ${clientInvoice.client?.companyName}` : undefined,
       },
       work: {
         label: 'Obra',
         type: ColumnType.SEARCH_SELECT,
         searchSelectConfig: {
-          selected: (work: WorkType) => work.name!,
+          selected: (work: WorkType) => `${work.code!}\n${work.name!}`,
           options: workOptions,
           optionLines: (work: WorkType) => [work.code!, work.name!],
           filter: (work: WorkType) => `${work.code} ${work.name}`,
-          tooltipTitle: (work: WorkType) => work.code!,
+          tooltipTitle: (work: WorkType) => work.name!,
           tooltipItems: (work: WorkType) => buildTooltipItems(work, workConfigs),
         },
         styleConfig: {
@@ -84,13 +86,15 @@ export class ClientInvoice {
           },
         },
         filterConfig: {
-          column: ClientInvoiceSortField.WORK_NAME,
+          column: ClientInvoiceSortField.WORK,
           kind: TableFilterKind.TEXT,
+          info: 'Pode pesquisar por: Pode pesquisar por: ID | Nome',
           valueConfig: {
-            valueKey: 'workName',
+            valueKey: 'work',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) => clientInvoice.work?.name,
+        displayValue: (clientInvoice: ClientInvoiceType) =>
+          clientInvoice.work ? `${clientInvoice.work?.code} - ${clientInvoice.work?.name}` : undefined,
       },
       description: {
         label: 'Descrição',
@@ -126,8 +130,7 @@ export class ClientInvoice {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'valueWithoutTaxMin',
-            maxKey: 'valueWithoutTaxMax',
+            valueKey: 'valueWithoutTax',
           },
         },
         displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.valueWithoutTax),
@@ -148,8 +151,7 @@ export class ClientInvoice {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'appliedTaxMin',
-            maxKey: 'appliedTaxMax',
+            valueKey: 'appliedTax',
           },
         },
         displayValue: (clientInvoice: ClientInvoiceType) => formatPercentage(clientInvoice.appliedTax),
@@ -169,8 +171,7 @@ export class ClientInvoice {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'taxValueMin',
-            maxKey: 'taxValueMax',
+            valueKey: 'taxValue',
           },
         },
         displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.taxValue),
@@ -190,8 +191,7 @@ export class ClientInvoice {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'totalValueMin',
-            maxKey: 'totalValueMax',
+            valueKey: 'totalValue',
           },
         },
         displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.totalValue),
@@ -211,8 +211,7 @@ export class ClientInvoice {
           kind: TableFilterKind.DATE_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.DATE,
-            minKey: 'registrationDateMin',
-            maxKey: 'registrationDateMax',
+            valueKey: 'registrationDate',
           },
         },
         displayValue: (clientInvoice: ClientInvoiceType) => clientInvoice.registrationDate,
@@ -232,8 +231,7 @@ export class ClientInvoice {
           kind: TableFilterKind.DATE_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.DATE,
-            minKey: 'dueDateMin',
-            maxKey: 'dueDateMax',
+            valueKey: 'dueDate',
           },
         },
         displayValue: (clientInvoice: ClientInvoiceType) => clientInvoice.dueDate,

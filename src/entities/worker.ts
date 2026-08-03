@@ -177,8 +177,7 @@ export class Worker {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'hourCostMin',
-            maxKey: 'hourCostMax',
+            valueKey: 'hourCost',
           },
         },
         displayValue: (worker: WorkerType) => formatCurrency(worker.currentWorkerCompensation?.hourCost),
@@ -198,8 +197,7 @@ export class Worker {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'defaultHoursMin',
-            maxKey: 'defaultHoursMax',
+            valueKey: 'defaultHours',
           },
         },
         displayValue: (worker: WorkerType) => formatNumber(worker.currentWorkerCompensation?.defaultHours),
@@ -253,8 +251,7 @@ export class Worker {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'hourRateMin',
-            maxKey: 'hourRateMax',
+            valueKey: 'hourRate',
           },
         },
         displayValue: (worker: WorkerType) => formatCurrency(worker.currentWorkerCompensation?.hourRate),
@@ -279,8 +276,7 @@ export class Worker {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'monthlySalaryMin',
-            maxKey: 'monthlySalaryMax',
+            valueKey: 'monthlySalary',
           },
         },
         displayValue: (worker: WorkerType) => formatCurrency(worker.currentWorkerCompensation?.monthlySalary),
@@ -305,8 +301,7 @@ export class Worker {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'tsuMin',
-            maxKey: 'tsuMax',
+            valueKey: 'tsu',
           },
         },
         displayValue: (worker: WorkerType) => formatPercentage(worker.currentWorkerCompensation?.tsu),
@@ -329,8 +324,7 @@ export class Worker {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'mealAllowanceMin',
-            maxKey: 'mealAllowanceMax',
+            valueKey: 'mealAllowance',
           },
         },
         displayValue: (worker: WorkerType) => formatCurrency(worker.currentWorkerCompensation?.mealAllowance),
@@ -353,8 +347,7 @@ export class Worker {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'accidentInsuranceMin',
-            maxKey: 'accidentInsuranceMax',
+            valueKey: 'accidentInsurance',
           },
         },
         displayValue: (worker: WorkerType) => formatCurrency(worker.currentWorkerCompensation?.accidentInsurance),
@@ -374,8 +367,7 @@ export class Worker {
           kind: TableFilterKind.DATE_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.DATE,
-            minKey: 'startDateMin',
-            maxKey: 'startDateMax',
+            valueKey: 'startDate',
           },
         },
         displayValue: (worker: WorkerType) => worker.startDate,
@@ -395,8 +387,7 @@ export class Worker {
           kind: TableFilterKind.DATE_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.DATE,
-            minKey: 'endDateMin',
-            maxKey: 'endDateMax',
+            valueKey: 'endDateMin',
           },
         },
         displayValue: (worker: WorkerType) => worker.endDate,

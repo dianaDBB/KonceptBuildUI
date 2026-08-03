@@ -92,7 +92,7 @@ export class ClientPayment {
         label: 'Cliente',
         type: ColumnType.SEARCH_SELECT,
         searchSelectConfig: {
-          selected: (client: ClientType) => client.companyName!,
+          selected: (client: ClientType) => `${client.code!}\n${client.companyName!}`,
           options: clientOptions,
           optionLines: (client: ClientType) => [client.code!, client.companyName!, client.nif!],
           filter: (client: ClientType) => `${client.companyName} ${client.nif} ${client.code}`,
@@ -107,14 +107,16 @@ export class ClientPayment {
           },
         },
         filterConfig: {
-          column: ClientPaymentSortField.CLIENT_NAME,
+          column: ClientPaymentSortField.CLIENT,
           kind: TableFilterKind.TEXT,
+          info: 'Pode pesquisar por: ID | Nome/Empresa | NIF | Contacto | E-mail | Tlf',
           valueConfig: {
-            valueKey: 'clientName',
+            valueKey: 'client',
           },
           dropdownAlign: 'start',
         },
-        displayValue: (clientPayment: ClientPaymentType) => clientPayment.client?.companyName,
+        displayValue: (clientPayment: ClientPaymentType) =>
+          clientPayment.client ? `${clientPayment.client?.code} - ${clientPayment.client?.companyName}` : undefined,
       },
       paymentDate: {
         label: 'Data Pagamento',
@@ -131,8 +133,7 @@ export class ClientPayment {
           kind: TableFilterKind.DATE_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.DATE,
-            minKey: 'paymentDateMin',
-            maxKey: 'paymentDateMax',
+            valueKey: 'paymentDate',
           },
         },
         displayValue: (clientPayment: ClientPaymentType) => clientPayment.paymentDate,
@@ -152,8 +153,7 @@ export class ClientPayment {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'paidValueMin',
-            maxKey: 'paidValueMax',
+            valueKey: 'paidValue',
           },
         },
         displayValue: (clientPayment: ClientPaymentType) => formatCurrency(clientPayment.paidValue),

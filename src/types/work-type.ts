@@ -1,6 +1,6 @@
 import { SortDirection } from './sort-direction';
 import { ClientType } from './client-type';
-import { EntityType } from './entity-configs';
+import { EntityType, RangeFilter } from './entity-configs';
 
 export interface WorkType extends EntityType {
   name?: string;
@@ -30,32 +30,23 @@ export enum WorkSortField {
   START_DATE = 'START_DATE',
   ESTIMATED_END_DATE = 'ESTIMATED_END_DATE',
   END_DATE = 'END_DATE',
-  CLIENT_NAME = 'CLIENT_NAME',
+  CLIENT = 'CLIENT',
 }
 
 export interface WorkFilters {
   code?: string;
   name?: string;
   status?: string;
-  contractedBudgetMin?: number;
-  contractedBudgetMax?: number;
-  estimatedCostMin?: number;
-  estimatedCostMax?: number;
-  estimatedCostMaterialsMin?: number;
-  estimatedCostMaterialsMax?: number;
-  estimatedCostLaborMin?: number;
-  estimatedCostLaborMax?: number;
-  estimatedMarginEurMin?: number;
-  estimatedMarginEurMax?: number;
-  estimatedMarginPercentualMin?: number;
-  estimatedMarginPercentualMax?: number;
-  startDateMin?: string;
-  startDateMax?: string;
-  estimatedEndDateMin?: string;
-  estimatedEndDateMax?: string;
-  endDateMin?: string;
-  endDateMax?: string;
-  clientName?: string;
+  contractedBudget?: RangeFilter;
+  estimatedCost?: RangeFilter;
+  estimatedCostMaterials?: RangeFilter;
+  estimatedCostLabor?: RangeFilter;
+  estimatedMarginEur?: RangeFilter;
+  estimatedMarginPercentual?: RangeFilter;
+  startDate?: RangeFilter;
+  estimatedEndDate?: RangeFilter;
+  endDate?: RangeFilter;
+  client?: string;
 
   sortBy?: WorkSortField;
   sortDirection?: SortDirection;

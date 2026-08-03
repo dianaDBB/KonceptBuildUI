@@ -16,7 +16,7 @@ export class Wage {
           showDisabled: () => true,
           isInvalid: () => false,
           columnStyle: {
-            width: '100px',
+            width: '120px',
           },
         },
         filterConfig: {
@@ -44,9 +44,9 @@ export class Wage {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'yearMin',
-            maxKey: 'yearMax',
+            valueKey: 'year',
           },
+          dropdownAlign: 'start',
         },
         displayValue: (wage: WageType) => wage.year,
       },
@@ -65,9 +65,9 @@ export class Wage {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'monthMin',
-            maxKey: 'monthMax',
+            valueKey: 'month',
           },
+          dropdownAlign: 'start',
         },
         displayValue: (wage: WageType) => wage.month,
       },
@@ -78,7 +78,7 @@ export class Wage {
           showDisabled: () => true,
           isInvalid: () => false,
           columnStyle: {
-            width: '80px',
+            width: '100px',
           },
         },
         filterConfig: {
@@ -147,8 +147,7 @@ export class Wage {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'expectedWageMin',
-            maxKey: 'expectedWageMax',
+            valueKey: 'expectedWage',
           },
         },
         displayValue: (wage: WageType) => formatCurrency(wage.expectedWage),
@@ -175,8 +174,7 @@ export class Wage {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'expectedExtraHoursMin',
-            maxKey: 'expectedExtraHoursMax',
+            valueKey: 'expectedExtraHours',
           },
         },
         displayValue: (wage: WageType) => formatCurrency(wage.expectedExtraHours),
@@ -200,8 +198,7 @@ export class Wage {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'expectedDeductionsMin',
-            maxKey: 'expectedDeductionsMax',
+            valueKey: 'expectedDeductions',
           },
         },
         displayValue: (wage: WageType) => formatCurrency(wage.expectedDeductions),
@@ -228,8 +225,7 @@ export class Wage {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'expectedInternalCostMin',
-            maxKey: 'expectedInternalCostMax',
+            valueKey: 'expectedInternalCost',
           },
         },
         displayValue: (wage: WageType) => formatCurrency(wage.expectedInternalCost),
@@ -249,8 +245,7 @@ export class Wage {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'paidValueMin',
-            maxKey: 'paidValueMax',
+            valueKey: 'paidValue',
           },
         },
         displayValue: (wage: WageType) => formatCurrency(wage.paidValue),
@@ -270,8 +265,7 @@ export class Wage {
           kind: TableFilterKind.DATE_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.DATE,
-            minKey: 'paidDateMin',
-            maxKey: 'paidDateMax',
+            valueKey: 'paidDate',
           },
         },
         displayValue: (wage: WageType) => wage.paidDate,

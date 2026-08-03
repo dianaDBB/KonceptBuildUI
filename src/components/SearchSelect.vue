@@ -162,7 +162,6 @@ onUnmounted(() => {
 
 .select-button {
   width: 100%;
-  min-height: 34px;
 
   display: flex;
   align-items: center;

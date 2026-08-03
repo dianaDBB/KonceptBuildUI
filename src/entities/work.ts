@@ -91,8 +91,7 @@ export class Work {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'contractedBudgetMin',
-            maxKey: 'contractedBudgetMax',
+            valueKey: 'contractedBudget',
           },
         },
         displayValue: (work: WorkType) => formatCurrency(work.contractedBudget),
@@ -113,8 +112,7 @@ export class Work {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'estimatedCostMin',
-            maxKey: 'estimatedCostMax',
+            valueKey: 'estimatedCost',
           },
         },
         displayValue: (work: WorkType) => formatCurrency(work.estimatedCost),
@@ -134,8 +132,7 @@ export class Work {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'estimatedCostMaterialsMin',
-            maxKey: 'estimatedCostMaterialsMax',
+            valueKey: 'estimatedCostMaterials',
           },
         },
         displayValue: (work: WorkType) => formatCurrency(work.estimatedCostMaterials),
@@ -155,8 +152,7 @@ export class Work {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'estimatedCostLaborMin',
-            maxKey: 'estimatedCostLaborMax',
+            valueKey: 'estimatedCostLabor',
           },
         },
         displayValue: (work: WorkType) => formatCurrency(work.estimatedCostLabor),
@@ -177,8 +173,7 @@ export class Work {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'estimatedMarginEurMin',
-            maxKey: 'estimatedMarginEurMax',
+            valueKey: 'estimatedMarginEur',
           },
         },
         displayValue: (work: WorkType) => formatCurrency(work.estimatedMarginEur),
@@ -199,8 +194,7 @@ export class Work {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'estimatedMarginPercentualMin',
-            maxKey: 'estimatedMarginPercentualMax',
+            valueKey: 'estimatedMarginPercentual',
           },
         },
         displayValue: (work: WorkType) => formatPercentage(work.estimatedMarginPercentual),
@@ -220,8 +214,7 @@ export class Work {
           kind: TableFilterKind.DATE_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.DATE,
-            minKey: 'startDateMin',
-            maxKey: 'startDateMax',
+            valueKey: 'startDate',
           },
         },
         displayValue: (work: WorkType) => work.startDate,
@@ -241,8 +234,7 @@ export class Work {
           kind: TableFilterKind.DATE_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.DATE,
-            minKey: 'estimatedEndDateMin',
-            maxKey: 'estimatedEndDateMax',
+            valueKey: 'estimatedEndDate',
           },
         },
         displayValue: (work: WorkType) => work.estimatedEndDate,
@@ -262,8 +254,7 @@ export class Work {
           kind: TableFilterKind.DATE_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.DATE,
-            minKey: 'endDateMin',
-            maxKey: 'endDateMax',
+            valueKey: 'endDate',
           },
         },
         displayValue: (work: WorkType) => work.endDate,
@@ -272,7 +263,7 @@ export class Work {
         label: 'Cliente',
         type: ColumnType.SEARCH_SELECT,
         searchSelectConfig: {
-          selected: (client: ClientType) => client.companyName!,
+          selected: (client: ClientType) => `${client.code!}\n${client.companyName!}`,
           options: clientOptions,
           optionLines: (client: ClientType) => [client.code!, client.companyName!, client.nif!],
           filter: (client: ClientType) => `${client.companyName} ${client.nif} ${client.code}`,
@@ -287,13 +278,15 @@ export class Work {
           },
         },
         filterConfig: {
-          column: WorkSortField.CLIENT_NAME,
+          column: WorkSortField.CLIENT,
           kind: TableFilterKind.TEXT,
+          info: 'Pode pesquisar por: ID | Nome/Empresa | NIF | Contacto | E-mail | Tlf',
           valueConfig: {
-            valueKey: 'clientName',
+            valueKey: 'client',
           },
         },
-        displayValue: (work: WorkType) => work.client?.companyName,
+        displayValue: (work: WorkType) =>
+          work.client ? `${work.client?.code} - ${work.client?.companyName}` : undefined,
       },
     };
   }

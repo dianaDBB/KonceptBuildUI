@@ -51,6 +51,10 @@
             :placeholder="`Pesquisar por ${config.label.toLowerCase()}`"
           />
 
+          <div v-if="config.filterConfig.info" class="info">
+            {{ config.filterConfig.info }}
+          </div>
+
           <select
             v-else-if="config.filterConfig.kind === TableFilterKind.SELECT"
             v-model="filterValues[(config.filterConfig.valueConfig as SingleFilterConfig).valueKey!]"
@@ -64,7 +68,7 @@
 
           <div v-else class="range-fields">
             <input
-              v-model="filterValues[(config.filterConfig.valueConfig as RangeFilterConfig).minKey!]"
+              v-model="(filterValues[(config.filterConfig.valueConfig as RangeFilterConfig).valueKey] as RangeFilter).min"
               :type="rangeInputType"
               :step="rangeStep"
               placeholder="Mínimo"
@@ -73,7 +77,7 @@
             <span>-</span>
 
             <input
-              v-model="filterValues[(config.filterConfig.valueConfig as RangeFilterConfig).maxKey!]"
+              v-model="(filterValues[(config.filterConfig.valueConfig as RangeFilterConfig).valueKey] as RangeFilter).max"
               :type="rangeInputType"
               :step="rangeStep"
               placeholder="Máximo"
@@ -100,6 +104,7 @@ import { SortDirection } from '@/types/sort-direction';
 import {
   EntityConfig,
   EntityType,
+  RangeFilter,
   RangeFilterConfig,
   RangeFilterValueType,
   SingleFilterConfig,
@@ -149,11 +154,7 @@ const filterKeys = computed(() => {
     return [];
   }
 
-  return [
-    (filterConfig.value.valueConfig as SingleFilterConfig).valueKey,
-    (filterConfig.value.valueConfig as RangeFilterConfig).minKey,
-    (filterConfig.value.valueConfig as RangeFilterConfig).maxKey,
-  ].filter(Boolean) as string[];
+  return [(filterConfig.value.valueConfig as SingleFilterConfig).valueKey];
 });
 
 const rangeConfig = computed(() => filterConfig.value?.valueConfig as RangeFilterConfig | undefined);
@@ -172,6 +173,12 @@ const dropdownStyle = ref<CSSProperties>({
 });
 
 function hasValue(value: unknown): boolean {
+  if (value && typeof value === 'object' && 'min' in (value as object) && 'max' in (value as object)) {
+    const range = value as RangeFilter;
+
+    return range.min != null || range.max != null;
+  }
+
   return value !== undefined && value !== null && value !== '';
 }
 
@@ -181,7 +188,23 @@ function toggleDropdown() {
     return;
   }
 
-  filterValues.value = Object.fromEntries(filterKeys.value.map((key) => [key, currentFilters.value[key]]));
+  filterValues.value = Object.fromEntries(
+    filterKeys.value.map((key) => [
+      key,
+      currentFilters.value[key] ? { ...(currentFilters.value[key] as object) } : undefined,
+    ]),
+  );
+
+  const valueConfig = filterConfig.value?.valueConfig;
+
+  if (valueConfig && 'valueType' in valueConfig) {
+    const key = valueConfig.valueKey;
+
+    filterValues.value[key] ??= {
+      min: undefined,
+      max: undefined,
+    };
+  }
 
   if (button.value) {
     const rect = button.value.getBoundingClientRect();
@@ -228,9 +251,20 @@ function apply() {
 }
 
 function clear() {
-  emit('clear', Object.fromEntries(filterKeys.value.map((key) => [key, undefined])));
+  const values: FilterValues = {};
 
-  close();
+  for (const key of filterKeys.value) {
+    if (filterConfig.value?.kind === TableFilterKind.NUMBER_RANGE) {
+      values[key] = {
+        min: undefined,
+        max: undefined,
+      };
+    } else {
+      values[key] = undefined;
+    }
+  }
+
+  emit('clear', values);
 }
 
 function closeOnOutsideClick(event: MouseEvent) {
@@ -370,5 +404,12 @@ function closeOnOutsideClick(event: MouseEvent) {
   &:hover {
     opacity: 0.9;
   }
+}
+
+.info {
+  color: var(--color-text-secondary);
+  font-size: 10px;
+
+  padding: 0.45rem 0.5rem;
 }
 </style>

@@ -1,5 +1,5 @@
 import { SortDirection } from './sort-direction';
-import { EntityType } from './entity-configs';
+import { EntityType, RangeFilter } from './entity-configs';
 import { UUID } from 'node:crypto';
 
 export interface WorkerType extends EntityType {
@@ -58,25 +58,16 @@ export interface WorkerFilters {
   phone?: string;
   email?: string;
   function?: string;
-  hourCostMin?: number;
-  hourCostMax?: number;
-  defaultHoursMin?: number;
-  defaultHoursMax?: number;
+  hourCost?: RangeFilter;
+  defaultHours?: RangeFilter;
   workerContractType?: string;
-  hourRateMin?: number;
-  hourRateMax?: number;
-  monthlySalaryMin?: number;
-  monthlySalaryMax?: number;
-  tsuMin?: number;
-  tsuMax?: number;
-  mealAllowanceMin?: number;
-  mealAllowanceMax?: number;
-  accidentInsuranceMin?: number;
-  accidentInsuranceMax?: number;
-  startDateMin?: string;
-  startDateMax?: string;
-  endDateMin?: string;
-  endDateMax?: string;
+  hourRate?: RangeFilter;
+  monthlySalary?: RangeFilter;
+  tsu?: RangeFilter;
+  mealAllowance?: RangeFilter;
+  accidentInsurance?: RangeFilter;
+  startDate?: RangeFilter;
+  endDate?: RangeFilter;
 
   sortBy?: WorkerSortField;
   sortDirection?: SortDirection;

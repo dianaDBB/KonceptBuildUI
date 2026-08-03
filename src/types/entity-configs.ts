@@ -100,6 +100,7 @@ export interface PhoneConfig<TEntity extends EntityType = EntityType> {
 export interface FilterConfig<TSortField extends string = string> {
   column: TSortField;
   kind: TableFilterKind;
+  info?: string;
   valueConfig: SingleFilterConfig | RangeFilterConfig;
   dropdownAlign?: 'start' | 'end';
 }
@@ -115,6 +116,10 @@ export enum RangeFilterValueType {
 
 export interface RangeFilterConfig {
   valueType: RangeFilterValueType;
-  minKey: string;
-  maxKey: string;
+  valueKey: string;
+}
+
+export interface RangeFilter {
+  min: string | number | undefined;
+  max: string | number | undefined;
 }

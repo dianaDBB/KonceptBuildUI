@@ -1,6 +1,6 @@
 import { SortDirection } from './sort-direction';
 import { ClientType } from './client-type';
-import { EntityType } from './entity-configs';
+import { EntityType, RangeFilter } from './entity-configs';
 import { WorkType } from './work-type';
 
 export interface ClientInvoiceType extends EntityType {
@@ -18,8 +18,8 @@ export interface ClientInvoiceType extends EntityType {
 
 export enum ClientInvoiceSortField {
   DOCUMENT_NUMBER = 'DOCUMENT_NUMBER',
-  CLIENT_NAME = 'CLIENT_NAME',
-  WORK_NAME = 'WORK_NAME',
+  CLIENT = 'CLIENT',
+  WORK = 'WORK',
   DESCRIPTION = 'DESCRIPTION',
   VALUE_WITHOUT_TAX = 'VALUE_WITHOUT_TAX',
   APPLIED_TAX = 'APPLIED_TAX',
@@ -31,21 +31,15 @@ export enum ClientInvoiceSortField {
 
 export interface ClientInvoiceFilters {
   docNumber?: string;
-  clientName?: string;
+  client?: string;
   workName?: string;
   description?: string;
-  valueWithoutTaxMin?: number;
-  valueWithoutTaxMax?: number;
-  appliedTaxMin?: number;
-  appliedTaxMax?: number;
-  taxValueMin?: number;
-  taxValueMax?: number;
-  totalValueMin?: number;
-  totalValueMax?: number;
-  registrationDateMin?: string;
-  registrationDateMax?: string;
-  dueDateMin?: string;
-  dueDateMax?: string;
+  valueWithoutTax?: RangeFilter;
+  appliedTax?: RangeFilter;
+  taxValue?: RangeFilter;
+  totalValue?: RangeFilter;
+  registrationDate?: RangeFilter;
+  dueDate?: RangeFilter;
 
   sortBy?: ClientInvoiceSortField;
   sortDirection?: SortDirection;
