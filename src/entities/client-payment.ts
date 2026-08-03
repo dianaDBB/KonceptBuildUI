@@ -65,35 +65,12 @@ export class ClientPayment {
         },
         displayValue: (clientPayment: ClientPaymentType) => clientPayment.documentId,
       },
-      invoices: {
-        label: 'Nº Documento Relacionado',
-        type: ColumnType.SEARCH_SELECT_MULTIPLE,
-        searchSelectMultipleConfig: {
-          selected: (invoices: ClientInvoiceType[]) => invoices.map((invoice) => invoice.docNumber).join(', '),
-          options: invoiceOptions,
-          optionKey: (invoice: ClientInvoiceType) => invoice.id!,
-          optionLines: (invoice: ClientInvoiceType) => [invoice.docNumber!],
-          filter: (invoice: ClientInvoiceType) => `${invoice.docNumber}`,
-          tooltipTitle: (invoice: ClientInvoiceType) => invoice.docNumber!,
-          tooltipItems: (invoice: ClientInvoiceType) => buildTooltipItems(invoice, invoiceConfigs),
-        },
-        styleConfig: {
-          showDisabled: () => false,
-          isInvalid: (clientPayment: ClientPaymentType) => !clientPayment.invoices?.length,
-          columnStyle: {
-            width: '200px',
-          },
-        },
-        // TODO: add the filter
-        displayValue: (clientPayment: ClientPaymentType) =>
-          clientPayment.invoices?.map((invoice) => invoice.docNumber).join(', '),
-      },
       client: {
         label: 'Cliente',
         type: ColumnType.SEARCH_SELECT,
         searchSelectConfig: {
           selected: (client: ClientType) => `${client.code!}\n${client.companyName!}`,
-          options: clientOptions,
+          options: () => clientOptions,
           optionLines: (client: ClientType) => [client.code!, client.companyName!, client.nif!],
           filter: (client: ClientType) => `${client.companyName} ${client.nif} ${client.code}`,
           tooltipTitle: (client: ClientType) => client.companyName!,
@@ -117,6 +94,35 @@ export class ClientPayment {
         },
         displayValue: (clientPayment: ClientPaymentType) =>
           clientPayment.client ? `${clientPayment.client?.code} - ${clientPayment.client?.companyName}` : undefined,
+      },
+      invoices: {
+        label: 'Nº Documento Relacionado',
+        type: ColumnType.SEARCH_SELECT_MULTIPLE,
+        searchSelectMultipleConfig: {
+          selected: (invoices: ClientInvoiceType[]) => invoices.map((invoice) => invoice.docNumber).join(', '),
+          options: (clientPayment: ClientPaymentType) => {
+            if (!clientPayment.client?.id) {
+              return invoiceOptions;
+            }
+
+            return invoiceOptions.filter((invoiceOption) => invoiceOption.client?.code === clientPayment.client?.code);
+          },
+          optionKey: (invoice: ClientInvoiceType) => invoice.id!,
+          optionLines: (invoice: ClientInvoiceType) => [invoice.docNumber!],
+          filter: (invoice: ClientInvoiceType) => `${invoice.docNumber}`,
+          tooltipTitle: (invoice: ClientInvoiceType) => invoice.docNumber!,
+          tooltipItems: (invoice: ClientInvoiceType) => buildTooltipItems(invoice, invoiceConfigs),
+        },
+        styleConfig: {
+          showDisabled: (clientPayment: ClientPaymentType) => clientPayment.client == undefined,
+          isInvalid: (clientPayment: ClientPaymentType) => !clientPayment.invoices?.length,
+          columnStyle: {
+            width: '200px',
+          },
+        },
+        // TODO: add the filter
+        displayValue: (clientPayment: ClientPaymentType) =>
+          clientPayment.invoices?.map((invoice) => invoice.docNumber).join(', '),
       },
       paymentDate: {
         label: 'Data Pagamento',

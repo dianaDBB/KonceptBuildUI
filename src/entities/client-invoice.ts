@@ -1,4 +1,4 @@
-import { ColumnType, Configs, RangeFilterValueType } from '@/types/entity-configs';
+import { ColumnType, Configs, RangeFilterValueType, TableRow } from '@/types/entity-configs';
 import { TableFilterKind } from '@/types/table-filter';
 import { WorkType } from '@/types/work-type';
 import { ClientType } from '@/types/client-type';
@@ -42,7 +42,7 @@ export class ClientInvoice {
         type: ColumnType.SEARCH_SELECT,
         searchSelectConfig: {
           selected: (client: ClientType) => `${client.code!}\n${client.companyName!}`,
-          options: clientOptions,
+          options: () => clientOptions,
           optionLines: (client: ClientType) => [client.code!, client.companyName!, client.nif!],
           filter: (client: ClientType) => `${client.companyName} ${client.nif} ${client.code}`,
           tooltipTitle: (client: ClientType) => client.companyName!,
@@ -72,14 +72,20 @@ export class ClientInvoice {
         type: ColumnType.SEARCH_SELECT,
         searchSelectConfig: {
           selected: (work: WorkType) => `${work.code!}\n${work.name!}`,
-          options: workOptions,
+          options: (invoice: ClientInvoiceType) => {
+            if (!invoice.client?.id) {
+              return workOptions;
+            }
+
+            return workOptions.filter((work) => work.client?.code === invoice.client?.code);
+          },
           optionLines: (work: WorkType) => [work.code!, work.name!],
           filter: (work: WorkType) => `${work.code} ${work.name}`,
           tooltipTitle: (work: WorkType) => work.name!,
           tooltipItems: (work: WorkType) => buildTooltipItems(work, workConfigs),
         },
         styleConfig: {
-          showDisabled: () => false,
+          showDisabled: (clientInvoice: ClientInvoiceType) => clientInvoice.client == undefined,
           isInvalid: (clientInvoice: ClientInvoiceType) => !clientInvoice.work,
           columnStyle: {
             width: '200px',

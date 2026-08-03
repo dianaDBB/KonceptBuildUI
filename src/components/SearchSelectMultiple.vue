@@ -193,6 +193,10 @@ onUnmounted(() => {
 
   cursor: pointer;
   transition: 0.2s;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
 }
 
 .selected-value {

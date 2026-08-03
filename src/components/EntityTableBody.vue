@@ -24,8 +24,16 @@
               "
               :config="config"
               :select-options="config.selectConfig?.options"
-              :search-select-options="config.searchSelectConfig?.options"
-              :search-select-multiple-options="config.searchSelectMultipleConfig?.options"
+              :search-select-options="
+                typeof config.searchSelectConfig?.options == 'function'
+                  ? config.searchSelectConfig.options(row.entity)
+                  : config.searchSelectConfig?.options
+              "
+              :search-select-multiple-options="
+                typeof config.searchSelectMultipleConfig?.options == 'function'
+                  ? config.searchSelectMultipleConfig?.options(row.entity)
+                  : config.searchSelectMultipleConfig
+              "
               :search-select-multiple-option-key="config.searchSelectMultipleConfig?.optionKey"
               :is-invalid="config.styleConfig.isInvalid(row.entity)"
               :is-disabled="config.styleConfig.showDisabled(row.entity, row)"

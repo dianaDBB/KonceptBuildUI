@@ -264,7 +264,7 @@ export class Work {
         type: ColumnType.SEARCH_SELECT,
         searchSelectConfig: {
           selected: (client: ClientType) => `${client.code!}\n${client.companyName!}`,
-          options: clientOptions,
+          options: () => clientOptions,
           optionLines: (client: ClientType) => [client.code!, client.companyName!, client.nif!],
           filter: (client: ClientType) => `${client.companyName} ${client.nif} ${client.code}`,
           tooltipTitle: (client: ClientType) => client.companyName!,

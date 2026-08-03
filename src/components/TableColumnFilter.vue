@@ -51,10 +51,6 @@
             :placeholder="`Pesquisar por ${config.label.toLowerCase()}`"
           />
 
-          <div v-if="config.filterConfig.info" class="info">
-            {{ config.filterConfig.info }}
-          </div>
-
           <select
             v-else-if="config.filterConfig.kind === TableFilterKind.SELECT"
             v-model="filterValues[(config.filterConfig.valueConfig as SingleFilterConfig).valueKey!]"
@@ -67,21 +63,15 @@
           </select>
 
           <div v-else class="range-fields">
-            <input
-              v-model="(filterValues[(config.filterConfig.valueConfig as RangeFilterConfig).valueKey] as RangeFilter).min"
-              :type="rangeInputType"
-              :step="rangeStep"
-              placeholder="Mínimo"
-            />
+            <input v-model="rangeFilter.min" :type="rangeInputType" :step="rangeStep" placeholder="Mínimo" />
 
             <span>-</span>
 
-            <input
-              v-model="(filterValues[(config.filterConfig.valueConfig as RangeFilterConfig).valueKey] as RangeFilter).max"
-              :type="rangeInputType"
-              :step="rangeStep"
-              placeholder="Máximo"
-            />
+            <input v-model="rangeFilter.max" :type="rangeInputType" :step="rangeStep" placeholder="Máximo" />
+          </div>
+
+          <div v-if="config.filterConfig.info" class="info">
+            {{ config.filterConfig.info }}
           </div>
         </template>
 
@@ -166,6 +156,23 @@ const rangeStep = computed(() => (rangeConfig.value?.valueType === RangeFilterVa
 const isFilterActive = computed(() => filterKeys.value.some((key) => hasValue(currentFilters.value[key])));
 
 const isSorted = computed(() => filterConfig.value && props.sortBy === filterConfig.value.column);
+
+const rangeFilter = computed<RangeFilter>(() => {
+  const key = (filterConfig.value!.valueConfig as RangeFilterConfig).valueKey;
+
+  let value = filterValues.value[key] as RangeFilter | undefined;
+
+  if (!value) {
+    value = {
+      min: undefined,
+      max: undefined,
+    };
+
+    filterValues.value[key] = value;
+  }
+
+  return value;
+});
 
 const dropdownStyle = ref<CSSProperties>({
   top: '0px',
@@ -254,7 +261,10 @@ function clear() {
   const values: FilterValues = {};
 
   for (const key of filterKeys.value) {
-    if (filterConfig.value?.kind === TableFilterKind.NUMBER_RANGE) {
+    if (
+      filterConfig.value?.kind === TableFilterKind.NUMBER_RANGE ||
+      filterConfig.value?.kind === TableFilterKind.DATE_RANGE
+    ) {
       values[key] = {
         min: undefined,
         max: undefined,

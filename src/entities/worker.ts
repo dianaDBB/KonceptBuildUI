@@ -236,12 +236,9 @@ export class Worker {
         type: ColumnType.MONEY,
         styleConfig: {
           showDisabled: (worker: WorkerType, row) =>
-            row?._isNew
-              ? !worker.workerContractType || worker.workerContractType === workerContractTypeOptions.INTERNAL.code
-              : true,
+            row?._isNew ? !worker.workerContractType || worker.workerContractType === 'INTERNAL' : true,
           isInvalid: (worker: WorkerType) =>
-            worker.workerContractType === workerContractTypeOptions.CONTRACTOR.code &&
-            !worker.currentWorkerCompensation?.hourRate,
+            worker.workerContractType === 'CONTRACTOR' && !worker.currentWorkerCompensation?.hourRate,
           columnStyle: {
             width: '90px',
           },
@@ -261,12 +258,9 @@ export class Worker {
         type: ColumnType.MONEY,
         styleConfig: {
           showDisabled: (worker: WorkerType, row) =>
-            row?._isNew
-              ? !worker.workerContractType || worker.workerContractType === workerContractTypeOptions.CONTRACTOR.code
-              : true,
+            row?._isNew ? !worker.workerContractType || worker.workerContractType === 'CONTRACTOR' : true,
           isInvalid: (worker: WorkerType) =>
-            worker.workerContractType === workerContractTypeOptions.INTERNAL.code &&
-            !worker.currentWorkerCompensation?.monthlySalary,
+            worker.workerContractType === 'INTERNAL' && !worker.currentWorkerCompensation?.monthlySalary,
           columnStyle: {
             width: '100px',
           },
@@ -286,12 +280,9 @@ export class Worker {
         type: ColumnType.PERCENTAGE,
         styleConfig: {
           showDisabled: (worker: WorkerType, row) =>
-            row?._isNew
-              ? !worker.workerContractType || worker.workerContractType === workerContractTypeOptions.CONTRACTOR.code
-              : true,
+            row?._isNew ? !worker.workerContractType || worker.workerContractType === 'CONTRACTOR' : true,
           isInvalid: (worker: WorkerType) =>
-            worker.workerContractType === workerContractTypeOptions.INTERNAL.code &&
-            !worker.currentWorkerCompensation?.tsu,
+            worker.workerContractType === 'INTERNAL' && !worker.currentWorkerCompensation?.tsu,
           columnStyle: {
             width: '80px',
           },
@@ -311,9 +302,7 @@ export class Worker {
         type: ColumnType.MONEY,
         styleConfig: {
           showDisabled: (worker: WorkerType, row) =>
-            row?._isNew
-              ? !worker.workerContractType || worker.workerContractType === workerContractTypeOptions.CONTRACTOR.code
-              : true,
+            row?._isNew ? !worker.workerContractType || worker.workerContractType === 'CONTRACTOR' : true,
           isInvalid: () => false,
           columnStyle: {
             width: '100px',
@@ -334,9 +323,7 @@ export class Worker {
         type: ColumnType.MONEY,
         styleConfig: {
           showDisabled: (worker: WorkerType, row) =>
-            row?._isNew
-              ? !worker.workerContractType || worker.workerContractType === workerContractTypeOptions.CONTRACTOR.code
-              : true,
+            row?._isNew ? !worker.workerContractType || worker.workerContractType === 'CONTRACTOR' : true,
           isInvalid: () => false,
           columnStyle: {
             width: '100px',
