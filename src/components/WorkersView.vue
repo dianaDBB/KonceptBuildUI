@@ -95,7 +95,7 @@
         </div>
 
         <div class="actions">
-          <button class="btn" :disabled="isEditing || apiStatus.isLoading" @click="addWorker">
+          <button class="btn" :disabled="isEditing || apiStatus.isLoading" @click="add">
             <Plus :size="18" /> Adicionar Colaborador
           </button>
         </div>
@@ -129,57 +129,38 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, nextTick, toRaw } from 'vue';
 import workerApi from '@/services/worker-api';
-import { WorkerType, WorkerFilters, WorkerSortField } from '@/types/worker-type';
+import { WorkerType, WorkerFilters } from '@/types/worker-type';
 import { ApiResponseStatus } from '@/types/api-response-status';
 import { ChevronRight, Contact, Plus, LoaderCircle, FunnelX, Trash2, Pencil, HandCoins } from 'lucide-vue-next';
-import Toast from '@/composables/Toast.vue';
-import { SortDirection } from '@/types/sort-direction';
+import Toast from '@/components/Toast.vue';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
-import ConfirmDialog from '@/composables/ConfirmDialog.vue';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import { Worker } from '@/entities/worker';
 import { TableRow } from '@/types/entity-configs';
-import EntityTableBody from '@/composables/EntityTableBody.vue';
-import { StatusEnum } from '@/types/status-enum';
-import configsApi from '@/services/configs-api';
-import { WorkerContractTypeEnum } from '@/types/worker-contract-type-enum';
+import EntityTableBody from '@/components/EntityTableBody.vue';
 import { apiError } from '@/services/api';
-import InfoTooltip from '@/composables/InfoTooltip.vue';
-import EditCompensationDialog from '@/composables/EditCompensationDialog.vue';
+import InfoTooltip from '@/components/InfoTooltip.vue';
+import EditCompensationDialog from '@/components/EditCompensationDialog.vue';
+import { useTableFilters } from '@/composables/useTableFilters';
+import { useConfigs } from '@/composables/useConfigs';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
 const tableBody = ref<HTMLTableSectionElement | null>(null);
 
-const status = ref<{ [k: string]: StatusEnum }>({});
-const workerContractType = ref<{ [k: string]: WorkerContractTypeEnum }>({});
-const workers = ref<WorkerRow[]>([]);
+const status = useConfigs().statusOptions;
+const workerContractType = useConfigs().workerContractTypeOptions;
 
+const workers = ref<WorkerRow[]>([]);
 const configs = computed(() => Worker.getConfigs(status.value, workerContractType.value));
 
 /*************************************************************************************************************** LOAD */
 
 onMounted(async () => {
-  await loadConfigs();
-  await fetchWorkers();
+  await fetch();
 });
 
-async function loadConfigs() {
-  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
-
-  try {
-    const gotStatusValues = await configsApi.getStatusValues();
-    status.value = Object.fromEntries(gotStatusValues.map((e) => [e.code, e]));
-
-    const gotWorkerContractTypeValues = await configsApi.getWorkerContractTypeValues();
-    workerContractType.value = Object.fromEntries(gotWorkerContractTypeValues.map((e) => [e.code, e]));
-
-    apiStatus.value = { isLoading: false, isSuccess: true, isError: false };
-  } catch (error: unknown) {
-    apiStatus.value = apiError(error, 'Failed to load config values.');
-  }
-}
-
-async function fetchWorkers() {
+async function fetch() {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
 
   try {
@@ -240,7 +221,7 @@ function startEditing(row: WorkerRow) {
 
 /**************************************************************************************************************** ADD */
 
-async function addWorker(): Promise<void> {
+async function add(): Promise<void> {
   workers.value.push({
     entity: {
       status: status.value.ACTIVE.code,
@@ -278,7 +259,7 @@ async function save(row: WorkerRow): Promise<void> {
       await workerApi.editWorker(row.entity);
     }
 
-    await fetchWorkers();
+    await fetch();
 
     apiStatus.value = {
       isLoading: false,
@@ -310,7 +291,7 @@ async function confirmDelete(): Promise<void> {
     }
 
     await workerApi.deleteWorker(workerToDelete.value.entity.id);
-    await fetchWorkers();
+    await fetch();
 
     apiStatus.value = {
       isLoading: false,
@@ -328,39 +309,14 @@ async function confirmDelete(): Promise<void> {
 
 /************************************************************************************************************ FILTERS */
 
-const workerFilters = ref<WorkerFilters>({});
-
-const hasActiveTableControls = computed(() =>
-  Object.values(workerFilters.value).some((value) => value !== undefined && value !== null && value !== ''),
-);
-
-function setSort(event: { column: WorkerSortField; direction: SortDirection | undefined }): void {
-  workerFilters.value = {
-    ...workerFilters.value,
-    sortBy: event.direction ? event.column : undefined,
-    sortDirection: event.direction,
-  };
-
-  fetchWorkers();
-}
-
-function applyFilterValues(values: Record<string, unknown>): void {
-  workerFilters.value = { ...workerFilters.value, ...(values as Partial<WorkerFilters>) };
-
-  fetchWorkers();
-}
-
-function clearFilterValues(values: Record<string, unknown>): void {
-  workerFilters.value = { ...workerFilters.value, ...(values as Partial<WorkerFilters>) };
-
-  fetchWorkers();
-}
-
-function clearAllTableControls(): void {
-  workerFilters.value = {};
-
-  void fetchWorkers();
-}
+const {
+  filters: workerFilters,
+  hasActiveTableControls,
+  setSort,
+  applyFilterValues,
+  clearFilterValues,
+  clearAllTableControls,
+} = useTableFilters<WorkerFilters>(fetch);
 
 /******************************************************************************************************* COMPENSATION */
 
@@ -392,7 +348,7 @@ async function saveCompensation(worker: WorkerType) {
     }
 
     await workerApi.updateCompensation(worker);
-    await fetchWorkers();
+    await fetch();
 
     apiStatus.value = {
       isLoading: false,
@@ -407,18 +363,4 @@ async function saveCompensation(worker: WorkerType) {
   }
 }
 </script>
-<style scoped lang="scss">
-.phone-input {
-  display: flex;
-}
-
-.country-code {
-  width: 40px;
-  border-right: none;
-  border-radius: 4px 0 0 4px;
-}
-
-.phone-number {
-  border-radius: 0 4px 4px 0;
-}
-</style>
+<style scoped lang="scss"></style>

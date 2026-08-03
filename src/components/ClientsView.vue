@@ -72,7 +72,7 @@
         </div>
 
         <div class="actions">
-          <button class="btn" :disabled="isEditing || apiStatus.isLoading" @click="addClient">
+          <button class="btn" :disabled="isEditing || apiStatus.isLoading" @click="add">
             <Plus :size="18" /> Adicionar Cliente
           </button>
         </div>
@@ -104,48 +104,33 @@
 import { ref, onMounted, computed, nextTick } from 'vue';
 import { ApiResponseStatus } from '@/types/api-response-status';
 import { ChevronRight, Users, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
-import Toast from '@/composables/Toast.vue';
-import { SortDirection } from '@/types/sort-direction';
+import Toast from '@/components/Toast.vue';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
-import ConfirmDialog from '@/composables/ConfirmDialog.vue';
-import { ClientType, ClientFilters, ClientSortField } from '@/types/client-type';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
+import { ClientType, ClientFilters } from '@/types/client-type';
 import clientApi from '@/services/client-api';
 import { Client } from '@/entities/client';
-import EntityTableBody from '@/composables/EntityTableBody.vue';
+import EntityTableBody from '@/components/EntityTableBody.vue';
 import { TableRow } from '@/types/entity-configs';
-import configsApi from '@/services/configs-api';
-import { StatusEnum } from '@/types/status-enum';
 import { apiError } from '@/services/api';
+import { useTableFilters } from '@/composables/useTableFilters';
+import { useConfigs } from '@/composables/useConfigs';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 const tableBody = ref<HTMLTableSectionElement | null>(null);
 
-const status = ref<{ [k: string]: StatusEnum }>({});
-const clients = ref<ClientRow[]>([]);
+const status = useConfigs().statusOptions;
 
-const configs = computed(() => Client.getConfigs(status.value));
+const clients = ref<ClientRow[]>([]);
+const configs = computed(() => Client.getConfigs());
 
 /*************************************************************************************************************** LOAD */
 
 onMounted(async () => {
-  await loadConfigs();
-  await fetchClients();
+  await fetch();
 });
 
-async function loadConfigs() {
-  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
-
-  try {
-    const gotValues = await configsApi.getStatusValues();
-    status.value = Object.fromEntries(gotValues.map((e) => [e.code, e]));
-
-    apiStatus.value = { isLoading: false, isSuccess: true, isError: false };
-  } catch (error: unknown) {
-    apiStatus.value = apiError(error, 'Failed to load config values.');
-  }
-}
-
-async function fetchClients() {
+async function fetch() {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
 
   try {
@@ -206,7 +191,7 @@ function startEditing(row: ClientRow) {
 
 /**************************************************************************************************************** ADD */
 
-async function addClient(): Promise<void> {
+async function add(): Promise<void> {
   clients.value.push({
     entity: {
       status: status.value.ACTIVE.code,
@@ -240,7 +225,7 @@ async function save(row: ClientRow): Promise<void> {
       await clientApi.editClient(row.entity);
     }
 
-    await fetchClients();
+    await fetch();
 
     apiStatus.value = {
       isLoading: false,
@@ -272,7 +257,7 @@ async function confirmDelete(): Promise<void> {
     }
 
     await clientApi.deleteClient(clientToDelete.value.entity.id);
-    await fetchClients();
+    await fetch();
 
     apiStatus.value = {
       isLoading: false,
@@ -290,38 +275,13 @@ async function confirmDelete(): Promise<void> {
 
 /************************************************************************************************************ FILTERS */
 
-const clientFilters = ref<ClientFilters>({});
-
-const hasActiveTableControls = computed(() =>
-  Object.values(clientFilters.value).some((value) => value !== undefined && value !== null && value !== ''),
-);
-
-function setSort(event: { column: ClientSortField; direction: SortDirection | undefined }): void {
-  clientFilters.value = {
-    ...clientFilters.value,
-    sortBy: event.direction ? event.column : undefined,
-    sortDirection: event.direction,
-  };
-
-  fetchClients();
-}
-
-function applyFilterValues(values: Record<string, unknown>): void {
-  clientFilters.value = { ...clientFilters.value, ...(values as Partial<ClientFilters>) };
-
-  fetchClients();
-}
-
-function clearFilterValues(values: Record<string, unknown>): void {
-  clientFilters.value = { ...clientFilters.value, ...(values as Partial<ClientFilters>) };
-
-  fetchClients();
-}
-
-function clearAllTableControls(): void {
-  clientFilters.value = {};
-
-  void fetchClients();
-}
+const {
+  filters: clientFilters,
+  hasActiveTableControls,
+  setSort,
+  applyFilterValues,
+  clearFilterValues,
+  clearAllTableControls,
+} = useTableFilters<ClientFilters>(fetch);
 </script>
 <style scoped lang="scss"></style>

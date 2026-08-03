@@ -19,7 +19,7 @@ export interface WorkerType extends EntityType {
 export interface WorkerCompensationType {
   id?: UUID;
   workerId?: string;
-  hourCost?: string;
+  hourCost?: number;
   defaultHours?: number;
   hourRate?: number;
   monthlySalary?: number;

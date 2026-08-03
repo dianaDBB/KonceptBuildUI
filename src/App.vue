@@ -69,7 +69,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('keydown', closeProfileMenuEscape);
 });
 
-onMounted(() => {
+onMounted(async () => {
   authApi.checkAuthentication();
 
   interval = window.setInterval(() => {

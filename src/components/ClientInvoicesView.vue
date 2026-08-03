@@ -137,73 +137,44 @@
 import { ref, onMounted, computed, nextTick, toRaw } from 'vue';
 import { ApiResponseStatus } from '@/types/api-response-status';
 import { ChevronRight, FileInput, Plus, LoaderCircle, FunnelX, Trash2, Pencil } from 'lucide-vue-next';
-import Toast from '@/composables/Toast.vue';
-import { SortDirection } from '@/types/sort-direction';
+import Toast from '@/components/Toast.vue';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
-import ConfirmDialog from '@/composables/ConfirmDialog.vue';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import { ClientFilters, ClientSortField, ClientType } from '@/types/client-type';
 import clientApi from '@/services/client-api';
-import EntityTableBody from '@/composables/EntityTableBody.vue';
+import EntityTableBody from '@/components/EntityTableBody.vue';
 import { TableRow } from '@/types/entity-configs';
-import { StatusEnum } from '@/types/status-enum';
 import configsApi from '@/services/configs-api';
-import { Client } from '@/entities/client';
 import { apiError } from '@/services/api';
-import { ClientInvoiceFilters, ClientInvoiceSortField, ClientInvoiceType } from '@/types/client-invoice-type';
+import { ClientInvoiceFilters, ClientInvoiceType } from '@/types/client-invoice-type';
 import { ClientInvoice } from '@/entities/client-invoice';
-import { Work } from '@/entities/work';
-import { WorkStatusEnum } from '@/types/work-status-enum';
 import { WorkType } from '@/types/work-type';
 import workApi from '@/services/work-api';
 import clientInvoiceApi from '@/services/client-invoice-api';
 import { ClientPaymentType } from '@/types/client-payment-type';
 import clientPaymentApi from '@/services/client-payment-api';
-import AddClientPaymentDialog from '@/composables/AddClientPaymentDialog.vue';
+import AddClientPaymentDialog from '@/components/AddClientPaymentDialog.vue';
 import router from '@/router';
+import { useTableFilters } from '@/composables/useTableFilters';
+import { useConfigs } from '@/composables/useConfigs';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 const tableBody = ref<HTMLTableSectionElement | null>(null);
 
-const status = ref<{ [k: string]: StatusEnum }>({});
-
+const status = useConfigs().statusOptions;
 const clients = ref<ClientType[]>([]);
-const clientConfigs = computed(() => Client.getConfigs(status.value));
-
 const works = ref<WorkType[]>([]);
-const workStatus = ref<{ [k: string]: WorkStatusEnum }>({});
-const workConfigsConfigs = computed(() =>
-  Work.getConfigs(status.value, workStatus.value, clients.value, clientConfigs.value),
-);
 
 const clientInvoices = ref<ClientInvoiceRow[]>([]);
-const configs = computed(() =>
-  ClientInvoice.getConfigs(status.value, clients.value, clientConfigs.value, works.value, workConfigsConfigs.value),
-);
+const configs = computed(() => ClientInvoice.getConfigs(clients.value, works.value));
 
 /*************************************************************************************************************** LOAD */
 
 onMounted(async () => {
-  await loadConfigs();
   await fetch();
   await fetchClients();
   await fetchWorks();
 });
-
-async function loadConfigs() {
-  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
-
-  try {
-    const gotStatusValues = await configsApi.getStatusValues();
-    status.value = Object.fromEntries(gotStatusValues.map((e) => [e.code, e]));
-
-    const gotWorkStatusValues = await configsApi.getWorkStatusValues();
-    workStatus.value = Object.fromEntries(gotWorkStatusValues.map((e) => [e.code, e]));
-
-    apiStatus.value = { isLoading: false, isSuccess: true, isError: false };
-  } catch (error: unknown) {
-    apiStatus.value = apiError(error, 'Failed to load config values.');
-  }
-}
 
 async function fetch() {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
@@ -359,39 +330,14 @@ async function confirmDelete(): Promise<void> {
 
 /************************************************************************************************************ FILTERS */
 
-const clientInvoicesFilter = ref<ClientInvoiceFilters>({});
-
-const hasActiveTableControls = computed(() =>
-  Object.values(clientInvoicesFilter.value).some((value) => value !== undefined && value !== null && value !== ''),
-);
-
-function setSort(event: { column: ClientInvoiceSortField; direction: SortDirection | undefined }): void {
-  clientInvoicesFilter.value = {
-    ...clientInvoicesFilter.value,
-    sortBy: event.direction ? event.column : undefined,
-    sortDirection: event.direction,
-  };
-
-  fetch();
-}
-
-function applyFilterValues(values: Record<string, unknown>): void {
-  clientInvoicesFilter.value = { ...clientInvoicesFilter.value, ...(values as Partial<ClientInvoiceFilters>) };
-
-  fetch();
-}
-
-function clearFilterValues(values: Record<string, unknown>): void {
-  clientInvoicesFilter.value = { ...clientInvoicesFilter.value, ...(values as Partial<ClientInvoiceFilters>) };
-
-  fetch();
-}
-
-function clearAllTableControls(): void {
-  clientInvoicesFilter.value = {};
-
-  void fetch();
-}
+const {
+  filters: clientInvoicesFilter,
+  hasActiveTableControls,
+  setSort,
+  applyFilterValues,
+  clearFilterValues,
+  clearAllTableControls,
+} = useTableFilters<ClientInvoiceFilters>(fetch);
 
 /******************************************************************************************************** ADD PAYMENT */
 

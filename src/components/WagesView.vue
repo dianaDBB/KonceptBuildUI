@@ -101,47 +101,29 @@
 import { ref, onMounted, computed } from 'vue';
 import { ApiResponseStatus } from '@/types/api-response-status';
 import { ChevronRight, HandCoins, LoaderCircle, FunnelX, Pencil } from 'lucide-vue-next';
-import Toast from '@/composables/Toast.vue';
-import { SortDirection } from '@/types/sort-direction';
+import Toast from '@/components/Toast.vue';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
-import EntityTableBody from '@/composables/EntityTableBody.vue';
+import EntityTableBody from '@/components/EntityTableBody.vue';
 import { TableRow } from '@/types/entity-configs';
-import configsApi from '@/services/configs-api';
 import { apiError } from '@/services/api';
 import { Wage } from '@/entities/wage';
-import { PaymentMethodEnum } from '@/types/payment-method-enum';
-import { WageFilters, WageSortField, WageType } from '@/types/wage-type';
+import { WageFilters, WageType } from '@/types/wage-type';
 import wagesApi from '@/services/wages-api';
-import InfoTooltip from '@/composables/InfoTooltip.vue';
+import InfoTooltip from '@/components/InfoTooltip.vue';
+import { useTableFilters } from '@/composables/useTableFilters';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
-const paymentMethodType = ref<{ [k: string]: PaymentMethodEnum }>({});
 const wages = ref<WageRow[]>([]);
-
-const configs = computed(() => Wage.getConfigs(paymentMethodType.value));
+const configs = computed(() => Wage.getConfigs());
 
 /*************************************************************************************************************** LOAD */
 
 onMounted(async () => {
-  await loadConfigs();
-  await fetchWages();
+  await fetch();
 });
 
-async function loadConfigs() {
-  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
-
-  try {
-    const gotPaymentMethodValues = await configsApi.getPaymentMethodValues();
-    paymentMethodType.value = Object.fromEntries(gotPaymentMethodValues.map((e) => [e.code, e]));
-
-    apiStatus.value = { isLoading: false, isSuccess: true, isError: false };
-  } catch (error: unknown) {
-    apiStatus.value = apiError(error, 'Failed to load config values.');
-  }
-}
-
-async function fetchWages() {
+async function fetch() {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
 
   try {
@@ -206,7 +188,7 @@ async function save(row: WageRow): Promise<void> {
       await wagesApi.editWage(row.entity);
     }
 
-    await fetchWages();
+    await fetch();
 
     apiStatus.value = {
       isLoading: false,
@@ -221,38 +203,13 @@ async function save(row: WageRow): Promise<void> {
 
 /************************************************************************************************************ FILTERS */
 
-const wageFilters = ref<WageFilters>({});
-
-const hasActiveTableControls = computed(() =>
-  Object.values(wageFilters.value).some((value) => value !== undefined && value !== null && value !== ''),
-);
-
-function setSort(event: { column: WageSortField; direction: SortDirection | undefined }): void {
-  wageFilters.value = {
-    ...wageFilters.value,
-    sortBy: event.direction ? event.column : undefined,
-    sortDirection: event.direction,
-  };
-
-  fetchWages();
-}
-
-function applyFilterValues(values: Record<string, unknown>): void {
-  wageFilters.value = { ...wageFilters.value, ...(values as Partial<WageFilters>) };
-
-  fetchWages();
-}
-
-function clearFilterValues(values: Record<string, unknown>): void {
-  wageFilters.value = { ...wageFilters.value, ...(values as Partial<WageFilters>) };
-
-  fetchWages();
-}
-
-function clearAllTableControls(): void {
-  wageFilters.value = {};
-
-  void fetchWages();
-}
+const {
+  filters: wageFilters,
+  hasActiveTableControls,
+  setSort,
+  applyFilterValues,
+  clearFilterValues,
+  clearAllTableControls,
+} = useTableFilters<WageFilters>(fetch);
 </script>
 <style scoped lang="scss"></style>

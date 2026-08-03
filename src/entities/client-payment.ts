@@ -1,20 +1,25 @@
 import { ColumnType, Configs, RangeFilterValueType } from '@/types/entity-configs';
 import { TableFilterKind } from '@/types/table-filter';
-import { ClientSortField, ClientType } from '@/types/client-type';
-import { EnumOptions } from '@/types/select-options';
+import { ClientType } from '@/types/client-type';
 import { ClientPaymentSortField, ClientPaymentType } from '@/types/client-payment-type';
-import { ClientInvoiceSortField, ClientInvoiceType } from '@/types/client-invoice-type';
+import { ClientInvoiceType } from '@/types/client-invoice-type';
+import { useConfigs } from '@/composables/useConfigs';
+import { Client } from './client';
+import { ClientInvoice } from './client-invoice';
+import { formatCurrency } from '@/utils/validation';
+import { buildTooltipItems } from '@/utils/tooltipItems';
 
 export class ClientPayment {
   static getConfigs(
-    clientPaymentTypeOptions: EnumOptions,
-    statusOptions: EnumOptions,
     clientOptions: ClientType[],
-    clientConfigs: Configs<ClientSortField, ClientType>,
     invoiceOptions: ClientInvoiceType[],
-    invoiceConfigs: Configs<ClientInvoiceSortField, ClientInvoiceType>,
-    paymentMethodOptions: EnumOptions,
   ): Configs<ClientPaymentSortField, ClientPaymentType> {
+    const clientPaymentTypeOptions = useConfigs().clientPaymentTypeOptions.value;
+    const paymentMethodOptions = useConfigs().paymentMethodOptions.value;
+
+    const clientConfigs = Client.getConfigs();
+    const invoiceConfigs = ClientInvoice.getConfigs([], []);
+
     return {
       type: {
         label: 'Tipo',
@@ -30,13 +35,15 @@ export class ClientPayment {
           },
         },
         filterConfig: {
-          column: ClientPaymentSortField.PAYMENT_METHOD,
+          column: ClientPaymentSortField.PAYMENT_TYPE,
           kind: TableFilterKind.SELECT,
           valueConfig: {
             valueKey: 'type',
           },
           dropdownAlign: 'start',
         },
+        displayValue: (clientPayment: ClientPaymentType) =>
+          clientPayment.type ? clientPaymentTypeOptions[clientPayment.type].label : undefined,
       },
       documentId: {
         label: 'ID Documento',
@@ -56,6 +63,7 @@ export class ClientPayment {
           },
           dropdownAlign: 'start',
         },
+        displayValue: (clientPayment: ClientPaymentType) => clientPayment.documentId,
       },
       invoices: {
         label: 'Nº Documento Relacionado',
@@ -67,34 +75,18 @@ export class ClientPayment {
           optionLines: (invoice: ClientInvoiceType) => [invoice.docNumber!],
           filter: (invoice: ClientInvoiceType) => `${invoice.docNumber}`,
           tooltipTitle: (invoice: ClientInvoiceType) => invoice.docNumber!,
-          tooltipItems: (invoice: ClientInvoiceType) => [
-            { label: invoiceConfigs.docNumber.label, value: invoice.docNumber },
-            { label: invoiceConfigs.client.label, value: `${invoice.client?.code} - ${invoice.client?.companyName}` },
-            { label: invoiceConfigs.work.label, value: `${invoice.work?.code} - ${invoice.work?.name}` },
-            { label: invoiceConfigs.description.label, value: invoice.description },
-            { label: invoiceConfigs.valueWithoutTax.label, value: invoice.valueWithoutTax },
-            { label: invoiceConfigs.appliedTax.label, value: invoice.appliedTax },
-            { label: invoiceConfigs.taxValue.label, value: invoice.taxValue },
-            { label: invoiceConfigs.totalValue.label, value: invoice.totalValue },
-            { label: invoiceConfigs.registrationDate.label, value: invoice.registrationDate },
-            { label: invoiceConfigs.dueDate.label, value: invoice.dueDate },
-          ],
+          tooltipItems: (invoice: ClientInvoiceType) => buildTooltipItems(invoice, invoiceConfigs),
         },
         styleConfig: {
           showDisabled: () => false,
-          isInvalid: (clientPayment: ClientPaymentType) => !clientPayment.invoices,
+          isInvalid: (clientPayment: ClientPaymentType) => !clientPayment.invoices?.length,
           columnStyle: {
             width: '200px',
           },
         },
-        filterConfig: {
-          column: ClientPaymentSortField.CLIENT_NAME,
-          kind: TableFilterKind.TEXT,
-          valueConfig: {
-            valueKey: 'clientName',
-          },
-          dropdownAlign: 'start',
-        },
+        // TODO: add the filter
+        displayValue: (clientPayment: ClientPaymentType) =>
+          clientPayment.invoices?.map((invoice) => invoice.docNumber).join(', '),
       },
       client: {
         label: 'Cliente',
@@ -105,26 +97,7 @@ export class ClientPayment {
           optionLines: (client: ClientType) => [client.code!, client.companyName!, client.nif!],
           filter: (client: ClientType) => `${client.companyName} ${client.nif} ${client.code}`,
           tooltipTitle: (client: ClientType) => client.companyName!,
-          tooltipItems: (client: ClientType) => [
-            { label: clientConfigs.code.label, value: client.code },
-            { label: clientConfigs.companyName.label, value: client.companyName },
-            { label: clientConfigs.address.label, value: client.address },
-            { label: clientConfigs.postalCode.label, value: client.postalCode },
-            { label: clientConfigs.city.label, value: client.city },
-            { label: clientConfigs.district.label, value: client.district },
-            { label: clientConfigs.nif.label, value: client.nif },
-            { label: clientConfigs.contact.label, value: client.contact },
-            { label: clientConfigs.email.label, value: client.email },
-            {
-              label: clientConfigs.phone.label,
-              value: `${client.phoneCountryCode ?? ''} ${client.phone ?? ''}`,
-            },
-            {
-              label: clientConfigs.status.label,
-              value: client.status ? statusOptions[client.status].label : client.status,
-            },
-            { label: clientConfigs.note.label, value: client.note },
-          ],
+          tooltipItems: (client: ClientType) => buildTooltipItems(client, clientConfigs),
         },
         styleConfig: {
           showDisabled: () => false,
@@ -141,6 +114,7 @@ export class ClientPayment {
           },
           dropdownAlign: 'start',
         },
+        displayValue: (clientPayment: ClientPaymentType) => clientPayment.client?.companyName,
       },
       paymentDate: {
         label: 'Data Pagamento',
@@ -154,13 +128,14 @@ export class ClientPayment {
         },
         filterConfig: {
           column: ClientPaymentSortField.PAYMENT_DATE,
-          kind: TableFilterKind.NUMBER_RANGE,
+          kind: TableFilterKind.DATE_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.DATE,
             minKey: 'paymentDateMin',
             maxKey: 'paymentDateMax',
           },
         },
+        displayValue: (clientPayment: ClientPaymentType) => clientPayment.paymentDate,
       },
       paidValue: {
         label: 'Valor Pago (€)',
@@ -181,6 +156,7 @@ export class ClientPayment {
             maxKey: 'paidValueMax',
           },
         },
+        displayValue: (clientPayment: ClientPaymentType) => formatCurrency(clientPayment.paidValue),
       },
       paymentMethod: {
         label: 'Método Pagamento',
@@ -202,6 +178,8 @@ export class ClientPayment {
             valueKey: 'paymentMethod',
           },
         },
+        displayValue: (clientPayment: ClientPaymentType) =>
+          clientPayment.paymentMethod ? paymentMethodOptions[clientPayment.paymentMethod].label : undefined,
       },
       notes: {
         label: 'Notas',
@@ -220,6 +198,7 @@ export class ClientPayment {
             valueKey: 'notes',
           },
         },
+        displayValue: (clientPayment: ClientPaymentType) => clientPayment.notes,
       },
     };
   }

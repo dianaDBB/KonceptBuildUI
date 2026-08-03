@@ -1,16 +1,17 @@
 import { ColumnType, Configs, RangeFilterValueType } from '@/types/entity-configs';
 import { TableFilterKind } from '@/types/table-filter';
 import { WorkSortField, WorkType } from '@/types/work-type';
-import { ClientSortField, ClientType } from '@/types/client-type';
-import { EnumOptions } from '@/types/select-options';
+import { ClientType } from '@/types/client-type';
+import { useConfigs } from '@/composables/useConfigs';
+import { Client } from './client';
+import { formatCurrency, formatPercentage } from '@/utils/validation';
+import { buildTooltipItems } from '@/utils/tooltipItems';
 
 export class Work {
-  static getConfigs(
-    statusOptions: EnumOptions,
-    workStatusOptions: EnumOptions,
-    clientOptions: ClientType[],
-    clientConfigs: Configs<ClientSortField, ClientType>,
-  ): Configs<WorkSortField, ClientType> {
+  static getConfigs(clientOptions: ClientType[]): Configs<WorkSortField, WorkType> {
+    const workStatusOptions = useConfigs().workStatusOptions.value;
+    const clientConfigs = Client.getConfigs();
+
     return {
       code: {
         label: 'ID',
@@ -30,6 +31,7 @@ export class Work {
           },
           dropdownAlign: 'start',
         },
+        displayValue: (work: WorkType) => work.code,
       },
       name: {
         label: 'Nome da Obra',
@@ -49,6 +51,7 @@ export class Work {
           },
           dropdownAlign: 'start',
         },
+        displayValue: (work: WorkType) => work.name,
       },
       status: {
         label: 'Estado',
@@ -71,6 +74,7 @@ export class Work {
           },
           dropdownAlign: 'start',
         },
+        displayValue: (work: WorkType) => (work.status ? workStatusOptions[work.status].label : undefined),
       },
       contractedBudget: {
         label: 'Orçamento Adjudicado (€)',
@@ -91,6 +95,7 @@ export class Work {
             maxKey: 'contractedBudgetMax',
           },
         },
+        displayValue: (work: WorkType) => formatCurrency(work.contractedBudget),
       },
       estimatedCost: {
         label: 'Custo Previsto (€)',
@@ -112,6 +117,7 @@ export class Work {
             maxKey: 'estimatedCostMax',
           },
         },
+        displayValue: (work: WorkType) => formatCurrency(work.estimatedCost),
       },
       estimatedCostMaterials: {
         label: 'Custo Previsto Materiais (€)',
@@ -128,10 +134,11 @@ export class Work {
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
-            minKey: 'estimatedCostMaterialMin',
-            maxKey: 'estimatedCostMaterialMax',
+            minKey: 'estimatedCostMaterialsMin',
+            maxKey: 'estimatedCostMaterialsMax',
           },
         },
+        displayValue: (work: WorkType) => formatCurrency(work.estimatedCostMaterials),
       },
       estimatedCostLabor: {
         label: 'Custo Previsto Mão-Obra (€)',
@@ -152,6 +159,7 @@ export class Work {
             maxKey: 'estimatedCostLaborMax',
           },
         },
+        displayValue: (work: WorkType) => formatCurrency(work.estimatedCostLabor),
       },
       estimatedMarginEur: {
         label: 'Margem Prevista (€)',
@@ -173,6 +181,7 @@ export class Work {
             maxKey: 'estimatedMarginEurMax',
           },
         },
+        displayValue: (work: WorkType) => formatCurrency(work.estimatedMarginEur),
       },
       estimatedMarginPercentual: {
         label: 'Margem Prevista (%)',
@@ -194,6 +203,7 @@ export class Work {
             maxKey: 'estimatedMarginPercentualMax',
           },
         },
+        displayValue: (work: WorkType) => formatPercentage(work.estimatedMarginPercentual),
       },
       startDate: {
         label: 'Data início',
@@ -207,13 +217,14 @@ export class Work {
         },
         filterConfig: {
           column: WorkSortField.START_DATE,
-          kind: TableFilterKind.NUMBER_RANGE,
+          kind: TableFilterKind.DATE_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.DATE,
             minKey: 'startDateMin',
             maxKey: 'startDateMax',
           },
         },
+        displayValue: (work: WorkType) => work.startDate,
       },
       estimatedEndDate: {
         label: 'Data Fim Prevista',
@@ -227,13 +238,14 @@ export class Work {
         },
         filterConfig: {
           column: WorkSortField.ESTIMATED_END_DATE,
-          kind: TableFilterKind.NUMBER_RANGE,
+          kind: TableFilterKind.DATE_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.DATE,
             minKey: 'estimatedEndDateMin',
             maxKey: 'estimatedEndDateMax',
           },
         },
+        displayValue: (work: WorkType) => work.estimatedEndDate,
       },
       endDate: {
         label: 'Data Fim',
@@ -247,13 +259,14 @@ export class Work {
         },
         filterConfig: {
           column: WorkSortField.END_DATE,
-          kind: TableFilterKind.NUMBER_RANGE,
+          kind: TableFilterKind.DATE_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.DATE,
             minKey: 'endDateMin',
             maxKey: 'endDateMax',
           },
         },
+        displayValue: (work: WorkType) => work.endDate,
       },
       client: {
         label: 'Cliente',
@@ -264,26 +277,7 @@ export class Work {
           optionLines: (client: ClientType) => [client.code!, client.companyName!, client.nif!],
           filter: (client: ClientType) => `${client.companyName} ${client.nif} ${client.code}`,
           tooltipTitle: (client: ClientType) => client.companyName!,
-          tooltipItems: (client: ClientType) => [
-            { label: clientConfigs.code.label, value: client.code },
-            { label: clientConfigs.companyName.label, value: client.companyName },
-            { label: clientConfigs.address.label, value: client.address },
-            { label: clientConfigs.postalCode.label, value: client.postalCode },
-            { label: clientConfigs.city.label, value: client.city },
-            { label: clientConfigs.district.label, value: client.district },
-            { label: clientConfigs.nif.label, value: client.nif },
-            { label: clientConfigs.contact.label, value: client.contact },
-            { label: clientConfigs.email.label, value: client.email },
-            {
-              label: clientConfigs.phone.label,
-              value: `${client.phoneCountryCode ?? ''} ${client.phone ?? ''}`,
-            },
-            {
-              label: clientConfigs.status.label,
-              value: client.status ? statusOptions[client.status].label : client.status,
-            },
-            { label: clientConfigs.note.label, value: client.note },
-          ],
+          tooltipItems: (client: ClientType) => buildTooltipItems(client, clientConfigs),
         },
         styleConfig: {
           showDisabled: () => false,
@@ -299,11 +293,12 @@ export class Work {
             valueKey: 'clientName',
           },
         },
+        displayValue: (work: WorkType) => work.client?.companyName,
       },
     };
   }
 
-  static isValid(work: WorkType, configs: Configs<WorkSortField, WorkType>): boolean {
+  static isValid(work: WorkType, configs: Configs<WorkSortField>): boolean {
     return Object.values(configs).every((config) => !config.styleConfig.isInvalid(work));
   }
 }

@@ -2,7 +2,7 @@ import { ColumnType, Configs, RangeFilterValueType, TableRow } from '@/types/ent
 import { EnumOptions } from '@/types/select-options';
 import { TableFilterKind } from '@/types/table-filter';
 import { WorkerType, WorkerSortField } from '@/types/worker-type';
-import { isValidEmail, isValidPhone } from '@/utils/validation';
+import { formatCurrency, formatNumber, formatPercentage, isValidEmail, isValidPhone } from '@/utils/validation';
 
 export class Worker {
   static getConfigs(
@@ -28,6 +28,7 @@ export class Worker {
           },
           dropdownAlign: 'start',
         },
+        displayValue: (worker: WorkerType) => worker.code,
       },
       name: {
         label: 'Nome',
@@ -48,6 +49,7 @@ export class Worker {
           },
           dropdownAlign: 'start',
         },
+        displayValue: (worker: WorkerType) => worker.name,
       },
       nif: {
         label: 'NIF',
@@ -67,6 +69,7 @@ export class Worker {
           },
           dropdownAlign: 'start',
         },
+        displayValue: (worker: WorkerType) => worker.nif,
       },
       status: {
         label: 'Estado',
@@ -88,6 +91,7 @@ export class Worker {
             valueKey: 'status',
           },
         },
+        displayValue: (worker: WorkerType) => (worker.status ? statusOptions[worker.status].label : undefined),
       },
       phone: {
         label: 'Tlf',
@@ -109,6 +113,8 @@ export class Worker {
             valueKey: 'phone',
           },
         },
+        displayValue: (worker: WorkerType) =>
+          worker.phoneCountryCode && worker.phone ? `${worker.phoneCountryCode} ${worker.phone}` : undefined,
       },
       email: {
         label: 'E-mail',
@@ -127,6 +133,7 @@ export class Worker {
             valueKey: 'email',
           },
         },
+        displayValue: (worker: WorkerType) => worker.email,
       },
       function: {
         label: 'Função',
@@ -145,6 +152,7 @@ export class Worker {
             valueKey: 'function',
           },
         },
+        displayValue: (worker: WorkerType) => worker.function,
       },
       'currentWorkerCompensation.hourCost': {
         label: 'Custo Hora (€)',
@@ -173,6 +181,7 @@ export class Worker {
             maxKey: 'hourCostMax',
           },
         },
+        displayValue: (worker: WorkerType) => formatCurrency(worker.currentWorkerCompensation?.hourCost),
       },
       'currentWorkerCompensation.defaultHours': {
         label: 'Horas Dia (Padrão)',
@@ -193,9 +202,10 @@ export class Worker {
             maxKey: 'defaultHoursMax',
           },
         },
+        displayValue: (worker: WorkerType) => formatNumber(worker.currentWorkerCompensation?.defaultHours),
       },
       workerContractType: {
-        label: 'Tipo de Contracto',
+        label: 'Tipo de Contrato',
         type: ColumnType.SELECT,
         onValueChanged: onContractTypeChanged,
         selectConfig: {
@@ -215,6 +225,8 @@ export class Worker {
             valueKey: 'workerContractType',
           },
         },
+        displayValue: (worker: WorkerType) =>
+          worker.workerContractType ? workerContractTypeOptions[worker.workerContractType].label : undefined,
       },
       'currentWorkerCompensation.hourRate': {
         label: 'Valor Hora (€)',
@@ -245,6 +257,7 @@ export class Worker {
             maxKey: 'hourRateMax',
           },
         },
+        displayValue: (worker: WorkerType) => formatCurrency(worker.currentWorkerCompensation?.hourRate),
       },
       'currentWorkerCompensation.monthlySalary': {
         label: 'Ordenado Base Mensal (€)',
@@ -270,6 +283,7 @@ export class Worker {
             maxKey: 'monthlySalaryMax',
           },
         },
+        displayValue: (worker: WorkerType) => formatCurrency(worker.currentWorkerCompensation?.monthlySalary),
       },
       'currentWorkerCompensation.tsu': {
         label: 'TSU Empresa (%)',
@@ -295,6 +309,7 @@ export class Worker {
             maxKey: 'tsuMax',
           },
         },
+        displayValue: (worker: WorkerType) => formatPercentage(worker.currentWorkerCompensation?.tsu),
       },
       'currentWorkerCompensation.mealAllowance': {
         label: 'Subsídio Alim. /Dia (€)',
@@ -318,6 +333,7 @@ export class Worker {
             maxKey: 'mealAllowanceMax',
           },
         },
+        displayValue: (worker: WorkerType) => formatCurrency(worker.currentWorkerCompensation?.mealAllowance),
       },
       'currentWorkerCompensation.accidentInsurance': {
         label: 'Seguro Ac. Trabalho (€/mês)',
@@ -341,6 +357,7 @@ export class Worker {
             maxKey: 'accidentInsuranceMax',
           },
         },
+        displayValue: (worker: WorkerType) => formatCurrency(worker.currentWorkerCompensation?.accidentInsurance),
       },
       startDate: {
         label: 'Data Admissão',
@@ -354,13 +371,14 @@ export class Worker {
         },
         filterConfig: {
           column: WorkerSortField.START_DATE,
-          kind: TableFilterKind.NUMBER_RANGE,
+          kind: TableFilterKind.DATE_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.DATE,
             minKey: 'startDateMin',
             maxKey: 'startDateMax',
           },
         },
+        displayValue: (worker: WorkerType) => worker.startDate,
       },
       endDate: {
         label: 'Data Cessação',
@@ -374,13 +392,14 @@ export class Worker {
         },
         filterConfig: {
           column: WorkerSortField.END_DATE,
-          kind: TableFilterKind.NUMBER_RANGE,
+          kind: TableFilterKind.DATE_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.DATE,
             minKey: 'endDateMin',
             maxKey: 'endDateMax',
           },
         },
+        displayValue: (worker: WorkerType) => worker.endDate,
       },
     };
   }
@@ -393,14 +412,17 @@ export class Worker {
 function onContractTypeChanged(row: TableRow<WorkerType>) {
   row._isEdited = true;
 
-  if (row.entity.workerContractType === 'INTERNAL' && row.entity.currentWorkerCompensation?.tsu == null) {
-    row.entity.currentWorkerCompensation!.tsu = 23.75;
+  const compensation = row.entity.currentWorkerCompensation;
+  if (!compensation) return;
+
+  if (row.entity.workerContractType === 'INTERNAL' && compensation.tsu == null) {
+    compensation.tsu = 23.75;
   }
 
   if (row.entity.workerContractType === 'CONTRACTOR') {
-    row.entity.currentWorkerCompensation!.tsu = undefined;
-    row.entity.currentWorkerCompensation!.monthlySalary = undefined;
-    row.entity.currentWorkerCompensation!.mealAllowance = undefined;
-    row.entity.currentWorkerCompensation!.accidentInsurance = undefined;
+    compensation.tsu = undefined;
+    compensation.monthlySalary = undefined;
+    compensation.mealAllowance = undefined;
+    compensation.accidentInsurance = undefined;
   }
 }

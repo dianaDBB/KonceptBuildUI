@@ -76,7 +76,7 @@
         </div>
 
         <div class="actions">
-          <button class="btn" :disabled="isEditing || apiStatus.isLoading" @click="addWork">
+          <button class="btn" :disabled="isEditing || apiStatus.isLoading" @click="add">
             <Plus :size="18" /> Adicionar Cliente
           </button>
         </div>
@@ -105,60 +105,38 @@
 import { ref, onMounted, computed, nextTick } from 'vue';
 import { ApiResponseStatus } from '@/types/api-response-status';
 import { ChevronRight, List, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
-import Toast from '@/composables/Toast.vue';
-import { SortDirection } from '@/types/sort-direction';
+import Toast from '@/components/Toast.vue';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
-import ConfirmDialog from '@/composables/ConfirmDialog.vue';
-import { WorkType, WorkFilters, WorkSortField } from '@/types/work-type';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
+import { WorkType, WorkFilters } from '@/types/work-type';
 import workApi from '@/services/work-api';
 import { ClientFilters, ClientSortField, ClientType } from '@/types/client-type';
 import clientApi from '@/services/client-api';
 import { Work } from '@/entities/work';
-import EntityTableBody from '@/composables/EntityTableBody.vue';
+import EntityTableBody from '@/components/EntityTableBody.vue';
 import { TableRow } from '@/types/entity-configs';
-import { StatusEnum } from '@/types/status-enum';
-import { WorkStatusEnum } from '@/types/work-status-enum';
-import configsApi from '@/services/configs-api';
-import { Client } from '@/entities/client';
 import { apiError } from '@/services/api';
+import { useTableFilters } from '@/composables/useTableFilters';
+import { useConfigs } from '@/composables/useConfigs';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 const tableBody = ref<HTMLTableSectionElement | null>(null);
 
-const status = ref<{ [k: string]: StatusEnum }>({});
-const workStatus = ref<{ [k: string]: WorkStatusEnum }>({});
+const status = useConfigs().statusOptions;
+const workStatus = useConfigs().workStatusOptions;
 const clients = ref<ClientType[]>([]);
+
 const works = ref<WorkRow[]>([]);
-
-const clientConfigs = computed(() => Client.getConfigs(status.value));
-
-const configs = computed(() => Work.getConfigs(status.value, workStatus.value, clients.value, clientConfigs.value));
+const configs = computed(() => Work.getConfigs(clients.value));
 
 /*************************************************************************************************************** LOAD */
 
 onMounted(async () => {
-  await loadConfigs();
-  await fetchWorks();
   await fetchClients();
+  await fetch();
 });
 
-async function loadConfigs() {
-  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
-
-  try {
-    const gotStatusValues = await configsApi.getStatusValues();
-    status.value = Object.fromEntries(gotStatusValues.map((e) => [e.code, e]));
-
-    const gotWorkStatusValues = await configsApi.getWorkStatusValues();
-    workStatus.value = Object.fromEntries(gotWorkStatusValues.map((e) => [e.code, e]));
-
-    apiStatus.value = { isLoading: false, isSuccess: true, isError: false };
-  } catch (error: unknown) {
-    apiStatus.value = apiError(error, 'Failed to load config values.');
-  }
-}
-
-async function fetchWorks() {
+async function fetch() {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
 
   try {
@@ -228,7 +206,7 @@ function startEditing(row: WorkRow) {
 
 /**************************************************************************************************************** ADD */
 
-async function addWork(): Promise<void> {
+async function add(): Promise<void> {
   works.value.push({
     entity: {
       status: workStatus.value.STARTED.code,
@@ -262,7 +240,7 @@ async function save(row: WorkRow): Promise<void> {
       await workApi.editWork(row.entity);
     }
 
-    await fetchWorks();
+    await fetch();
 
     apiStatus.value = {
       isLoading: false,
@@ -294,7 +272,7 @@ async function confirmDelete(): Promise<void> {
     }
 
     await workApi.deleteWork(workToDelete.value.entity.id);
-    await fetchWorks();
+    await fetch();
 
     apiStatus.value = {
       isLoading: false,
@@ -312,38 +290,13 @@ async function confirmDelete(): Promise<void> {
 
 /************************************************************************************************************ FILTERS */
 
-const workFilters = ref<WorkFilters>({});
-
-const hasActiveTableControls = computed(() =>
-  Object.values(workFilters.value).some((value) => value !== undefined && value !== null && value !== ''),
-);
-
-function setSort(event: { column: WorkSortField; direction: SortDirection | undefined }): void {
-  workFilters.value = {
-    ...workFilters.value,
-    sortBy: event.direction ? event.column : undefined,
-    sortDirection: event.direction,
-  };
-
-  fetchWorks();
-}
-
-function applyFilterValues(values: Record<string, unknown>): void {
-  workFilters.value = { ...workFilters.value, ...(values as Partial<WorkFilters>) };
-
-  fetchWorks();
-}
-
-function clearFilterValues(values: Record<string, unknown>): void {
-  workFilters.value = { ...workFilters.value, ...(values as Partial<WorkFilters>) };
-
-  fetchWorks();
-}
-
-function clearAllTableControls(): void {
-  workFilters.value = {};
-
-  void fetchWorks();
-}
+const {
+  filters: workFilters,
+  hasActiveTableControls,
+  setSort,
+  applyFilterValues,
+  clearFilterValues,
+  clearAllTableControls,
+} = useTableFilters<WorkFilters>(fetch);
 </script>
 <style scoped lang="scss"></style>

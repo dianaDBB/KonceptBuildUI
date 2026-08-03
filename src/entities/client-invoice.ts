@@ -1,18 +1,21 @@
 import { ColumnType, Configs, RangeFilterValueType } from '@/types/entity-configs';
 import { TableFilterKind } from '@/types/table-filter';
-import { WorkSortField, WorkType } from '@/types/work-type';
-import { ClientSortField, ClientType } from '@/types/client-type';
+import { WorkType } from '@/types/work-type';
+import { ClientType } from '@/types/client-type';
 import { ClientInvoiceSortField, ClientInvoiceType } from '@/types/client-invoice-type';
-import { EnumOptions } from '@/types/select-options';
+import { Client } from './client';
+import { Work } from './work';
+import { formatCurrency, formatPercentage } from '@/utils/validation';
+import { buildTooltipItems } from '@/utils/tooltipItems';
 
 export class ClientInvoice {
   static getConfigs(
-    statusOptions: EnumOptions,
     clientOptions: ClientType[],
-    clientConfigs: Configs<ClientSortField, ClientType>,
     workOptions: WorkType[],
-    workConfigs: Configs<WorkSortField, WorkType>,
   ): Configs<ClientInvoiceSortField, ClientInvoiceType> {
+    const clientConfigs = Client.getConfigs();
+    const workConfigs = Work.getConfigs(clientOptions);
+
     return {
       docNumber: {
         label: 'Nº Documento',
@@ -32,6 +35,7 @@ export class ClientInvoice {
           },
           dropdownAlign: 'start',
         },
+        displayValue: (clientInvoice: ClientInvoiceType) => clientInvoice.docNumber,
       },
       client: {
         label: 'Cliente',
@@ -42,30 +46,11 @@ export class ClientInvoice {
           optionLines: (client: ClientType) => [client.code!, client.companyName!, client.nif!],
           filter: (client: ClientType) => `${client.companyName} ${client.nif} ${client.code}`,
           tooltipTitle: (client: ClientType) => client.companyName!,
-          tooltipItems: (client: ClientType) => [
-            { label: clientConfigs.code.label, value: client.code },
-            { label: clientConfigs.companyName.label, value: client.companyName },
-            { label: clientConfigs.address.label, value: client.address },
-            { label: clientConfigs.postalCode.label, value: client.postalCode },
-            { label: clientConfigs.city.label, value: client.city },
-            { label: clientConfigs.district.label, value: client.district },
-            { label: clientConfigs.nif.label, value: client.nif },
-            { label: clientConfigs.contact.label, value: client.contact },
-            { label: clientConfigs.email.label, value: client.email },
-            {
-              label: clientConfigs.phone.label,
-              value: `${client.phoneCountryCode ?? ''} ${client.phone ?? ''}`,
-            },
-            {
-              label: clientConfigs.status.label,
-              value: client.status ? statusOptions[client.status].label : client.status,
-            },
-            { label: clientConfigs.note.label, value: client.note },
-          ],
+          tooltipItems: (client: ClientType) => buildTooltipItems(client, clientConfigs),
         },
         styleConfig: {
           showDisabled: () => false,
-          isInvalid: (work: WorkType) => !work.client,
+          isInvalid: (clientInvoice: ClientInvoiceType) => !clientInvoice.client,
           columnStyle: {
             width: '200px',
           },
@@ -78,6 +63,7 @@ export class ClientInvoice {
           },
           dropdownAlign: 'start',
         },
+        displayValue: (clientInvoice: ClientInvoiceType) => clientInvoice.client?.companyName,
       },
       work: {
         label: 'Obra',
@@ -88,24 +74,11 @@ export class ClientInvoice {
           optionLines: (work: WorkType) => [work.code!, work.name!],
           filter: (work: WorkType) => `${work.code} ${work.name}`,
           tooltipTitle: (work: WorkType) => work.code!,
-          tooltipItems: (work: WorkType) => [
-            { label: workConfigs.code.label, value: work.code },
-            { label: workConfigs.name.label, value: work.name },
-            { label: workConfigs.status.label, value: work.status },
-            { label: workConfigs.contractedBudget.label, value: work.contractedBudget },
-            { label: workConfigs.estimatedCost.label, value: work.estimatedCost },
-            { label: workConfigs.estimatedCostMaterials.label, value: work.estimatedCostMaterials },
-            { label: workConfigs.estimatedCostLabor.label, value: work.estimatedCostLabor },
-            { label: workConfigs.estimatedMarginEur.label, value: work.estimatedMarginEur },
-            { label: workConfigs.estimatedMarginPercentual.label, value: work.estimatedMarginPercentual },
-            { label: workConfigs.startDate.label, value: work.startDate },
-            { label: workConfigs.estimatedEndDate.label, value: work.estimatedEndDate },
-            { label: workConfigs.endDate.label, value: work.endDate },
-          ],
+          tooltipItems: (work: WorkType) => buildTooltipItems(work, workConfigs),
         },
         styleConfig: {
           showDisabled: () => false,
-          isInvalid: (work: WorkType) => !work.client,
+          isInvalid: (clientInvoice: ClientInvoiceType) => !clientInvoice.work,
           columnStyle: {
             width: '200px',
           },
@@ -117,6 +90,7 @@ export class ClientInvoice {
             valueKey: 'workName',
           },
         },
+        displayValue: (clientInvoice: ClientInvoiceType) => clientInvoice.work?.name,
       },
       description: {
         label: 'Descrição',
@@ -135,6 +109,7 @@ export class ClientInvoice {
             valueKey: 'description',
           },
         },
+        displayValue: (clientInvoice: ClientInvoiceType) => clientInvoice.description,
       },
       valueWithoutTax: {
         label: 'Valor s/IVA (€)',
@@ -155,6 +130,7 @@ export class ClientInvoice {
             maxKey: 'valueWithoutTaxMax',
           },
         },
+        displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.valueWithoutTax),
       },
       appliedTax: {
         label: 'Taxa IVA (%)',
@@ -176,6 +152,7 @@ export class ClientInvoice {
             maxKey: 'appliedTaxMax',
           },
         },
+        displayValue: (clientInvoice: ClientInvoiceType) => formatPercentage(clientInvoice.appliedTax),
       },
       taxValue: {
         label: 'IVA (€)',
@@ -196,6 +173,7 @@ export class ClientInvoice {
             maxKey: 'taxValueMax',
           },
         },
+        displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.taxValue),
       },
       totalValue: {
         label: 'Valor Total (€) (C/IVA)',
@@ -216,6 +194,7 @@ export class ClientInvoice {
             maxKey: 'totalValueMax',
           },
         },
+        displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.totalValue),
       },
       registrationDate: {
         label: 'Data Registo',
@@ -229,13 +208,14 @@ export class ClientInvoice {
         },
         filterConfig: {
           column: ClientInvoiceSortField.REGISTRATION_DATE,
-          kind: TableFilterKind.NUMBER_RANGE,
+          kind: TableFilterKind.DATE_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.DATE,
             minKey: 'registrationDateMin',
             maxKey: 'registrationDateMax',
           },
         },
+        displayValue: (clientInvoice: ClientInvoiceType) => clientInvoice.registrationDate,
       },
       dueDate: {
         label: 'Data Vencimento',
@@ -248,22 +228,20 @@ export class ClientInvoice {
           },
         },
         filterConfig: {
-          column: ClientInvoiceSortField.REGISTRATION_DATE,
-          kind: TableFilterKind.NUMBER_RANGE,
+          column: ClientInvoiceSortField.DUE_DATE,
+          kind: TableFilterKind.DATE_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.DATE,
             minKey: 'dueDateMin',
             maxKey: 'dueDateMax',
           },
         },
+        displayValue: (clientInvoice: ClientInvoiceType) => clientInvoice.dueDate,
       },
     };
   }
 
-  static isValid(
-    clientInvoice: ClientInvoiceType,
-    configs: Configs<ClientInvoiceSortField, ClientInvoiceType>,
-  ): boolean {
+  static isValid(clientInvoice: ClientInvoiceType, configs: Configs<ClientInvoiceSortField>): boolean {
     return Object.values(configs).every((config) => !config.styleConfig.isInvalid(clientInvoice));
   }
 }

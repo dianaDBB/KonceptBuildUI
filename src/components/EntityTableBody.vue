@@ -92,7 +92,6 @@
 import { Trash2, Pencil, Undo2, Check } from 'lucide-vue-next';
 import type { Component } from 'vue';
 import { ColumnType, EntityConfig, EntityType, TableRow } from '@/types/entity-configs';
-
 import TextInput from './inputs/TextInput.vue';
 import { formatCurrency, formatNumber, formatPercentage } from '@/utils/validation.ts';
 import InfoTooltip from './InfoTooltip.vue';
@@ -106,15 +105,15 @@ import SelectInput from './inputs/SelectInput.vue';
 import SearchSelectInput from './inputs/SearchSelectInput.vue';
 import SearchSelectMultipleInput from './inputs/SearchSelectMultipleInput.vue';
 
-interface Props<TEntity extends EntityType = EntityType> {
+interface Props {
   rows: TableRow<TEntity>[];
-  configs: Record<string, EntityConfig<TSortField, TEntity>>;
+  configs: Record<string, EntityConfig<TSortField>>;
   rowIsActive: (row: TableRow<TEntity>) => boolean;
   isValid: (entity: TEntity) => boolean;
   isEditing?: boolean;
 }
 
-const props = withDefaults(defineProps<Props<TEntity>>(), {
+const props = withDefaults(defineProps<Props>(), {
   isEditing: false,
 });
 
@@ -176,7 +175,7 @@ function toDisplayString(value: unknown): string {
   return value == null ? '' : String(value);
 }
 
-function getFormatedValue(row: TableRow<TEntity>, fieldKey: string, config: EntityConfig<TSortField, TEntity>): string {
+function getFormatedValue(row: TableRow<TEntity>, fieldKey: string, config: EntityConfig<TSortField>): string {
   const value = getFieldValue(row, fieldKey);
 
   switch (config.type) {

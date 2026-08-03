@@ -109,93 +109,39 @@
 import { ref, onMounted, computed, nextTick } from 'vue';
 import { ApiResponseStatus } from '@/types/api-response-status';
 import { ChevronRight, FileInput, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
-import Toast from '@/composables/Toast.vue';
-import { SortDirection } from '@/types/sort-direction';
+import Toast from '@/components/Toast.vue';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
-import ConfirmDialog from '@/composables/ConfirmDialog.vue';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import { ClientFilters, ClientSortField, ClientType } from '@/types/client-type';
 import clientApi from '@/services/client-api';
-import EntityTableBody from '@/composables/EntityTableBody.vue';
+import EntityTableBody from '@/components/EntityTableBody.vue';
 import { TableRow } from '@/types/entity-configs';
-import { StatusEnum } from '@/types/status-enum';
-import configsApi from '@/services/configs-api';
-import { Client } from '@/entities/client';
 import { apiError } from '@/services/api';
-import { ClientPaymentFilters, ClientPaymentSortField, ClientPaymentType } from '@/types/client-payment-type';
+import { ClientPaymentFilters, ClientPaymentType } from '@/types/client-payment-type';
 import { ClientPayment } from '@/entities/client-payment';
-import { ClientPaymentTypeEnum } from '@/types/client-payment-type-enum';
-import { PaymentMethodEnum } from '@/types/payment-method-enum';
 import clientPaymentApi from '@/services/client-payment-api';
-import { ClientInvoice } from '@/entities/client-invoice';
 import { ClientInvoiceType } from '@/types/client-invoice-type';
-import { Work } from '@/entities/work';
-import { WorkStatusEnum } from '@/types/work-status-enum';
-import { WorkType } from '@/types/work-type';
-import workApi from '@/services/work-api';
 import clientInvoiceApi from '@/services/client-invoice-api';
+import { useTableFilters } from '@/composables/useTableFilters';
+import { useConfigs } from '@/composables/useConfigs';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 const tableBody = ref<HTMLTableSectionElement | null>(null);
 
-const clientPaymentType = ref<{ [k: string]: ClientPaymentTypeEnum }>({});
-const status = ref<{ [k: string]: StatusEnum }>({});
-const paymentMethod = ref<{ [k: string]: PaymentMethodEnum }>({});
-
+const status = useConfigs().statusOptions;
 const clients = ref<ClientType[]>([]);
-const clientConfigs = computed(() => Client.getConfigs(status.value));
-
-const works = ref<WorkType[]>([]);
-const workStatus = ref<{ [k: string]: WorkStatusEnum }>({});
-const workConfigsConfigs = computed(() =>
-  Work.getConfigs(status.value, workStatus.value, clients.value, clientConfigs.value),
-);
-
 const clientInvoices = ref<ClientInvoiceType[]>([]);
-const clientInvoiceConfigs = computed(() =>
-  ClientInvoice.getConfigs(status.value, clients.value, clientConfigs.value, works.value, workConfigsConfigs.value),
-);
 
 const clientPayments = ref<ClientPaymentRow[]>([]);
-const configs = computed(() =>
-  ClientPayment.getConfigs(
-    clientPaymentType.value,
-    status.value,
-    clients.value,
-    clientConfigs.value,
-    clientInvoices.value,
-    clientInvoiceConfigs.value,
-    paymentMethod.value,
-  ),
-);
+const configs = computed(() => ClientPayment.getConfigs(clients.value, clientInvoices.value));
 
 /*************************************************************************************************************** LOAD */
 
 onMounted(async () => {
-  await loadConfigs();
   await fetch();
   await fetchClients();
-  await fetchWorks();
   await fetchClientInvoices();
 });
-
-async function loadConfigs() {
-  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
-
-  try {
-    const gotClientPaymentType = await configsApi.getClientPaymentTypeValues();
-    clientPaymentType.value = Object.fromEntries(gotClientPaymentType.map((e) => [e.code, e]));
-
-    const gotStatusValues = await configsApi.getStatusValues();
-    status.value = Object.fromEntries(gotStatusValues.map((e) => [e.code, e]));
-
-    const gotPaymentMethodValues = await configsApi.getPaymentMethodValues();
-    paymentMethod.value = Object.fromEntries(gotPaymentMethodValues.map((e) => [e.code, e]));
-
-    apiStatus.value = { isLoading: false, isSuccess: true, isError: false };
-  } catch (error: unknown) {
-    apiStatus.value = apiError(error, 'Failed to load config values.');
-  }
-}
 
 async function fetch() {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
@@ -225,10 +171,6 @@ async function fetchClients() {
   };
 
   clients.value = await clientApi.searchClients(clientFilters);
-}
-
-async function fetchWorks() {
-  works.value = await workApi.searchWorks();
 }
 
 async function fetchClientInvoices() {
@@ -355,38 +297,13 @@ async function confirmDelete(): Promise<void> {
 
 /************************************************************************************************************ FILTERS */
 
-const clientPaymentsFilter = ref<ClientPaymentFilters>({});
-
-const hasActiveTableControls = computed(() =>
-  Object.values(clientPaymentsFilter.value).some((value) => value !== undefined && value !== null && value !== ''),
-);
-
-function setSort(event: { column: ClientPaymentSortField; direction: SortDirection | undefined }): void {
-  clientPaymentsFilter.value = {
-    ...clientPaymentsFilter.value,
-    sortBy: event.direction ? event.column : undefined,
-    sortDirection: event.direction,
-  };
-
-  fetch();
-}
-
-function applyFilterValues(values: Record<string, unknown>): void {
-  clientPaymentsFilter.value = { ...clientPaymentsFilter.value, ...(values as Partial<ClientPaymentFilters>) };
-
-  fetch();
-}
-
-function clearFilterValues(values: Record<string, unknown>): void {
-  clientPaymentsFilter.value = { ...clientPaymentsFilter.value, ...(values as Partial<ClientPaymentFilters>) };
-
-  fetch();
-}
-
-function clearAllTableControls(): void {
-  clientPaymentsFilter.value = {};
-
-  void fetch();
-}
+const {
+  filters: clientPaymentsFilter,
+  hasActiveTableControls,
+  setSort,
+  applyFilterValues,
+  clearFilterValues,
+  clearAllTableControls,
+} = useTableFilters<ClientPaymentFilters>(fetch);
 </script>
 <style scoped lang="scss"></style>

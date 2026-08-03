@@ -84,10 +84,10 @@ import { onMounted, ref } from 'vue';
 import type { HrDashboardType } from '@/types/hr-dashboard-type';
 import hrDashboardApi from '@/services/hr-dashboard-api';
 import { ApiResponseStatus } from '@/types/api-response-status';
-import Toast from '@/composables/Toast.vue';
+import Toast from '@/components/Toast.vue';
 import { LayoutDashboard, ChevronRight } from 'lucide-vue-next';
 import { years } from '@/utils/date';
-import HrDashboardTable from '@/composables/HrDashboardTable.vue';
+import HrDashboardTable from '@/components/HrDashboardTable.vue';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 

@@ -1,10 +1,13 @@
 import { ColumnType, Configs, RangeFilterValueType } from '@/types/entity-configs';
 import { TableFilterKind } from '@/types/table-filter';
-import { EnumOptions } from '@/types/select-options';
 import { WageSortField, WageType } from '@/types/wage-type';
+import { useConfigs } from '@/composables/useConfigs';
+import { formatCurrency } from '@/utils/validation';
 
 export class Wage {
-  static getConfigs(paymentMethodOptions: EnumOptions): Configs<WageSortField, WageType> {
+  static getConfigs(): Configs<WageSortField, WageType> {
+    const paymentMethodOptions = useConfigs().paymentMethodOptions.value;
+
     return {
       code: {
         label: 'ID',
@@ -24,6 +27,7 @@ export class Wage {
           },
           dropdownAlign: 'start',
         },
+        displayValue: (wage: WageType) => wage.code,
       },
       year: {
         label: 'Ano',
@@ -44,6 +48,7 @@ export class Wage {
             maxKey: 'yearMax',
           },
         },
+        displayValue: (wage: WageType) => wage.year,
       },
       month: {
         label: 'Mês',
@@ -64,6 +69,7 @@ export class Wage {
             maxKey: 'monthMax',
           },
         },
+        displayValue: (wage: WageType) => wage.month,
       },
       workerCode: {
         label: 'ID Colaborador',
@@ -82,6 +88,7 @@ export class Wage {
             valueKey: 'workerCode',
           },
         },
+        displayValue: (wage: WageType) => wage.workerCode,
       },
       workerName: {
         label: 'Nome Colaborador',
@@ -100,6 +107,7 @@ export class Wage {
             valueKey: 'workerName',
           },
         },
+        displayValue: (wage: WageType) => wage.workerName,
       },
       baseSalary: {
         label: 'Valor Base',
@@ -115,6 +123,7 @@ export class Wage {
             width: '80px',
           },
         },
+        displayValue: (wage: WageType) => formatCurrency(wage.baseSalary),
       },
       expectedWage: {
         label: 'Salário Estimado',
@@ -142,6 +151,7 @@ export class Wage {
             maxKey: 'expectedWageMax',
           },
         },
+        displayValue: (wage: WageType) => formatCurrency(wage.expectedWage),
       },
       expectedExtraHours: {
         label: 'Custo Estimado Horas Extras',
@@ -169,6 +179,7 @@ export class Wage {
             maxKey: 'expectedExtraHoursMax',
           },
         },
+        displayValue: (wage: WageType) => formatCurrency(wage.expectedExtraHours),
       },
       expectedDeductions: {
         label: 'Custo Estimado Horas Não Pagas',
@@ -193,6 +204,7 @@ export class Wage {
             maxKey: 'expectedDeductionsMax',
           },
         },
+        displayValue: (wage: WageType) => formatCurrency(wage.expectedDeductions),
       },
       expectedInternalCost: {
         label: 'Custo Interno Estimado',
@@ -212,7 +224,7 @@ export class Wage {
           },
         },
         filterConfig: {
-          column: WageSortField.EXPECTED_DEDUCTIONS,
+          column: WageSortField.EXPECTED_INTERNAL_COST,
           kind: TableFilterKind.NUMBER_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.NUMBER,
@@ -220,6 +232,7 @@ export class Wage {
             maxKey: 'expectedInternalCostMax',
           },
         },
+        displayValue: (wage: WageType) => formatCurrency(wage.expectedInternalCost),
       },
       paidValue: {
         label: 'Valor Pago',
@@ -240,6 +253,7 @@ export class Wage {
             maxKey: 'paidValueMax',
           },
         },
+        displayValue: (wage: WageType) => formatCurrency(wage.paidValue),
       },
       paidDate: {
         label: 'Data Pagamento',
@@ -252,14 +266,15 @@ export class Wage {
           },
         },
         filterConfig: {
-          column: WageSortField.PAID_VALUE,
-          kind: TableFilterKind.NUMBER_RANGE,
+          column: WageSortField.PAID_DATE,
+          kind: TableFilterKind.DATE_RANGE,
           valueConfig: {
             valueType: RangeFilterValueType.DATE,
             minKey: 'paidDateMin',
             maxKey: 'paidDateMax',
           },
         },
+        displayValue: (wage: WageType) => wage.paidDate,
       },
       paymentMethod: {
         label: 'Método Pagamento',
@@ -281,6 +296,8 @@ export class Wage {
             valueKey: 'paymentMethod',
           },
         },
+        displayValue: (wage: WageType) =>
+          wage.paymentMethod ? paymentMethodOptions[wage.paymentMethod].label : undefined,
       },
       notes: {
         label: 'Notas',
@@ -299,6 +316,7 @@ export class Wage {
             valueKey: 'notes',
           },
         },
+        displayValue: (wage: WageType) => wage.notes,
       },
     };
   }

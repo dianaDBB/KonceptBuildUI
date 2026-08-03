@@ -2,7 +2,7 @@ import { StyleValue } from 'vue';
 import { TableFilterKind } from './table-filter';
 import { SelectOption } from './select-options';
 import { UUID } from 'crypto';
-import { TooltipItem } from '@/composables/InfoTooltip.vue';
+import { TooltipItem } from '@/components/InfoTooltip.vue';
 
 export interface EntityType {
   id?: UUID;
@@ -53,6 +53,8 @@ export interface EntityConfig<TSortField extends string = string, TEntity extend
   styleConfig: StyleConfig;
 
   filterConfig?: FilterConfig<TSortField>;
+
+  displayValue: (entity: EntityType) => string | number | undefined;
 }
 
 export interface StyleConfig {
@@ -70,7 +72,7 @@ export interface SearchSelectConfig<TEntity extends EntityType = EntityType> {
   tooltipTitle?: (value: TEntity) => string;
   tooltipItems?: (value: TEntity) => {
     label: string;
-    value?: string | number | null;
+    value?: string | number | undefined;
   }[];
 }
 
@@ -83,7 +85,7 @@ export interface SearchSelectMultipleConfig<TEntity extends EntityType = EntityT
   tooltipTitle?: (value: TEntity) => string;
   tooltipItems?: (value: TEntity) => {
     label: string;
-    value?: string | number | null;
+    value?: string | number | undefined;
   }[];
 }
 

@@ -1,11 +1,13 @@
+import { useConfigs } from '@/composables/useConfigs';
 import { ClientSortField, ClientType } from '@/types/client-type';
 import { ColumnType, Configs } from '@/types/entity-configs';
-import { EnumOptions } from '@/types/select-options';
 import { TableFilterKind } from '@/types/table-filter';
 import { isValidEmail, isValidPhone } from '@/utils/validation';
 
 export class Client {
-  static getConfigs(statusOptions: EnumOptions): Configs<ClientSortField, ClientType> {
+  static getConfigs(): Configs<ClientSortField, ClientType> {
+    const statusOptions = useConfigs().statusOptions.value;
+
     return {
       code: {
         label: 'ID',
@@ -25,6 +27,7 @@ export class Client {
           },
           dropdownAlign: 'start',
         },
+        displayValue: (client: ClientType) => client.code,
       },
       companyName: {
         label: 'Nome / Empresa',
@@ -44,6 +47,7 @@ export class Client {
           },
           dropdownAlign: 'start',
         },
+        displayValue: (client: ClientType) => client.companyName,
       },
       address: {
         label: 'Morada',
@@ -63,6 +67,7 @@ export class Client {
           },
           dropdownAlign: 'start',
         },
+        displayValue: (client: ClientType) => client.address,
       },
       postalCode: {
         label: 'Código Postal',
@@ -81,6 +86,7 @@ export class Client {
             valueKey: 'postalCode',
           },
         },
+        displayValue: (client: ClientType) => client.postalCode,
       },
       city: {
         label: 'Localidade',
@@ -99,6 +105,7 @@ export class Client {
             valueKey: 'city',
           },
         },
+        displayValue: (client: ClientType) => client.city,
       },
       district: {
         label: 'Distrito',
@@ -117,6 +124,7 @@ export class Client {
             valueKey: 'district',
           },
         },
+        displayValue: (client: ClientType) => client.district,
       },
       nif: {
         label: 'NIF',
@@ -135,6 +143,7 @@ export class Client {
             valueKey: 'nif',
           },
         },
+        displayValue: (client: ClientType) => client.nif,
       },
       contact: {
         label: 'Contacto',
@@ -153,6 +162,7 @@ export class Client {
             valueKey: 'contact',
           },
         },
+        displayValue: (client: ClientType) => client.contact,
       },
       email: {
         label: 'E-mail',
@@ -171,6 +181,7 @@ export class Client {
             valueKey: 'email',
           },
         },
+        displayValue: (client: ClientType) => client.email,
       },
       phone: {
         label: 'Tlf',
@@ -192,6 +203,8 @@ export class Client {
             valueKey: 'phone',
           },
         },
+        displayValue: (client: ClientType) =>
+          client.phoneCountryCode && client.phone ? `${client.phoneCountryCode} ${client.phone}` : undefined,
       },
       status: {
         label: 'Estado',
@@ -213,6 +226,7 @@ export class Client {
             valueKey: 'status',
           },
         },
+        displayValue: (client: ClientType) => (client.status ? statusOptions[client.status].label : undefined),
       },
       note: {
         label: 'Notas',
@@ -231,11 +245,12 @@ export class Client {
             valueKey: 'note',
           },
         },
+        displayValue: (client: ClientType) => client.note,
       },
     };
   }
 
-  static isValid(client: ClientType, configs: Configs<ClientSortField, ClientType>): boolean {
+  static isValid(client: ClientType, configs: Configs<ClientSortField>): boolean {
     return Object.values(configs).every((config) => !config.styleConfig.isInvalid(client));
   }
 }

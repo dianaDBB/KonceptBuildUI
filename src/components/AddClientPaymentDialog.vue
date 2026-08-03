@@ -6,7 +6,7 @@
       <div class="form-group">
         <label>Tipo</label>
         <SelectInput
-          :value="form.type"
+          :value="form.type!"
           :is-invalid="!form.type"
           :is-disabled="false"
           :select-options="Object.values(paymentTypes)"
@@ -16,13 +16,13 @@
 
       <div class="form-group">
         <label>Nº Documento Relacionado</label>
-        <TextInput :value="invoice?.docNumber" :is-disabled="true" :is-invalid="false" />
+        <TextInput :value="invoice!.docNumber!" :is-disabled="true" :is-invalid="false" />
       </div>
 
       <div class="form-group">
         <label>Data Pagamento</label>
         <DateInput
-          :value="form.paymentDate"
+          :value="form.paymentDate!"
           :is-invalid="!form.paymentDate"
           :is-disabled="isLoading"
           @update:value="form.paymentDate = $event"
@@ -43,7 +43,7 @@
       <div class="form-group">
         <label>Método Pagamento</label>
         <SelectInput
-          :value="form.paymentMethod"
+          :value="form.paymentMethod!"
           :is-invalid="!form.paymentMethod"
           :select-options="Object.values(paymentMethods)"
           :is-disabled="isLoading"
@@ -54,7 +54,7 @@
       <div class="form-group">
         <label>Notas</label>
         <TextInput
-          :value="form.notes"
+          :value="form.notes!"
           :is-disabled="isLoading"
           :is-invalid="false"
           @update:value="form.notes = $event"
@@ -81,10 +81,10 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { Delete, Save } from 'lucide-vue-next';
 
 import BaseDialog from '@/components/BaseDialog.vue';
-import TextInput from '@/composables/inputs/TextInput.vue';
-import DateInput from '@/composables/inputs/DateInput.vue';
-import MoneyInput from '@/composables/inputs/MoneyInput.vue';
-import SelectInput from '@/composables/inputs/SelectInput.vue';
+import TextInput from '@/components/inputs/TextInput.vue';
+import DateInput from '@/components/inputs/DateInput.vue';
+import MoneyInput from '@/components/inputs/MoneyInput.vue';
+import SelectInput from '@/components/inputs/SelectInput.vue';
 
 import { ClientInvoiceType } from '@/types/client-invoice-type';
 import { ClientPaymentType } from '@/types/client-payment-type';

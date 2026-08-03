@@ -16,7 +16,7 @@ export interface WageType extends EntityType {
   expectedInternalCost?: number;
   paidValue?: number;
   paidDate?: string;
-  paymentMethod?: PaymentMethodEnum;
+  paymentMethod?: string;
   notes?: string;
 }
 
