@@ -1,14 +1,14 @@
+import { useConfigs } from '@/composables/useConfigs';
 import { ColumnType, Configs, RangeFilterValueType, TableRow } from '@/types/entity-configs';
-import { EnumOptions } from '@/types/select-options';
 import { TableFilterKind } from '@/types/table-filter';
 import { WorkerType, WorkerSortField } from '@/types/worker-type';
 import { formatCurrency, formatNumber, formatPercentage, isValidEmail, isValidPhone } from '@/utils/validation';
 
 export class Worker {
-  static getConfigs(
-    statusOptions: EnumOptions,
-    workerContractTypeOptions: EnumOptions,
-  ): Configs<WorkerSortField, WorkerType> {
+  static getConfigs(): Configs<WorkerSortField, WorkerType> {
+    const statusOptions = useConfigs().statusOptions.value;
+    const workerContractTypeOptions = useConfigs().workerContractTypeOptions.value;
+
     return {
       code: {
         label: 'ID',
@@ -224,7 +224,7 @@ export class Worker {
           },
         },
         displayValue: (worker: WorkerType) =>
-          worker.workerContractType ? workerContractTypeOptions[worker.workerContractType].label : undefined,
+          worker.workerContractType ? workerContractTypeOptions[worker.workerContractType]?.label : undefined,
       },
       'currentWorkerCompensation.hourRate': {
         label: 'Valor Hora (€)',

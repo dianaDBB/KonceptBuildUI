@@ -71,7 +71,26 @@
               @row-delete="askDelete"
               @row-save="save"
               @row-discard="discard"
+              @row-toggle="toggleRow"
             >
+              <template #details="{ row }">
+                <tr v-for="(paidInvoice, index) in row.entity.paidInvoices" :key="index" class="sub-row">
+                  <div class="sub-row-cell">
+                    <td />
+                    <td />
+                    <td />
+                    <td>
+                      {{ paidInvoice.invoice!.docNumber }}
+                    </td>
+                    <td>
+                      {{ paidInvoice.paidValue }}
+                    </td>
+                    <td />
+                    <td />
+                    <td />
+                  </div>
+                </tr>
+              </template>
             </EntityTableBody>
           </table>
         </div>
@@ -156,6 +175,7 @@ async function fetch() {
       _key: clientPayment.code ?? nextKey(),
       _isNew: false,
       _isEdited: false,
+      _expanded: false,
     }));
 
     apiStatus.value = { isLoading: false, isSuccess: true, isError: false };
@@ -184,6 +204,7 @@ interface ClientPaymentRow extends TableRow<ClientPaymentType> {
   _key: string;
   _isNew: boolean;
   _isEdited: boolean;
+  _expanded?: boolean;
   _original?: ClientPaymentType;
 }
 
@@ -204,6 +225,14 @@ function discard(row: ClientPaymentRow) {
   }
 }
 
+function toggleRow(row: ClientPaymentRow) {
+  if (row._isNew || row._isEdited) {
+    return;
+  }
+
+  row._expanded = !row._expanded;
+}
+
 /*************************************************************************************************************** EDIT */
 
 function startEditing(row: ClientPaymentRow) {
@@ -221,6 +250,7 @@ async function add(): Promise<void> {
     _key: nextKey(),
     _isNew: true,
     _isEdited: false,
+    _expanded: true,
   });
 
   await nextTick();

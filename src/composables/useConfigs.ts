@@ -17,7 +17,7 @@ const loaded = ref(false);
 export async function loadConfigs() {
   if (loaded.value) return;
 
-  const workerContractTypesValues = await configsApi.getPaymentMethodValues();
+  const workerContractTypesValues = await configsApi.getWorkerContractTypeValues();
   workerContractTypeOptions.value = Object.fromEntries(workerContractTypesValues.map((e) => [e.code, e]));
 
   const statususValues = await configsApi.getStatusValues();

@@ -17,11 +17,11 @@ class ClientPaymentApi {
       type: clientPayment.type!,
       clientId: clientPayment.client!.id!,
       paymentDate: clientPayment.paymentDate!,
-      paidValue: clientPayment.paidValue!,
       paymentMethod: clientPayment.paymentMethod!,
       notes: clientPayment.notes,
-      invoices: clientPayment.invoices!.map((invoice) => ({
-        invoiceId: invoice.id!,
+      paidInvoices: clientPayment.paidInvoices!.map((paidInvoice) => ({
+        invoiceId: paidInvoice.invoice!.id!,
+        paidValue: clientPayment.totalPaidValue!,
       })),
     };
 
@@ -36,11 +36,11 @@ class ClientPaymentApi {
       type: clientPayment.type!,
       clientId: clientPayment.client!.id!,
       paymentDate: clientPayment.paymentDate!,
-      paidValue: clientPayment.paidValue!,
       paymentMethod: clientPayment.paymentMethod!,
       notes: clientPayment.notes,
-      invoices: clientPayment.invoices!.map((invoice) => ({
-        invoiceId: invoice.id!,
+      paidInvoices: clientPayment.paidInvoices!.map((paidInvoice) => ({
+        invoiceId: paidInvoice.invoice!.id!,
+        paidValue: clientPayment.totalPaidValue!,
       })),
     };
 

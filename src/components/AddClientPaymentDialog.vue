@@ -1,6 +1,6 @@
 <template>
   <BaseDialog v-model="isOpen">
-    <h2>Adicionar pagamento para a fatura {{ invoice?.docNumber }}</h2>
+    <h2>Gerar pagamento para a fatura {{ invoice?.docNumber }}</h2>
 
     <form class="dialog-form" @submit.prevent="handleSave">
       <div class="form-group">
@@ -8,7 +8,7 @@
         <SelectInput
           :value="form.type!"
           :is-invalid="!form.type"
-          :is-disabled="false"
+          :is-disabled="isLoading"
           :select-options="Object.values(paymentTypes)"
           @update:value="form.type = $event"
         />
@@ -33,7 +33,7 @@
         <label>Valor Pago (€)</label>
         <MoneyInput
           :entity="form"
-          :value="form.paidValue!"
+          :value="form.paidValue"
           :is-invalid="!form.paidValue"
           :is-disabled="isLoading"
           field-key="paidValue"
@@ -77,23 +77,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Delete, Save } from 'lucide-vue-next';
 
 import BaseDialog from '@/components/BaseDialog.vue';
-import TextInput from '@/components/inputs/TextInput.vue';
 import DateInput from '@/components/inputs/DateInput.vue';
 import MoneyInput from '@/components/inputs/MoneyInput.vue';
 import SelectInput from '@/components/inputs/SelectInput.vue';
+import TextInput from '@/components/inputs/TextInput.vue';
+
+import { useConfigs } from '@/composables/useConfigs';
 
 import { ClientInvoiceType } from '@/types/client-invoice-type';
 import { ClientPaymentType } from '@/types/client-payment-type';
-import { ClientPaymentTypeEnum } from '@/types/client-payment-type-enum';
-import { PaymentMethodEnum } from '@/types/payment-method-enum';
-
-import configsApi from '@/services/configs-api';
-import { ApiResponseStatus } from '@/types/api-response-status.ts';
-import { apiError } from '@/services/api';
 
 const props = defineProps<{
   modelValue: boolean;
@@ -111,65 +107,74 @@ const isOpen = computed({
 });
 
 const isLoading = ref(false);
-const paymentTypes = ref<Record<string, ClientPaymentTypeEnum>>({});
-const paymentMethods = ref<Record<string, PaymentMethodEnum>>({});
 
-const form = ref<Partial<ClientPaymentType>>({});
+const paymentTypes = useConfigs().clientPaymentTypeOptions;
+const paymentMethods = useConfigs().paymentMethodOptions;
+
+const form = ref({
+  type: undefined as ClientPaymentType['type'] | undefined,
+  client: undefined as ClientPaymentType['client'] | undefined,
+  paymentDate: '',
+  paidValue: undefined as number | undefined,
+  paymentMethod: undefined as ClientPaymentType['paymentMethod'] | undefined,
+  notes: '',
+});
 
 const isFormValid = computed(() => {
-  const { type, paymentDate, paidValue, paymentMethod } = form.value;
-  return !!(type && paymentDate && paidValue && paymentMethod);
+  return !!(form.value.type && form.value.paymentDate && form.value.paymentMethod && form.value.paidValue);
 });
 
 watch(
   () => props.invoice,
-  (newInvoice) => {
-    resetForm();
-    if (!newInvoice) {
+  (invoice) => {
+    if (!invoice) {
+      resetForm();
       return;
     }
 
     form.value = {
       type: undefined,
-      invoices: [newInvoice],
-      client: newInvoice.client,
+      client: invoice.client,
       paymentDate: new Date().toISOString().split('T')[0],
-      paidValue: newInvoice.totalValue,
+      paidValue: invoice.totalValue,
       paymentMethod: undefined,
-      notes: undefined,
+      notes: '',
     };
   },
-  { deep: true },
+  { immediate: true },
 );
 
-onMounted(async () => {
-  await loadConfigs();
-});
-
-const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
-
-async function loadConfigs() {
-  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
-  try {
-    const gotClientPaymentType = await configsApi.getClientPaymentTypeValues();
-    paymentTypes.value = Object.fromEntries(gotClientPaymentType.map((e) => [e.code, e]));
-
-    const gotPaymentMethods = await configsApi.getPaymentMethodValues();
-    paymentMethods.value = Object.fromEntries(gotPaymentMethods.map((e) => [e.code, e]));
-
-    apiStatus.value = { isLoading: false, isSuccess: true, isError: false };
-  } catch (error: unknown) {
-    apiStatus.value = apiError(error, 'Failed to load config values.');
-  }
-}
-
 function resetForm() {
-  form.value = {};
+  form.value = {
+    type: undefined,
+    client: undefined,
+    paymentDate: '',
+    paidValue: undefined,
+    paymentMethod: undefined,
+    notes: '',
+  };
 }
 
 function handleSave() {
-  if (!isFormValid.value) return;
+  if (!isFormValid.value || !props.invoice) {
+    return;
+  }
 
-  emit('save', form.value as ClientPaymentType);
+  const payment: ClientPaymentType = {
+    type: form.value.type!,
+    client: form.value.client!,
+    paymentDate: form.value.paymentDate,
+    paymentMethod: form.value.paymentMethod!,
+    notes: form.value.notes,
+    totalPaidValue: form.value.paidValue!,
+    paidInvoices: [
+      {
+        invoice: props.invoice,
+        paidValue: form.value.paidValue!,
+      },
+    ],
+  };
+
+  emit('save', payment);
 }
 </script>

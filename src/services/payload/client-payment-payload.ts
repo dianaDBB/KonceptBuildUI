@@ -5,10 +5,10 @@ export type ClientPaymentPayload = {
   type: string;
   clientId: string;
   paymentDate: string;
-  paidValue: number;
   paymentMethod: string;
   notes?: string;
-  invoices: {
+  paidInvoices: {
     invoiceId: string;
+    paidValue: number;
   }[];
 };

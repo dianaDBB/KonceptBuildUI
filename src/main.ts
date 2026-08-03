@@ -4,9 +4,12 @@ import './assets/styles/main.scss';
 import router from './router';
 import { loadConfigs } from './composables/useConfigs.ts';
 
-await loadConfigs();
+async function bootstrap() {
+  await loadConfigs();
 
-const app = createApp(App);
+  const app = createApp(App);
+  app.use(router);
+  app.mount('#app');
+}
 
-app.use(router);
-app.mount('#app');
+bootstrap();

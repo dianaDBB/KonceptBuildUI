@@ -149,10 +149,9 @@ const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, i
 const tableBody = ref<HTMLTableSectionElement | null>(null);
 
 const status = useConfigs().statusOptions;
-const workerContractType = useConfigs().workerContractTypeOptions;
 
 const workers = ref<WorkerRow[]>([]);
-const configs = computed(() => Worker.getConfigs(status.value, workerContractType.value));
+const configs = computed(() => Worker.getConfigs());
 
 /*************************************************************************************************************** LOAD */
 

@@ -1,7 +1,7 @@
 import { ColumnType, Configs, RangeFilterValueType } from '@/types/entity-configs';
 import { TableFilterKind } from '@/types/table-filter';
 import { ClientType } from '@/types/client-type';
-import { ClientPaymentSortField, ClientPaymentType } from '@/types/client-payment-type';
+import { ClientPaymentInvoice, ClientPaymentSortField, ClientPaymentType } from '@/types/client-payment-type';
 import { ClientInvoiceType } from '@/types/client-invoice-type';
 import { useConfigs } from '@/composables/useConfigs';
 import { Client } from './client';
@@ -21,6 +21,26 @@ export class ClientPayment {
     const invoiceConfigs = ClientInvoice.getConfigs([], []);
 
     return {
+      documentId: {
+        label: 'ID Documento',
+        type: ColumnType.TEXT,
+        styleConfig: {
+          showDisabled: () => true,
+          isInvalid: () => false,
+          columnStyle: {
+            width: '80px',
+          },
+        },
+        filterConfig: {
+          column: ClientPaymentSortField.DOCUMENT_ID,
+          kind: TableFilterKind.TEXT,
+          valueConfig: {
+            valueKey: 'documentId',
+          },
+          dropdownAlign: 'start',
+        },
+        displayValue: (clientPayment: ClientPaymentType) => clientPayment.documentId,
+      },
       type: {
         label: 'Tipo',
         type: ColumnType.SELECT,
@@ -44,26 +64,6 @@ export class ClientPayment {
         },
         displayValue: (clientPayment: ClientPaymentType) =>
           clientPayment.type ? clientPaymentTypeOptions[clientPayment.type].label : undefined,
-      },
-      documentId: {
-        label: 'ID Documento',
-        type: ColumnType.TEXT,
-        styleConfig: {
-          showDisabled: () => true,
-          isInvalid: () => false,
-          columnStyle: {
-            width: '80px',
-          },
-        },
-        filterConfig: {
-          column: ClientPaymentSortField.DOCUMENT_ID,
-          kind: TableFilterKind.TEXT,
-          valueConfig: {
-            valueKey: 'documentId',
-          },
-          dropdownAlign: 'start',
-        },
-        displayValue: (clientPayment: ClientPaymentType) => clientPayment.documentId,
       },
       client: {
         label: 'Cliente',
@@ -95,34 +95,39 @@ export class ClientPayment {
         displayValue: (clientPayment: ClientPaymentType) =>
           clientPayment.client ? `${clientPayment.client?.code} - ${clientPayment.client?.companyName}` : undefined,
       },
-      invoices: {
-        label: 'Nº Documento Relacionado',
-        type: ColumnType.SEARCH_SELECT_MULTIPLE,
-        searchSelectMultipleConfig: {
-          selected: (invoices: ClientInvoiceType[]) => invoices.map((invoice) => invoice.docNumber).join(', '),
-          options: (clientPayment: ClientPaymentType) => {
-            if (!clientPayment.client?.id) {
-              return invoiceOptions;
-            }
-
-            return invoiceOptions.filter((invoiceOption) => invoiceOption.client?.code === clientPayment.client?.code);
-          },
-          optionKey: (invoice: ClientInvoiceType) => invoice.id!,
-          optionLines: (invoice: ClientInvoiceType) => [invoice.docNumber!],
-          filter: (invoice: ClientInvoiceType) => `${invoice.docNumber}`,
-          tooltipTitle: (invoice: ClientInvoiceType) => invoice.docNumber!,
-          tooltipItems: (invoice: ClientInvoiceType) => buildTooltipItems(invoice, invoiceConfigs),
-        },
+      paidInvoices: {
+        label: 'Documentos Relacionados',
+        type: ColumnType.LABEL,
         styleConfig: {
-          showDisabled: (clientPayment: ClientPaymentType) => clientPayment.client == undefined,
-          isInvalid: (clientPayment: ClientPaymentType) => !clientPayment.invoices?.length,
+          showDisabled: () => true,
+          isInvalid: () => false,
           columnStyle: {
             width: '200px',
           },
         },
         // TODO: add the filter
         displayValue: (clientPayment: ClientPaymentType) =>
-          clientPayment.invoices?.map((invoice) => invoice.docNumber).join(', '),
+          clientPayment.paidInvoices?.map((paidInvoice) => paidInvoice.invoice?.docNumber).join(', '),
+      },
+      totalPaidValue: {
+        label: 'Valor Pago (€)',
+        type: ColumnType.LABEL,
+        styleConfig: {
+          showDisabled: () => true,
+          isInvalid: () => false,
+          columnStyle: {
+            width: '80px',
+          },
+        },
+        filterConfig: {
+          column: ClientPaymentSortField.TOTAL_PAID_VALUE,
+          kind: TableFilterKind.NUMBER_RANGE,
+          valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
+            valueKey: 'paidValue',
+          },
+        },
+        displayValue: (clientPayment: ClientPaymentType) => formatCurrency(clientPayment.totalPaidValue),
       },
       paymentDate: {
         label: 'Data Pagamento',
@@ -143,26 +148,6 @@ export class ClientPayment {
           },
         },
         displayValue: (clientPayment: ClientPaymentType) => clientPayment.paymentDate,
-      },
-      paidValue: {
-        label: 'Valor Pago (€)',
-        type: ColumnType.MONEY,
-        styleConfig: {
-          showDisabled: () => false,
-          isInvalid: (clientPayment: ClientPaymentType) => !clientPayment.paidValue,
-          columnStyle: {
-            width: '80px',
-          },
-        },
-        filterConfig: {
-          column: ClientPaymentSortField.PAID_VALUE,
-          kind: TableFilterKind.NUMBER_RANGE,
-          valueConfig: {
-            valueType: RangeFilterValueType.NUMBER,
-            valueKey: 'paidValue',
-          },
-        },
-        displayValue: (clientPayment: ClientPaymentType) => formatCurrency(clientPayment.paidValue),
       },
       paymentMethod: {
         label: 'Método Pagamento',

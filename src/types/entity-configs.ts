@@ -15,6 +15,7 @@ export interface TableRow<TEntity extends EntityType = EntityType> {
   _isNew: boolean;
   _isEdited: boolean;
   _original?: TEntity;
+  _expanded?: boolean;
 }
 
 export enum ColumnType {
@@ -28,6 +29,7 @@ export enum ColumnType {
   EMAIL,
   PHONE,
   PERCENTAGE,
+  LABEL,
 }
 
 export type Configs<TSortField extends string = string, TEntity extends EntityType = EntityType> = Record<

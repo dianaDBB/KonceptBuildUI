@@ -144,7 +144,6 @@ import { ClientFilters, ClientSortField, ClientType } from '@/types/client-type'
 import clientApi from '@/services/client-api';
 import EntityTableBody from '@/components/EntityTableBody.vue';
 import { TableRow } from '@/types/entity-configs';
-import configsApi from '@/services/configs-api';
 import { apiError } from '@/services/api';
 import { ClientInvoiceFilters, ClientInvoiceType } from '@/types/client-invoice-type';
 import { ClientInvoice } from '@/entities/client-invoice';
