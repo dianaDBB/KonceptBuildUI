@@ -241,7 +241,6 @@ async function save(row: ClientPaymentRow): Promise<void> {
 
   try {
     if (row._isNew) {
-      console.log('Adding new client payment:', JSON.stringify(row.entity));
       await clientPaymentApi.add(row.entity);
     } else if (row._isEdited) {
       await clientPaymentApi.edit(row.entity);
