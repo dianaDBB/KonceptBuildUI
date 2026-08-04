@@ -40,7 +40,7 @@
                       :filters="clientInvoicesFilter"
                       :sort-by="clientInvoicesFilter.sortBy"
                       :sort-direction="clientInvoicesFilter.sortDirection"
-                      :disabled="isEditing"
+                      :disabled="clientInvoicesTable.isEditing.value"
                       @sort="setSort"
                       @apply="applyFilterValues"
                       @clear="clearFilterValues"
@@ -51,7 +51,7 @@
                   <button
                     v-if="hasActiveTableControls"
                     class="clear-table-controls"
-                    :disabled="isEditing || apiStatus.isLoading"
+                    :disabled="clientInvoicesTable.isEditing.value || apiStatus.isLoading"
                     title="Limpar todos os filtros e ordenação"
                     aria-label="Limpar todos os filtros e ordenação"
                     @click="clearAllTableControls"
@@ -61,25 +61,23 @@
                 </th>
               </tr>
             </thead>
-            <EntityTableBody
-              :rows="clientInvoices"
-              :configs="configs"
-              :row-is-active="() => true"
-              :is-valid="(clientInvoice) => ClientInvoice.isValid(clientInvoice, configs)"
-              :is-editing="isEditing"
-              @row-edit="startEditing"
-              @row-delete="askDelete"
-              @row-save="save"
-              @row-discard="discard"
-            >
+            <EntityTableBody :rows="clientInvoicesTable">
               <template #row-actions="{ row }">
-                <button title="Eliminar fatura" @click="askDelete(row)">
+                <button title="Eliminar fatura" :disabled="clientInvoicesTable.isEditing.value" @click="askDelete(row)">
                   <Trash2 :size="16" />
                 </button>
-                <button title="Editar fatura" @click="startEditing(row)">
+                <button
+                  title="Editar fatura"
+                  :disabled="clientInvoicesTable.isEditing.value"
+                  @click="startEditing(row)"
+                >
                   <Pencil :size="16" />
                 </button>
-                <button title="Efectuar pagamento" @click="startAddingClientPayment(row)">
+                <button
+                  title="Efectuar pagamento"
+                  :disabled="clientInvoicesTable.isEditing.value"
+                  @click="startAddingClientPayment(row)"
+                >
                   <FileInput :size="16" />
                 </button>
               </template>
@@ -88,7 +86,7 @@
         </div>
 
         <div class="actions">
-          <button class="btn" :disabled="isEditing || apiStatus.isLoading" @click="add">
+          <button class="btn" :disabled="clientInvoicesTable.isEditing.value || apiStatus.isLoading" @click="add">
             <Plus :size="18" /> Adicionar Fatura
           </button>
         </div>
@@ -143,9 +141,9 @@ import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import { ClientFilters, ClientSortField, ClientType } from '@/types/client-type';
 import clientApi from '@/services/client-api';
 import EntityTableBody from '@/components/EntityTableBody.vue';
-import { TableRow } from '@/types/entity-configs';
+import { EntityTableBodyProps, TableRow } from '@/types/entity-configs';
 import { apiError } from '@/services/api';
-import { ClientInvoiceFilters, ClientInvoiceType } from '@/types/client-invoice-type';
+import { ClientInvoiceFilters, ClientInvoiceSortField, ClientInvoiceType } from '@/types/client-invoice-type';
 import { ClientInvoice } from '@/entities/client-invoice';
 import { WorkType } from '@/types/work-type';
 import workApi from '@/services/work-api';
@@ -166,6 +164,21 @@ const works = ref<WorkType[]>([]);
 
 const clientInvoices = ref<ClientInvoiceRow[]>([]);
 const configs = computed(() => ClientInvoice.getConfigs(clients.value, works.value));
+
+const isEditing = ref(false);
+const clientInvoicesTable = computed<EntityTableBodyProps<ClientPaymentType, ClientInvoiceSortField>>(() => ({
+  rows: clientInvoices.value,
+  configs: configs.value,
+  handlers: {
+    edit: startEditing,
+    delete: askDelete,
+    save,
+    discard,
+  },
+  rowIsActive: () => true,
+  isValid: (clientInvoice) => ClientInvoice.isValid(clientInvoice, configs.value),
+  isEditing: isEditing,
+}));
 
 /*************************************************************************************************************** LOAD */
 
@@ -211,17 +224,9 @@ async function fetchWorks() {
 
 /******************************************************************************************************** ROW ACTIONS */
 
-interface ClientInvoiceRow extends TableRow<ClientInvoiceType> {
-  entity: ClientInvoiceType;
-  _key: string;
-  _isNew: boolean;
-  _isEdited: boolean;
-  _original?: ClientInvoiceType;
-}
+interface ClientInvoiceRow extends TableRow<ClientInvoiceType> {}
 
-const isEditing = computed(() => clientInvoices.value.some((row) => row._isNew || row._isEdited));
 let _keyCounter = 0;
-
 function nextKey(): string {
   return `row-${++_keyCounter}`;
 }
@@ -234,11 +239,15 @@ function discard(row: ClientInvoiceRow) {
     row._isNew = false;
     row._isEdited = false;
   }
+
+  isEditing.value = false;
 }
 
 /*************************************************************************************************************** EDIT */
 
 function startEditing(row: ClientInvoiceRow) {
+  isEditing.value = true;
+
   row._isEdited = true;
   row._original = JSON.parse(JSON.stringify(row.entity));
 }
@@ -246,6 +255,8 @@ function startEditing(row: ClientInvoiceRow) {
 /**************************************************************************************************************** ADD */
 
 async function add(): Promise<void> {
+  isEditing.value = true;
+
   clientInvoices.value.push({
     entity: {
       appliedTax: 23,
@@ -280,6 +291,7 @@ async function save(row: ClientInvoiceRow): Promise<void> {
     }
 
     await fetch();
+    isEditing.value = false;
 
     apiStatus.value = {
       isLoading: false,

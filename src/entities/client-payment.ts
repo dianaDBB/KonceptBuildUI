@@ -1,24 +1,18 @@
 import { ColumnType, Configs, RangeFilterValueType } from '@/types/entity-configs';
 import { TableFilterKind } from '@/types/table-filter';
 import { ClientType } from '@/types/client-type';
-import { ClientPaymentInvoice, ClientPaymentSortField, ClientPaymentType } from '@/types/client-payment-type';
-import { ClientInvoiceType } from '@/types/client-invoice-type';
+import { ClientPaymentSortField, ClientPaymentType } from '@/types/client-payment-type';
 import { useConfigs } from '@/composables/useConfigs';
 import { Client } from './client';
-import { ClientInvoice } from './client-invoice';
 import { formatCurrency } from '@/utils/validation';
 import { buildTooltipItems } from '@/utils/tooltipItems';
 
 export class ClientPayment {
-  static getConfigs(
-    clientOptions: ClientType[],
-    invoiceOptions: ClientInvoiceType[],
-  ): Configs<ClientPaymentSortField, ClientPaymentType> {
+  static getConfigs(clientOptions: ClientType[]): Configs<ClientPaymentSortField, ClientPaymentType> {
     const clientPaymentTypeOptions = useConfigs().clientPaymentTypeOptions.value;
     const paymentMethodOptions = useConfigs().paymentMethodOptions.value;
 
     const clientConfigs = Client.getConfigs();
-    const invoiceConfigs = ClientInvoice.getConfigs([], []);
 
     return {
       documentId: {

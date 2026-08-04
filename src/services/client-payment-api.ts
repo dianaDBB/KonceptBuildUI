@@ -40,7 +40,7 @@ class ClientPaymentApi {
       notes: clientPayment.notes,
       paidInvoices: clientPayment.paidInvoices!.map((paidInvoice) => ({
         invoiceId: paidInvoice.invoice!.id!,
-        paidValue: clientPayment.totalPaidValue!,
+        paidValue: paidInvoice.paidValue!,
       })),
     };
 

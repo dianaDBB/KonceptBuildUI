@@ -1,4 +1,4 @@
-import { StyleValue } from 'vue';
+import { CSSProperties, Ref } from 'vue';
 import { TableFilterKind } from './table-filter';
 import { SelectOption } from './select-options';
 import { UUID } from 'crypto';
@@ -16,6 +16,29 @@ export interface TableRow<TEntity extends EntityType = EntityType> {
   _isEdited: boolean;
   _original?: TEntity;
   _expanded?: boolean;
+  _parentId?: string;
+}
+
+export interface EntityTableBodyProps<TEntity extends EntityType, TSortField extends string = string> {
+  rows: TableRow<TEntity>[];
+  configs: Record<string, EntityConfig<TSortField>>;
+  handlers: RowHandlers<TEntity>;
+  rowIsActive: (row: TableRow<TEntity>) => boolean;
+  isValid: (entity: TEntity) => boolean;
+  isEditing: Ref<boolean>;
+}
+
+export interface EntityTableBodySubrowProps<TParent extends EntityType, TSubrow extends EntityType>
+  extends Omit<EntityTableBodyProps<TSubrow>, 'rows'> {
+  rows(parent: TParent): TableRow<TSubrow>[];
+}
+
+export interface RowHandlers<TEntity extends EntityType = EntityType> {
+  edit?(row: TableRow<TEntity>): void;
+  save?(row: TableRow<TEntity>): void;
+  delete?(row: TableRow<TEntity>): void;
+  discard?(row: TableRow<TEntity>): void;
+  toggle?(row: TableRow<TEntity>): void;
 }
 
 export enum ColumnType {
@@ -63,7 +86,7 @@ export interface StyleConfig {
   showDisabled: (entity: EntityType, row?: TableRow<EntityType>) => boolean;
   isInvalid: (entity: EntityType) => boolean;
   isHighlight?: boolean;
-  columnStyle: StyleValue;
+  columnStyle: CSSProperties;
 }
 
 export interface SearchSelectConfig<TEntity extends EntityType = EntityType> {

@@ -47,7 +47,7 @@
                       :filters="workerFilters"
                       :sort-by="workerFilters.sortBy"
                       :sort-direction="workerFilters.sortDirection"
-                      :disabled="isEditing"
+                      :disabled="workersTable.isEditing.value"
                       @sort="setSort"
                       @apply="applyFilterValues"
                       @clear="clearFilterValues"
@@ -58,7 +58,7 @@
                   <button
                     v-if="hasActiveTableControls"
                     class="clear-table-controls"
-                    :disabled="isEditing || apiStatus.isLoading"
+                    :disabled="workersTable.isEditing.value || apiStatus.isLoading"
                     title="Limpar todos os filtros e ordenação"
                     aria-label="Limpar todos os filtros e ordenação"
                     @click="clearAllTableControls"
@@ -68,25 +68,19 @@
                 </th>
               </tr>
             </thead>
-            <EntityTableBody
-              :rows="workers"
-              :configs="configs"
-              :row-is-active="isActive"
-              :is-valid="(wroker) => Worker.isValid(wroker, configs)"
-              :is-editing="isEditing"
-              @row-edit="startEditing"
-              @row-delete="askDelete"
-              @row-save="save"
-              @row-discard="discard"
-            >
+            <EntityTableBody :rows="workersTable">
               <template #row-actions="{ row }">
-                <button title="Eliminar colaborador" @click="askDelete(row)">
+                <button title="Eliminar colaborador" :disabled="workersTable.isEditing.value" @click="askDelete(row)">
                   <Trash2 :size="16" />
                 </button>
-                <button title="Editar colaborador" @click="startEditing(row)">
+                <button title="Editar colaborador" :disabled="workersTable.isEditing.value" @click="startEditing(row)">
                   <Pencil :size="16" />
                 </button>
-                <button title="Editar compensações" @click="startEditingCompensation(row)">
+                <button
+                  title="Editar compensações"
+                  :disabled="workersTable.isEditing.value"
+                  @click="startEditingCompensation(row)"
+                >
                   <HandCoins :size="16" />
                 </button>
               </template>
@@ -95,7 +89,7 @@
         </div>
 
         <div class="actions">
-          <button class="btn" :disabled="isEditing || apiStatus.isLoading" @click="add">
+          <button class="btn" :disabled="workersTable.isEditing.value || apiStatus.isLoading" @click="add">
             <Plus :size="18" /> Adicionar Colaborador
           </button>
         </div>
@@ -129,14 +123,14 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, nextTick, toRaw } from 'vue';
 import workerApi from '@/services/worker-api';
-import { WorkerType, WorkerFilters } from '@/types/worker-type';
+import { WorkerType, WorkerFilters, WorkerSortField } from '@/types/worker-type';
 import { ApiResponseStatus } from '@/types/api-response-status';
 import { ChevronRight, Contact, Plus, LoaderCircle, FunnelX, Trash2, Pencil, HandCoins } from 'lucide-vue-next';
 import Toast from '@/components/Toast.vue';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import { Worker } from '@/entities/worker';
-import { TableRow } from '@/types/entity-configs';
+import { EntityTableBodyProps, TableRow } from '@/types/entity-configs';
 import EntityTableBody from '@/components/EntityTableBody.vue';
 import { apiError } from '@/services/api';
 import InfoTooltip from '@/components/InfoTooltip.vue';
@@ -152,6 +146,21 @@ const status = useConfigs().statusOptions;
 
 const workers = ref<WorkerRow[]>([]);
 const configs = computed(() => Worker.getConfigs());
+
+const isEditing = ref(false);
+const workersTable = computed<EntityTableBodyProps<WorkerType, WorkerSortField>>(() => ({
+  rows: workers.value,
+  configs: configs.value,
+  handlers: {
+    edit: startEditing,
+    delete: askDelete,
+    save,
+    discard,
+  },
+  rowIsActive: isActive,
+  isValid: (worker) => Worker.isValid(worker, configs.value),
+  isEditing: isEditing,
+}));
 
 /*************************************************************************************************************** LOAD */
 
@@ -181,17 +190,9 @@ async function fetch() {
 
 /******************************************************************************************************** ROW ACTIONS */
 
-interface WorkerRow extends TableRow<WorkerType> {
-  entity: WorkerType;
-  _key: string;
-  _isNew: boolean;
-  _isEdited: boolean;
-  _original?: WorkerType;
-}
+interface WorkerRow extends TableRow<WorkerType> {}
 
-const isEditing = computed(() => workers.value.some((row) => row._isNew || row._isEdited));
 let _keyCounter = 0;
-
 function nextKey(): string {
   return `row-${++_keyCounter}`;
 }
@@ -204,6 +205,8 @@ function discard(row: WorkerRow) {
     row._isNew = false;
     row._isEdited = false;
   }
+
+  isEditing.value = false;
 }
 
 function isActive(row: WorkerRow) {
@@ -213,14 +216,17 @@ function isActive(row: WorkerRow) {
 /*************************************************************************************************************** EDIT */
 
 function startEditing(row: WorkerRow) {
-  row._isEdited = true;
+  isEditing.value = true;
 
+  row._isEdited = true;
   row._original = JSON.parse(JSON.stringify(toRaw(row.entity)));
 }
 
 /**************************************************************************************************************** ADD */
 
 async function add(): Promise<void> {
+  isEditing.value = true;
+
   workers.value.push({
     entity: {
       status: status.value.ACTIVE.code,
@@ -259,6 +265,7 @@ async function save(row: WorkerRow): Promise<void> {
     }
 
     await fetch();
+    isEditing.value = false;
 
     apiStatus.value = {
       isLoading: false,

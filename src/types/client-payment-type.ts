@@ -1,7 +1,7 @@
 import { SortDirection } from './sort-direction';
 import { ClientType } from './client-type';
 import { EntityType, RangeFilter } from './entity-configs';
-import { ClientInvoiceType } from './client-invoice-type';
+import { ClientPaymentInvoiceType } from './client-payment-invoice-type';
 
 export interface ClientPaymentType extends EntityType {
   documentId?: string;
@@ -11,12 +11,7 @@ export interface ClientPaymentType extends EntityType {
   totalPaidValue?: number;
   paymentMethod?: string;
   notes?: string;
-  paidInvoices?: ClientPaymentInvoice[];
-}
-
-export interface ClientPaymentInvoice {
-  invoice?: ClientInvoiceType;
-  paidValue?: number;
+  paidInvoices?: ClientPaymentInvoiceType[];
 }
 
 export enum ClientPaymentSortField {

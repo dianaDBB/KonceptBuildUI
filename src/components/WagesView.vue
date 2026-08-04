@@ -47,7 +47,7 @@
                       :filters="wageFilters"
                       :sort-by="wageFilters.sortBy"
                       :sort-direction="wageFilters.sortDirection"
-                      :disabled="isEditing"
+                      :disabled="wagesTable.isEditing.value"
                       @sort="setSort"
                       @apply="applyFilterValues"
                       @clear="clearFilterValues"
@@ -58,7 +58,7 @@
                   <button
                     v-if="hasActiveTableControls"
                     class="clear-table-controls"
-                    :disabled="isEditing || apiStatus.isLoading"
+                    :disabled="wagesTable.isEditing.value || apiStatus.isLoading"
                     title="Limpar todos os filtros e ordenação"
                     aria-label="Limpar todos os filtros e ordenação"
                     @click="clearAllTableControls"
@@ -68,18 +68,9 @@
                 </th>
               </tr>
             </thead>
-            <EntityTableBody
-              :rows="wages"
-              :configs="configs"
-              :row-is-active="() => true"
-              :is-valid="(wage) => Wage.isValid(wage, configs)"
-              :is-editing="isEditing"
-              @row-edit="startEditing"
-              @row-save="save"
-              @row-discard="discard"
-            >
+            <EntityTableBody :rows="wagesTable">
               <template #row-actions="{ row }">
-                <button title="Editar colaborador" @click="startEditing(row)">
+                <button title="Editar colaborador" :disabled="wagesTable.isEditing.value" @click="startEditing(row)">
                   <Pencil :size="16" />
                 </button>
               </template>
@@ -104,10 +95,10 @@ import { ChevronRight, HandCoins, LoaderCircle, FunnelX, Pencil } from 'lucide-v
 import Toast from '@/components/Toast.vue';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
 import EntityTableBody from '@/components/EntityTableBody.vue';
-import { TableRow } from '@/types/entity-configs';
+import { EntityTableBodyProps, TableRow } from '@/types/entity-configs';
 import { apiError } from '@/services/api';
 import { Wage } from '@/entities/wage';
-import { WageFilters, WageType } from '@/types/wage-type';
+import { WageFilters, WageSortField, WageType } from '@/types/wage-type';
 import wagesApi from '@/services/wages-api';
 import InfoTooltip from '@/components/InfoTooltip.vue';
 import { useTableFilters } from '@/composables/useTableFilters';
@@ -116,6 +107,20 @@ const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, i
 
 const wages = ref<WageRow[]>([]);
 const configs = computed(() => Wage.getConfigs());
+
+const isEditing = ref(false);
+const wagesTable = computed<EntityTableBodyProps<WageType, WageSortField>>(() => ({
+  rows: wages.value,
+  configs: configs.value,
+  handlers: {
+    edit: startEditing,
+    save,
+    discard,
+  },
+  rowIsActive: () => true,
+  isValid: (wage) => Wage.isValid(wage, configs.value),
+  isEditing: isEditing,
+}));
 
 /*************************************************************************************************************** LOAD */
 
@@ -146,17 +151,9 @@ async function fetch() {
 
 /******************************************************************************************************** ROW ACTIONS */
 
-interface WageRow extends TableRow<WageType> {
-  entity: WageType;
-  _key: string;
-  _isNew: boolean;
-  _isEdited: boolean;
-  _original?: WageType;
-}
+interface WageRow extends TableRow<WageType> {}
 
-const isEditing = computed(() => wages.value.some((row) => row._isNew || row._isEdited));
 let _keyCounter = 0;
-
 function nextKey(): string {
   return `row-${++_keyCounter}`;
 }
@@ -169,11 +166,15 @@ function discard(row: WageRow) {
     row._isNew = false;
     row._isEdited = false;
   }
+
+  isEditing.value = false;
 }
 
 /*************************************************************************************************************** EDIT */
 
 function startEditing(row: WageRow) {
+  isEditing.value = true;
+
   row._isEdited = true;
   row._original = JSON.parse(JSON.stringify(row.entity));
 }
@@ -189,6 +190,7 @@ async function save(row: WageRow): Promise<void> {
     }
 
     await fetch();
+    isEditing.value = false;
 
     apiStatus.value = {
       isLoading: false,

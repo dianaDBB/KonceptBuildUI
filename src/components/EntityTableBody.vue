@@ -1,13 +1,13 @@
 <template>
   <tbody ref="tableBody">
-    <template v-for="row in rows" :key="row._key">
+    <template v-for="row in props.rows.rows" :key="row._key">
       <tr
         :class="{ disabled: !isRowActive(row), 'main-row': row._expanded != undefined }"
-        @dblclick="!isEditing && $emit('row-edit', row)"
-        @click="!isEditing && row._expanded !== undefined && $emit('row-toggle', row)"
+        @dblclick="!props.rows.isEditing.value && props.rows.handlers.edit?.(row)"
+        @click="!props.rows.isEditing.value && hasChildren(row) && props.rows.handlers.toggle?.(row)"
       >
         <td
-          v-for="(config, fieldKey, index) in configs"
+          v-for="(config, fieldKey, index) in props.rows.configs"
           :key="fieldKey"
           :style="config.styleConfig.columnStyle"
           :class="getColumnClasses(fieldKey)"
@@ -54,11 +54,7 @@
           <template v-else>
             <slot :name="`display-${fieldKey}`" :row="row" :config="config" :field-key="fieldKey">
               <div v-if="index === 0" class="main-cell">
-                <component
-                  v-if="row._expanded !== undefined"
-                  :is="row._expanded ? ChevronDown : ChevronRight"
-                  :size="18"
-                />
+                <component v-if="hasChildren(row)" :is="row._expanded ? ChevronDown : ChevronRight" :size="18" />
 
                 <template v-if="config.type === ColumnType.SEARCH_SELECT">
                   <div class="with-info-tooltip">
@@ -88,41 +84,85 @@
         <td class="actions-column">
           <div v-if="!rowHasChanges(row)" class="action-buttons">
             <slot name="row-actions" :row="row">
-              <button title="Eliminar" :disabled="isEditing" @click="$emit('row-delete', row)">
+              <button
+                v-if="props.rows.handlers.delete"
+                title="Eliminar"
+                :disabled="props.rows.isEditing.value"
+                @click="props.rows.handlers.delete(row)"
+              >
                 <Trash2 :size="16" />
               </button>
 
-              <button title="Editar" :disabled="isEditing" @click="$emit('row-edit', row)">
+              <button
+                v-if="props.rows.handlers.edit"
+                title="Editar"
+                :disabled="props.rows.isEditing.value"
+                @click="props.rows.handlers.edit(row)"
+              >
                 <Pencil :size="16" />
               </button>
             </slot>
           </div>
 
           <div v-else class="action-buttons editing">
-            <button @click="$emit('row-discard', row)">
+            <button
+              v-if="props.rows.handlers.discard"
+              title="Descartar alterações"
+              @click="props.rows.handlers.discard(row)"
+            >
               <Undo2 :size="16" />
             </button>
 
-            <button :disabled="!isRowValid(row.entity)" @click="$emit('row-save', row)">
+            <button
+              v-if="props.rows.handlers.save"
+              title="Guardar alterações"
+              :disabled="!isRowValid(row.entity)"
+              @click="props.rows.handlers.save(row)"
+            >
               <Check :size="16" />
             </button>
           </div>
         </td>
       </tr>
 
-      <tr v-if="$slots.details && row._expanded" class="sub-row">
-        <td :colspan="Object.keys(configs).length + 1">
-          <slot name="details" :row="row" />
+      <tr v-if="row._expanded && props.subrows" class="details-row">
+        <td :colspan="totalColumns" class="details-cell">
+          <table class="sub-table">
+            <colgroup>
+              <col
+                v-for="config in Object.values(props.subrows.configs)"
+                :key="config.label"
+                :style="config.styleConfig.columnStyle"
+              />
+              <col style="width: 50px" />
+            </colgroup>
+            <EntityTableBody
+              :rows="{
+                ...props.subrows,
+                rows: props.subrows.rows(row.entity),
+              }"
+            />
+          </table>
         </td>
       </tr>
     </template>
   </tbody>
 </template>
 
-<script setup lang="ts" generic="TSortField extends string, TEntity extends EntityType = EntityType">
+<script
+  setup
+  lang="ts"
+  generic="TSortField extends string, TEntity extends EntityType = EntityType, TSubrow extends EntityType = EntityType"
+>
 import { Trash2, Pencil, Undo2, Check, ChevronDown, ChevronRight } from 'lucide-vue-next';
-import type { Component } from 'vue';
-import { ColumnType, EntityConfig, EntityType, TableRow } from '@/types/entity-configs';
+import { computed, type Component } from 'vue';
+import {
+  ColumnType,
+  EntityType,
+  TableRow,
+  EntityTableBodyProps,
+  EntityTableBodySubrowProps,
+} from '@/types/entity-configs';
 import TextInput from './inputs/TextInput.vue';
 import InfoTooltip from './InfoTooltip.vue';
 import NumberInput from './inputs/NumberInput.vue';
@@ -135,26 +175,14 @@ import SelectInput from './inputs/SelectInput.vue';
 import SearchSelectInput from './inputs/SearchSelectInput.vue';
 import SearchSelectMultipleInput from './inputs/SearchSelectMultipleInput.vue';
 import Label from './inputs/Label.vue';
+import EntityTableBody from './EntityTableBody.vue';
 
 interface Props {
-  rows: TableRow<TEntity>[];
-  configs: Record<string, EntityConfig<TSortField>>;
-  rowIsActive: (row: TableRow<TEntity>) => boolean;
-  isValid: (entity: TEntity) => boolean;
-  isEditing?: boolean;
+  rows: EntityTableBodyProps<TEntity, TSortField>;
+  subrows?: EntityTableBodySubrowProps<TEntity, TSubrow>;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  isEditing: false,
-});
-
-defineEmits<{
-  'row-edit': [row: TableRow<TEntity>];
-  'row-delete': [row: TableRow<TEntity>];
-  'row-save': [row: TableRow<TEntity>];
-  'row-discard': [row: TableRow<TEntity>];
-  'row-toggle': [row: TableRow<TEntity>];
-}>();
+const props = defineProps<Props>();
 
 const editableComponentMap: Record<ColumnType, Component | undefined> = {
   [ColumnType.TEXT]: TextInput,
@@ -170,6 +198,12 @@ const editableComponentMap: Record<ColumnType, Component | undefined> = {
   [ColumnType.LABEL]: Label,
 };
 
+const totalColumns = computed(() => Object.keys(props.rows.configs).length + 1);
+
+function hasChildren(row: TableRow<TEntity>) {
+  return !!props.subrows && props.subrows.rows(row.entity).length > 0;
+}
+
 function getEditableComponent(type: ColumnType): Component | undefined {
   return editableComponentMap[type];
 }
@@ -179,16 +213,16 @@ function rowHasChanges(row: TableRow<TEntity>): boolean {
 }
 
 function isRowValid(entity: TEntity): boolean {
-  return props.isValid(entity);
+  return props.rows.isValid(entity);
 }
 
 function isRowActive(row: TableRow<TEntity>): boolean {
-  return props.rowIsActive(row);
+  return props.rows.rowIsActive(row);
 }
 
 function getColumnClasses(fieldKey: string): Record<string, boolean> {
   return {
-    highlight: props.configs[fieldKey].styleConfig.isHighlight ?? false,
+    highlight: props.rows.configs[fieldKey].styleConfig.isHighlight ?? false,
   };
 }
 
@@ -222,7 +256,7 @@ function updateFieldValue(row: TableRow<TEntity>, fieldKey: string, value: unkno
 
   row._isEdited = true;
 
-  props.configs[fieldKey]?.onValueChanged?.(row, value);
+  props.rows.configs[fieldKey]?.onValueChanged?.(row, value);
 }
 </script>
 

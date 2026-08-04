@@ -40,7 +40,7 @@
                       :filters="workFilters"
                       :sort-by="workFilters.sortBy"
                       :sort-direction="workFilters.sortDirection"
-                      :disabled="isEditing"
+                      :disabled="worksTable.isEditing.value"
                       @sort="setSort"
                       @apply="applyFilterValues"
                       @clear="clearFilterValues"
@@ -51,7 +51,7 @@
                   <button
                     v-if="hasActiveTableControls"
                     class="clear-table-controls"
-                    :disabled="isEditing || apiStatus.isLoading"
+                    :disabled="worksTable.isEditing.value || apiStatus.isLoading"
                     title="Limpar todos os filtros e ordenação"
                     aria-label="Limpar todos os filtros e ordenação"
                     @click="clearAllTableControls"
@@ -61,22 +61,12 @@
                 </th>
               </tr>
             </thead>
-            <EntityTableBody
-              :rows="works"
-              :configs="configs"
-              :row-is-active="isActive"
-              :is-valid="(wrok) => Work.isValid(wrok, configs)"
-              :is-editing="isEditing"
-              @row-edit="startEditing"
-              @row-delete="askDelete"
-              @row-save="save"
-              @row-discard="discard"
-            />
+            <EntityTableBody :rows="worksTable" />
           </table>
         </div>
 
         <div class="actions">
-          <button class="btn" :disabled="isEditing || apiStatus.isLoading" @click="add">
+          <button class="btn" :disabled="worksTable.isEditing.value || apiStatus.isLoading" @click="add">
             <Plus :size="18" /> Adicionar Cliente
           </button>
         </div>
@@ -108,13 +98,13 @@ import { ChevronRight, List, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next
 import Toast from '@/components/Toast.vue';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
-import { WorkType, WorkFilters } from '@/types/work-type';
+import { WorkType, WorkFilters, WorkSortField } from '@/types/work-type';
 import workApi from '@/services/work-api';
 import { ClientFilters, ClientSortField, ClientType } from '@/types/client-type';
 import clientApi from '@/services/client-api';
 import { Work } from '@/entities/work';
 import EntityTableBody from '@/components/EntityTableBody.vue';
-import { TableRow } from '@/types/entity-configs';
+import { EntityTableBodyProps, TableRow } from '@/types/entity-configs';
 import { apiError } from '@/services/api';
 import { useTableFilters } from '@/composables/useTableFilters';
 import { useConfigs } from '@/composables/useConfigs';
@@ -128,6 +118,21 @@ const clients = ref<ClientType[]>([]);
 
 const works = ref<WorkRow[]>([]);
 const configs = computed(() => Work.getConfigs(clients.value));
+
+const isEditing = ref(false);
+const worksTable = computed<EntityTableBodyProps<WorkType, WorkSortField>>(() => ({
+  rows: works.value,
+  configs: configs.value,
+  handlers: {
+    edit: startEditing,
+    delete: askDelete,
+    save,
+    discard,
+  },
+  rowIsActive: isActive,
+  isValid: (work) => Work.isValid(work, configs.value),
+  isEditing: isEditing,
+}));
 
 /*************************************************************************************************************** LOAD */
 
@@ -168,17 +173,9 @@ async function fetchClients() {
 
 /******************************************************************************************************** ROW ACTIONS */
 
-interface WorkRow extends TableRow<WorkType> {
-  entity: WorkType;
-  _key: string;
-  _isNew: boolean;
-  _isEdited: boolean;
-  _original?: WorkType;
-}
+interface WorkRow extends TableRow<WorkType> {}
 
-const isEditing = computed(() => works.value.some((row) => row._isNew || row._isEdited));
 let _keyCounter = 0;
-
 function nextKey(): string {
   return `row-${++_keyCounter}`;
 }
@@ -191,6 +188,8 @@ function discard(row: WorkRow) {
     row._isNew = false;
     row._isEdited = false;
   }
+
+  isEditing.value = false;
 }
 
 function isActive(row: WorkRow) {
@@ -200,6 +199,8 @@ function isActive(row: WorkRow) {
 /*************************************************************************************************************** EDIT */
 
 function startEditing(row: WorkRow) {
+  isEditing.value = true;
+
   row._isEdited = true;
   row._original = JSON.parse(JSON.stringify(row.entity));
 }
@@ -207,6 +208,8 @@ function startEditing(row: WorkRow) {
 /**************************************************************************************************************** ADD */
 
 async function add(): Promise<void> {
+  isEditing.value = true;
+
   works.value.push({
     entity: {
       status: workStatus.value.STARTED.code,
@@ -241,6 +244,7 @@ async function save(row: WorkRow): Promise<void> {
     }
 
     await fetch();
+    isEditing.value = false;
 
     apiStatus.value = {
       isLoading: false,

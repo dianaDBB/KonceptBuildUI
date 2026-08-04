@@ -40,7 +40,7 @@
                       :filters="clientPaymentsFilter"
                       :sort-by="clientPaymentsFilter.sortBy"
                       :sort-direction="clientPaymentsFilter.sortDirection"
-                      :disabled="isEditing"
+                      :disabled="clientPaymentsTable.isEditing.value"
                       @sort="setSort"
                       @apply="applyFilterValues"
                       @clear="clearFilterValues"
@@ -51,7 +51,7 @@
                   <button
                     v-if="hasActiveTableControls"
                     class="clear-table-controls"
-                    :disabled="isEditing || apiStatus.isLoading"
+                    :disabled="clientPaymentsTable.isEditing.value || apiStatus.isLoading"
                     title="Limpar todos os filtros e ordenação"
                     aria-label="Limpar todos os filtros e ordenação"
                     @click="clearAllTableControls"
@@ -61,42 +61,12 @@
                 </th>
               </tr>
             </thead>
-            <EntityTableBody
-              :rows="clientPayments"
-              :configs="configs"
-              :row-is-active="() => true"
-              :is-valid="(clientPayment) => ClientPayment.isValid(clientPayment, configs)"
-              :is-editing="isEditing"
-              @row-edit="startEditing"
-              @row-delete="askDelete"
-              @row-save="save"
-              @row-discard="discard"
-              @row-toggle="toggleRow"
-            >
-              <template #details="{ row }">
-                <tr v-for="(paidInvoice, index) in row.entity.paidInvoices" :key="index" class="sub-row">
-                  <div class="sub-row-cell">
-                    <td />
-                    <td />
-                    <td />
-                    <td>
-                      {{ paidInvoice.invoice!.docNumber }}
-                    </td>
-                    <td>
-                      {{ paidInvoice.paidValue }}
-                    </td>
-                    <td />
-                    <td />
-                    <td />
-                  </div>
-                </tr>
-              </template>
-            </EntityTableBody>
+            <EntityTableBody :rows="clientPaymentsTable" :subrows="clientPaymentInvoicesTable" />
           </table>
         </div>
 
         <div class="actions">
-          <button class="btn" :disabled="isEditing || apiStatus.isLoading" @click="add">
+          <button class="btn" :disabled="clientPaymentsTable.isEditing.value || apiStatus.isLoading" @click="add">
             <Plus :size="18" /> Adicionar Pagamento
           </button>
         </div>
@@ -134,15 +104,17 @@ import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import { ClientFilters, ClientSortField, ClientType } from '@/types/client-type';
 import clientApi from '@/services/client-api';
 import EntityTableBody from '@/components/EntityTableBody.vue';
-import { TableRow } from '@/types/entity-configs';
+import { EntityTableBodyProps, TableRow } from '@/types/entity-configs';
 import { apiError } from '@/services/api';
-import { ClientPaymentFilters, ClientPaymentType } from '@/types/client-payment-type';
+import { ClientPaymentFilters, ClientPaymentSortField, ClientPaymentType } from '@/types/client-payment-type';
 import { ClientPayment } from '@/entities/client-payment';
 import clientPaymentApi from '@/services/client-payment-api';
 import { ClientInvoiceType } from '@/types/client-invoice-type';
 import clientInvoiceApi from '@/services/client-invoice-api';
 import { useTableFilters } from '@/composables/useTableFilters';
 import { useConfigs } from '@/composables/useConfigs';
+import { ClientPaymentInvoice } from '@/entities/client-payment-invoice';
+import { ClientPaymentInvoiceType } from '@/types/client-payment-invoice-type';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 const tableBody = ref<HTMLTableSectionElement | null>(null);
@@ -152,7 +124,39 @@ const clients = ref<ClientType[]>([]);
 const clientInvoices = ref<ClientInvoiceType[]>([]);
 
 const clientPayments = ref<ClientPaymentRow[]>([]);
-const configs = computed(() => ClientPayment.getConfigs(clients.value, clientInvoices.value));
+const configs = computed(() => ClientPayment.getConfigs(clients.value));
+const paymentInvoiceConfigs = computed(() => ClientPaymentInvoice.getConfigs(clientInvoices.value));
+
+const isEditing = ref(false);
+
+const clientPaymentsTable = computed<EntityTableBodyProps<ClientPaymentType, ClientPaymentSortField>>(() => ({
+  rows: clientPayments.value,
+  configs: configs.value,
+  handlers: {
+    edit: startEditing,
+    delete: askDelete,
+    save,
+    discard,
+    toggle: toggleRow,
+  },
+  rowIsActive: () => true,
+  isValid: (payment) => ClientPayment.isValid(payment, configs.value),
+  isEditing: isEditing,
+}));
+
+const clientPaymentInvoicesTable = computed(() => ({
+  rows: fetchClientPaymentInvoiceRows,
+  configs: paymentInvoiceConfigs.value,
+  handlers: {
+    edit: startEditingSubrow,
+    save: saveSubrow,
+    delete: () => {},
+    discard: discardSubRow,
+  },
+  rowIsActive: () => true,
+  isValid: (invoice: ClientPaymentInvoiceType) => ClientPaymentInvoice.isValid(invoice, paymentInvoiceConfigs.value),
+  isEditing: isEditing,
+}));
 
 /*************************************************************************************************************** LOAD */
 
@@ -184,6 +188,22 @@ async function fetch() {
   }
 }
 
+function fetchClientPaymentInvoiceRows(payment: ClientPaymentType): ClientPaymentInvoiceRow[] {
+  if (!(payment as ClientPaymentType & { _paidInvoiceRows?: ClientPaymentInvoiceRow[] })._paidInvoiceRows) {
+    (payment as ClientPaymentType & { _paidInvoiceRows?: ClientPaymentInvoiceRow[] })._paidInvoiceRows = (
+      payment.paidInvoices ?? []
+    ).map((paidInvoice, index) => ({
+      entity: paidInvoice,
+      _key: paidInvoice.id ?? `${payment.id}-${index}`,
+      _isNew: false,
+      _isEdited: false,
+      _parentId: payment.id!,
+    }));
+  }
+
+  return (payment as ClientPaymentType & { _paidInvoiceRows: ClientPaymentInvoiceRow[] })._paidInvoiceRows;
+}
+
 async function fetchClients() {
   const clientFilters: ClientFilters = {
     status: status.value.ACTIVE.code,
@@ -197,20 +217,11 @@ async function fetchClientInvoices() {
   clientInvoices.value = await clientInvoiceApi.search();
 }
 
-/******************************************************************************************************** ROW ACTIONS */
+/******************************************************************************************** ROW ACTIONS - MAIN ROWS */
 
-interface ClientPaymentRow extends TableRow<ClientPaymentType> {
-  entity: ClientPaymentType;
-  _key: string;
-  _isNew: boolean;
-  _isEdited: boolean;
-  _expanded?: boolean;
-  _original?: ClientPaymentType;
-}
+interface ClientPaymentRow extends TableRow<ClientPaymentType> {}
 
-const isEditing = computed(() => clientPayments.value.some((row) => row._isNew || row._isEdited));
 let _keyCounter = 0;
-
 function nextKey(): string {
   return `row-${++_keyCounter}`;
 }
@@ -223,6 +234,8 @@ function discard(row: ClientPaymentRow) {
     row._isNew = false;
     row._isEdited = false;
   }
+
+  isEditing.value = false;
 }
 
 function toggleRow(row: ClientPaymentRow) {
@@ -233,9 +246,39 @@ function toggleRow(row: ClientPaymentRow) {
   row._expanded = !row._expanded;
 }
 
+/********************************************************************************************* ROW ACTIONS - SUB ROWS */
+
+interface ClientPaymentInvoiceRow extends TableRow<ClientPaymentInvoiceType> {}
+
+let _keyCounterSubrow = 0;
+function nextKeySubRow(): string {
+  return `row-${++_keyCounterSubrow}`;
+}
+
+function discardSubRow(row: ClientPaymentInvoiceRow) {
+  if (row._isNew) {
+    // TODO
+  } else {
+    row.entity = row._original!;
+    row._isNew = false;
+    row._isEdited = false;
+  }
+
+  isEditing.value = false;
+}
+
 /*************************************************************************************************************** EDIT */
 
 function startEditing(row: ClientPaymentRow) {
+  isEditing.value = true;
+
+  row._isEdited = true;
+  row._original = JSON.parse(JSON.stringify(row.entity));
+}
+
+function startEditingSubrow(row: ClientPaymentInvoiceRow) {
+  isEditing.value = true;
+
   row._isEdited = true;
   row._original = JSON.parse(JSON.stringify(row.entity));
 }
@@ -243,10 +286,14 @@ function startEditing(row: ClientPaymentRow) {
 /**************************************************************************************************************** ADD */
 
 async function add(): Promise<void> {
+  isEditing.value = true;
+
   clientPayments.value.push({
     entity: {
       paymentDate: new Date().toISOString().split('T')[0],
-    },
+      paidInvoices: [],
+      _paidInvoiceRows: [],
+    } as ClientPaymentType & { _paidInvoiceRows: ClientPaymentInvoiceRow[] },
     _key: nextKey(),
     _isNew: true,
     _isEdited: false,
@@ -277,6 +324,48 @@ async function save(row: ClientPaymentRow): Promise<void> {
     }
 
     await fetch();
+    isEditing.value = false;
+
+    apiStatus.value = {
+      isLoading: false,
+      isSuccess: true,
+      isError: false,
+      message: 'Client payment saved successfully.',
+    };
+  } catch (error: unknown) {
+    apiStatus.value = apiError(error, 'Failed to save client payment.');
+  }
+}
+
+async function saveSubrow(row: ClientPaymentInvoiceRow): Promise<void> {
+  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
+
+  try {
+    const payment = clientPayments.value.find((clientPayment) => clientPayment.entity.id === row._parentId);
+
+    if (!payment) {
+      apiStatus.value = apiError(null, 'Failed to save client payment - Payment not found.');
+      return;
+    }
+
+    const invoices = payment.entity.paidInvoices ?? [];
+
+    if (row._isNew) {
+      invoices.push(row.entity);
+    } else if (row._isEdited) {
+      const index = invoices.findIndex((invoice) => invoice.invoice?.id === row.entity.invoice?.id);
+
+      if (index >= 0) {
+        invoices[index] = row.entity;
+      }
+    }
+
+    payment.entity.paidInvoices = invoices;
+
+    await clientPaymentApi.edit(payment.entity);
+
+    await fetch();
+    isEditing.value = false;
 
     apiStatus.value = {
       isLoading: false,
