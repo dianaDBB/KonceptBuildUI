@@ -55,7 +55,7 @@ export class ClientPaymentInvoice {
         searchSelectConfig: {
           selected: (clientInvoice: ClientInvoiceType) => clientInvoice.docNumber!,
           options: (clientPaymentInvoice: ClientPaymentInvoiceType) => {
-            const clientId = clientPaymentInvoice.invoice?.client?.id;
+            const clientId = clientPaymentInvoice._client?.id;
 
             if (!clientId) {
               return invoiceOptions;

@@ -56,6 +56,12 @@
               <div v-if="index === 0" class="main-cell">
                 <component v-if="hasChildren(row)" :is="row._expanded ? ChevronDown : ChevronRight" :size="18" />
 
+                <template v-else>
+                  {{ config.displayValue(row.entity) }}
+                </template>
+              </div>
+
+              <template v-else>
                 <template v-if="config.type === ColumnType.SEARCH_SELECT">
                   <div class="with-info-tooltip">
                     <span>{{ config.displayValue(row.entity) }}</span>
@@ -68,14 +74,9 @@
                     />
                   </div>
                 </template>
-
                 <template v-else>
                   {{ config.displayValue(row.entity) }}
                 </template>
-              </div>
-
-              <template v-else>
-                {{ config.displayValue(row.entity) }}
               </template>
             </slot>
           </template>
@@ -83,7 +84,7 @@
 
         <td class="actions-column">
           <div v-if="!rowHasChanges(row)" class="action-buttons">
-            <slot name="row-actions" :row="row">
+            <slot name="row-actions" :row="row" :isSubrow="!props.subrows">
               <button
                 v-if="props.rows.handlers.delete"
                 title="Eliminar"
@@ -134,14 +135,19 @@
                 :key="config.label"
                 :style="config.styleConfig.columnStyle"
               />
-              <col style="width: 50px" />
+              <col style="width: 130px" />
             </colgroup>
             <EntityTableBody
               :rows="{
                 ...props.subrows,
                 rows: props.subrows.rows(row.entity),
               }"
-            />
+            >
+              <!-- @vue-ignore -->
+              <template #row-actions="{ row, isSubrow }">
+                <slot name="row-actions" :row="row" :isSubrow="isSubrow" />
+              </template>
+            </EntityTableBody>
           </table>
         </td>
       </tr>

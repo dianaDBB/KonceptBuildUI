@@ -304,7 +304,7 @@ body {
   }
 }
 
-.table tr:hover .action-buttons,
+.table tbody tr:hover > td.actions-column .action-buttons,
 .action-buttons.editing {
   opacity: 1;
   pointer-events: auto;

@@ -27,7 +27,7 @@
                 :key="config.label"
                 :style="config.styleConfig.columnStyle"
               />
-              <col style="width: 50px" />
+              <col style="width: 120px" />
             </colgroup>
             <thead>
               <tr>
@@ -61,7 +61,49 @@
                 </th>
               </tr>
             </thead>
-            <EntityTableBody :rows="clientPaymentsTable" :subrows="clientPaymentInvoicesTable" />
+            <EntityTableBody :rows="clientPaymentsTable" :subrows="clientPaymentInvoicesTable">
+              <template #row-actions="{ row, isSubrow }">
+                <template v-if="!isSubrow">
+                  <button
+                    title="Eliminar pagamento"
+                    :disabled="clientPaymentsTable.isEditing.value"
+                    @click="askDelete(row)"
+                  >
+                    <Trash2 :size="16" />
+                  </button>
+                  <button
+                    title="Editar pagamento"
+                    :disabled="clientPaymentsTable.isEditing.value"
+                    @click="startEditing(row)"
+                  >
+                    <Pencil :size="16" />
+                  </button>
+                  <button
+                    title="Adicionar pagamento de fatura"
+                    :disabled="clientPaymentsTable.isEditing.value"
+                    @click="addSubrow(row)"
+                  >
+                    <Plus :size="16" />
+                  </button>
+                </template>
+                <template v-else>
+                  <button
+                    title="Eliminar pagamento de fatura"
+                    :disabled="clientPaymentsTable.isEditing.value"
+                    @click="askDeleteSubrow(row)"
+                  >
+                    <Trash2 :size="16" />
+                  </button>
+                  <button
+                    title="Editar pagamento de fatura"
+                    :disabled="clientPaymentsTable.isEditing.value"
+                    @click="startEditingSubrow(row)"
+                  >
+                    <Pencil :size="16" />
+                  </button>
+                </template>
+              </template>
+            </EntityTableBody>
           </table>
         </div>
 
@@ -92,12 +134,25 @@
     cancel-text="Cancelar"
     @confirm="confirmDelete"
   />
+
+  <!-- delete dialog subrow-->
+  <ConfirmDialog
+    v-model="showDeleteDialogSubrow"
+    title="Eliminar pagamento"
+    :message="[
+      `${clientPaymentInvoiceToDelete?.entity.invoice?.docNumber}`,
+      'Tem a certeza que quer eliminar definitivamente o pagamento desta fatura?',
+    ]"
+    confirm-text="Apagar"
+    cancel-text="Cancelar"
+    @confirm="confirmDeleteSubrow"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed, nextTick } from 'vue';
 import { ApiResponseStatus } from '@/types/api-response-status';
-import { ChevronRight, FileInput, Plus, LoaderCircle, FunnelX } from 'lucide-vue-next';
+import { ChevronRight, FileInput, Plus, LoaderCircle, FunnelX, Trash2, Pencil } from 'lucide-vue-next';
 import Toast from '@/components/Toast.vue';
 import TableColumnFilter from '@/components/TableColumnFilter.vue';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
@@ -192,13 +247,20 @@ function fetchClientPaymentInvoiceRows(payment: ClientPaymentType): ClientPaymen
   if (!(payment as ClientPaymentType & { _paidInvoiceRows?: ClientPaymentInvoiceRow[] })._paidInvoiceRows) {
     (payment as ClientPaymentType & { _paidInvoiceRows?: ClientPaymentInvoiceRow[] })._paidInvoiceRows = (
       payment.paidInvoices ?? []
-    ).map((paidInvoice, index) => ({
-      entity: paidInvoice,
-      _key: paidInvoice.id ?? `${payment.id}-${index}`,
-      _isNew: false,
-      _isEdited: false,
-      _parentId: payment.id!,
-    }));
+    ).map((paidInvoice, index) => {
+      paidInvoice._client = payment.client;
+
+      const key = paidInvoice.id ?? `${payment.id}-${index}`;
+      console.log('_key = ' + key);
+
+      return {
+        entity: paidInvoice,
+        _key: paidInvoice.id ?? `${payment.id}-${index}`,
+        _isNew: false,
+        _isEdited: false,
+        _parentId: payment.id!,
+      };
+    });
   }
 
   return (payment as ClientPaymentType & { _paidInvoiceRows: ClientPaymentInvoiceRow[] })._paidInvoiceRows;
@@ -257,7 +319,15 @@ function nextKeySubRow(): string {
 
 function discardSubRow(row: ClientPaymentInvoiceRow) {
   if (row._isNew) {
-    // TODO
+    const payment = clientPayments.value.find((clientPayment) => clientPayment.entity.id === row._parentId);
+
+    if (!payment) {
+      return;
+    }
+
+    payment.entity.paidInvoices = (payment.entity.paidInvoices ?? []).filter((invoice) => invoice !== row.entity);
+
+    delete (payment.entity as ClientPaymentType & { _paidInvoiceRows?: ClientPaymentInvoiceRow[] })._paidInvoiceRows;
   } else {
     row.entity = row._original!;
     row._isNew = false;
@@ -311,6 +381,30 @@ async function add(): Promise<void> {
   (lastRow?.querySelector('input') as HTMLInputElement)?.focus();
 }
 
+async function addSubrow(row: ClientPaymentRow): Promise<void> {
+  isEditing.value = true;
+
+  const entity: ClientPaymentInvoiceType = {
+    _client: row.entity.client,
+  };
+
+  row.entity.paidInvoices ??= [];
+  row.entity.paidInvoices.push(entity);
+
+  const subrows = fetchClientPaymentInvoiceRows(row.entity);
+  subrows.push({
+    entity,
+    _key: nextKeySubRow(),
+    _parentId: row.entity.id!,
+    _isNew: true,
+    _isEdited: false,
+  });
+
+  row._expanded = true;
+
+  await nextTick();
+}
+
 /*************************************************************************************************************** SAVE */
 
 async function save(row: ClientPaymentRow): Promise<void> {
@@ -333,6 +427,7 @@ async function save(row: ClientPaymentRow): Promise<void> {
       message: 'Client payment saved successfully.',
     };
   } catch (error: unknown) {
+    await fetch();
     apiStatus.value = apiError(error, 'Failed to save client payment.');
   }
 }
@@ -348,20 +443,6 @@ async function saveSubrow(row: ClientPaymentInvoiceRow): Promise<void> {
       return;
     }
 
-    const invoices = payment.entity.paidInvoices ?? [];
-
-    if (row._isNew) {
-      invoices.push(row.entity);
-    } else if (row._isEdited) {
-      const index = invoices.findIndex((invoice) => invoice.invoice?.id === row.entity.invoice?.id);
-
-      if (index >= 0) {
-        invoices[index] = row.entity;
-      }
-    }
-
-    payment.entity.paidInvoices = invoices;
-
     await clientPaymentApi.edit(payment.entity);
 
     await fetch();
@@ -373,7 +454,8 @@ async function saveSubrow(row: ClientPaymentInvoiceRow): Promise<void> {
       isError: false,
       message: 'Client payment saved successfully.',
     };
-  } catch (error: unknown) {
+  } catch (error) {
+    await fetch();
     apiStatus.value = apiError(error, 'Failed to save client payment.');
   }
 }
@@ -409,7 +491,57 @@ async function confirmDelete(): Promise<void> {
     showDeleteDialog.value = false;
     clientPaymentToDelete.value = null;
   } catch (error: unknown) {
+    await fetch();
     apiStatus.value = apiError(error, 'Failed to delete client payment.');
+  }
+}
+
+const showDeleteDialogSubrow = ref(false);
+const clientPaymentInvoiceToDelete = ref<ClientPaymentInvoiceRow | null>(null);
+
+function askDeleteSubrow(row: ClientPaymentInvoiceRow) {
+  clientPaymentInvoiceToDelete.value = row;
+  showDeleteDialogSubrow.value = true;
+}
+
+async function confirmDeleteSubrow(): Promise<void> {
+  if (!clientPaymentInvoiceToDelete.value) {
+    return;
+  }
+
+  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
+  const row = clientPaymentInvoiceToDelete.value;
+
+  try {
+    const payment = clientPayments.value.find((clientPayment) => clientPayment.entity.id === row._parentId);
+
+    if (!payment) {
+      apiStatus.value = apiError(null, 'Failed to save client payment - Payment not found.');
+      return;
+    }
+
+    const updatedPayment = {
+      ...payment.entity,
+      paidInvoices: (payment.entity.paidInvoices ?? []).filter(
+        (invoice) => invoice.invoice?.id !== row.entity.invoice?.id,
+      ),
+    };
+
+    await clientPaymentApi.edit(updatedPayment);
+    await fetch();
+
+    apiStatus.value = {
+      isLoading: false,
+      isSuccess: true,
+      isError: false,
+      message: 'Client payment invoice deleted successfully.',
+    };
+
+    showDeleteDialogSubrow.value = false;
+    clientPaymentInvoiceToDelete.value = null;
+  } catch (error: unknown) {
+    await fetch();
+    apiStatus.value = apiError(error, 'Failed to delete client payment invoice.');
   }
 }
 

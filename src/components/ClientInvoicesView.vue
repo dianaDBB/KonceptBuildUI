@@ -300,6 +300,7 @@ async function save(row: ClientInvoiceRow): Promise<void> {
       message: 'Client invoice saved successfully.',
     };
   } catch (error: unknown) {
+    await fetch();
     apiStatus.value = apiError(error, 'Failed to save client invoice.');
   }
 }
@@ -335,6 +336,7 @@ async function confirmDelete(): Promise<void> {
     showDeleteDialog.value = false;
     clientInvoiceToDelete.value = null;
   } catch (error: unknown) {
+    await fetch();
     apiStatus.value = apiError(error, 'Failed to delete client invoice.');
   }
 }
@@ -373,6 +375,7 @@ async function saveClientPayment(payment: ClientPaymentType): Promise<void> {
     showAddClientPaymentDialog.value = false;
     showWClientPaymentsPageDialog.value = true;
   } catch (error: unknown) {
+    await fetch();
     apiStatus.value = apiError(error, 'Failed to add payment.');
   }
 }

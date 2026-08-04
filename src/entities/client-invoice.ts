@@ -72,12 +72,12 @@ export class ClientInvoice {
         type: ColumnType.SEARCH_SELECT,
         searchSelectConfig: {
           selected: (work: WorkType) => `${work.code!}\n${work.name!}`,
-          options: (invoice: ClientInvoiceType) => {
-            if (!invoice.client?.id) {
+          options: (clientInvoice: ClientInvoiceType) => {
+            if (!clientInvoice.client?.id) {
               return workOptions;
             }
 
-            return workOptions.filter((work) => work.client?.code === invoice.client?.code);
+            return workOptions.filter((work) => work.client?.code === clientInvoice.client?.code);
           },
           optionLines: (work: WorkType) => [work.code!, work.name!],
           filter: (work: WorkType) => `${work.code} ${work.name}`,

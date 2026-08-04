@@ -199,6 +199,7 @@ async function save(row: WageRow): Promise<void> {
       message: 'Wage saved successfully.',
     };
   } catch (error: unknown) {
+    await fetch();
     apiStatus.value = apiError(error, 'Failed to save wage.');
   }
 }

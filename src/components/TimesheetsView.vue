@@ -475,6 +475,7 @@ async function save() {
 
     await fetchTimesheet();
   } catch (error: unknown) {
+    await fetchTimesheet();
     apiStatus.value = apiError(error, 'Failed to save timesheet.');
   }
 }

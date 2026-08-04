@@ -274,6 +274,7 @@ async function save(row: WorkerRow): Promise<void> {
       message: 'Worker saved successfully.',
     };
   } catch (error: unknown) {
+    await fetch();
     apiStatus.value = apiError(error, 'Failed to save worker.');
   }
 }
@@ -309,6 +310,7 @@ async function confirmDelete(): Promise<void> {
     showDeleteDialog.value = false;
     workerToDelete.value = null;
   } catch (error: unknown) {
+    await fetch();
     apiStatus.value = apiError(error, 'Failed to delete worker.');
   }
 }
@@ -365,6 +367,7 @@ async function saveCompensation(worker: WorkerType) {
 
     showCompensationDialog.value = false;
   } catch (error: unknown) {
+    await fetch();
     apiStatus.value = apiError(error, 'Failed to update compensation.');
   }
 }

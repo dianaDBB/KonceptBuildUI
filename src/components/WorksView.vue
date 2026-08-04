@@ -67,7 +67,7 @@
 
         <div class="actions">
           <button class="btn" :disabled="worksTable.isEditing.value || apiStatus.isLoading" @click="add">
-            <Plus :size="18" /> Adicionar Cliente
+            <Plus :size="18" /> Adicionar Obra
           </button>
         </div>
 
@@ -253,6 +253,7 @@ async function save(row: WorkRow): Promise<void> {
       message: 'Work saved successfully.',
     };
   } catch (error: unknown) {
+    await fetch();
     apiStatus.value = apiError(error, 'Failed to save work.');
   }
 }
@@ -288,6 +289,7 @@ async function confirmDelete(): Promise<void> {
     showDeleteDialog.value = false;
     workToDelete.value = null;
   } catch (error: unknown) {
+    await fetch();
     apiStatus.value = apiError(error, 'Failed to delete work.');
   }
 }

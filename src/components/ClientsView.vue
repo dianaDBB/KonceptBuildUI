@@ -237,6 +237,7 @@ async function save(row: ClientRow): Promise<void> {
       message: 'Client saved successfully.',
     };
   } catch (error: unknown) {
+    await fetch();
     apiStatus.value = apiError(error, 'Failed to save client.');
   }
 }
@@ -272,6 +273,7 @@ async function confirmDelete(): Promise<void> {
     showDeleteDialog.value = false;
     clientToDelete.value = null;
   } catch (error: unknown) {
+    await fetch();
     apiStatus.value = apiError(error, 'Failed to delete client.');
   }
 }
