@@ -71,7 +71,7 @@ export class ClientPayment {
           tooltipItems: (client: ClientType) => buildTooltipItems(client, clientConfigs),
         },
         styleConfig: {
-          showDisabled: () => false,
+          showDisabled: () => true,
           isInvalid: (clientPayment: ClientPaymentType) => !clientPayment.client,
           columnStyle: {
             width: '200px',

@@ -21,7 +21,7 @@
           :search-select-options="clients"
           :config="clientConfig"
           :is-invalid="configs.client.styleConfig.isInvalid(clientPayment)"
-          :is-disabled="configs.client.styleConfig.showDisabled(clientPayment)"
+          :is-disabled="false"
           @update:value="onClientChange($event as any)"
         />
       </div>

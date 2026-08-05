@@ -664,6 +664,15 @@ select {
   font-size: 13px;
 }
 
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  background: var(--color-bg-secondary);
+  border-radius: 6px;
+}
+
 /************************************************************************************************************ SPINNER */
 
 .spinner {
