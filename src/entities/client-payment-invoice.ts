@@ -54,14 +54,26 @@ export class ClientPaymentInvoice {
         type: ColumnType.SEARCH_SELECT,
         searchSelectConfig: {
           selected: (clientInvoice: ClientInvoiceType) => clientInvoice.docNumber!,
-          options: (clientPaymentInvoice: ClientPaymentInvoiceType) => {
+          options: (
+            clientPaymentInvoice: ClientPaymentInvoiceType,
+            alreadyUsedOptions?: ClientPaymentInvoiceType[],
+          ) => {
             const clientId = clientPaymentInvoice._client?.id;
 
             if (!clientId) {
               return invoiceOptions;
             }
 
-            return invoiceOptions.filter((invoice) => invoice.client?.id === clientId);
+            const usedIds = new Set(
+              alreadyUsedOptions
+                ?.filter((row) => row !== clientPaymentInvoice)
+                .map((row) => row.invoice?.id)
+                .filter(Boolean),
+            );
+
+            return invoiceOptions.filter(
+              (invoice) => invoice.client?.id === clientPaymentInvoice._client?.id && !usedIds.has(invoice.id),
+            );
           },
           optionLines: (clientInvoice: ClientInvoiceType) => [clientInvoice.docNumber!],
           filter: (clientInvoice: ClientInvoiceType) => clientInvoice.docNumber!,

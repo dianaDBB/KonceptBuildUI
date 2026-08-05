@@ -30,7 +30,10 @@
                 :select-options="config.selectConfig?.options"
                 :search-select-options="
                   typeof config.searchSelectConfig?.options == 'function'
-                    ? config.searchSelectConfig.options(row.entity)
+                    ? config.searchSelectConfig.options(
+                        row.entity,
+                        props.rows.rows.map((r) => r.entity),
+                      )
                     : config.searchSelectConfig?.options
                 "
                 :search-select-multiple-options="
