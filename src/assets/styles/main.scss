@@ -296,7 +296,9 @@ body {
     }
 
     &:disabled {
-      opacity: 0.45;
+      cursor: not-allowed;
+      opacity: 0.5;
+
       background: var(--color-background-disabled);
       color: var(--color-text-disabled);
       border-color: var(--color-border-light);
@@ -370,9 +372,11 @@ select {
   }
 
   &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+
     background: var(--color-background-disabled);
     color: var(--color-text-light);
-    cursor: not-allowed;
   }
 }
 
@@ -421,6 +425,7 @@ select {
     &:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+
       background: var(--color-background-disabled);
       color: var(--color-text-disabled);
       border-color: var(--color-border-light);

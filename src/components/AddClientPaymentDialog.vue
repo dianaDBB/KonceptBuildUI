@@ -1,6 +1,6 @@
 <template>
   <BaseDialog v-model="isOpen">
-    <h2>Adicionar Pagamento</h2>
+    <h2>Adicionar Pagamento / Reembolso</h2>
 
     <form class="dialog-form" @submit.prevent="handleSave">
       <div class="form-group">

@@ -113,7 +113,7 @@
             :disabled="clientPaymentsTable.isEditing.value || apiStatus.isLoading"
             @click="startAddingClientPayment()"
           >
-            <Plus :size="18" /> Adicionar Pagamento
+            <Plus :size="18" /> Adicionar Pagamento / Reembolso
           </button>
         </div>
 

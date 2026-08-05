@@ -121,10 +121,13 @@ export class ClientPayment {
             valueKey: 'paidValue',
           },
         },
-        displayValue: (clientPayment: ClientPaymentType) => formatCurrency(clientPayment.totalPaidValue),
+        displayValue: (clientPayment: ClientPaymentType) =>
+          clientPayment.type == 'PAYMENT'
+            ? formatCurrency(clientPayment.totalPaidValue)
+            : formatCurrency(clientPayment.totalPaidValue ? clientPayment.totalPaidValue * -1 : undefined),
       },
       paymentDate: {
-        label: 'Data Pagamento',
+        label: 'Data Transação',
         type: ColumnType.DATE,
         styleConfig: {
           showDisabled: () => false,

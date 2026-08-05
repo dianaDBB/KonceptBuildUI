@@ -8,7 +8,7 @@
         <SelectInput
           :value="form.type!"
           :is-invalid="!form.type"
-          :is-disabled="isLoading"
+          :is-disabled="true"
           :select-options="Object.values(paymentTypes)"
           @update:value="form.type = $event"
         />
@@ -20,7 +20,7 @@
       </div>
 
       <div class="form-group">
-        <label>Data Pagamento</label>
+        <label>Data Transação</label>
         <DateInput
           :value="form.paymentDate!"
           :is-invalid="!form.paymentDate"
@@ -133,7 +133,7 @@ watch(
     }
 
     form.value = {
-      type: undefined,
+      type: 'PAYMENT',
       client: invoice.client,
       paymentDate: new Date().toISOString().split('T')[0],
       paidValue: invoice.totalValue,
