@@ -152,13 +152,17 @@
             </colgroup>
             <EntityTableBody
               :rows="{
-                ...props.subrows,
                 rows: props.subrows.rows(row.entity),
+                configs: props.subrows.configs,
+                handlers: props.subrows.handlers,
+                rowIsActive: props.subrows.rowIsActive,
+                isValid: props.subrows.isValid,
+                isEditing: props.subrows.isEditing,
               }"
             >
               <!-- @vue-ignore -->
-              <template #row-actions="{ row, isSubrow }">
-                <slot name="row-actions" :row="row" :isSubrow="isSubrow" />
+              <template #row-actions="{ row: subrow }">
+                <slot name="row-actions" :row="subrow" :isSubrow="true" />
               </template>
             </EntityTableBody>
           </table>

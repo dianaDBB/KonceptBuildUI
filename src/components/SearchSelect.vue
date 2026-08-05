@@ -162,6 +162,7 @@ onUnmounted(() => {
 
 .select-button {
   width: 100%;
+  min-height: 34px;
 
   display: flex;
   align-items: center;
@@ -181,6 +182,8 @@ onUnmounted(() => {
   transition: 0.2s;
 
   &:disabled {
+    background: var(--color-background-disabled);
+    color: var(--color-text-disabled);
     cursor: not-allowed;
   }
 }

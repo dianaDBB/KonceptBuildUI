@@ -114,7 +114,7 @@
   />
 
   <!-- add payment -->
-  <AddClientPaymentDialog
+  <AddClientPaymentInvoiceDialog
     v-model="showAddClientPaymentDialog"
     :invoice="selectedClientInvoice"
     @save="saveClientPayment"
@@ -150,10 +150,10 @@ import workApi from '@/services/work-api';
 import clientInvoiceApi from '@/services/client-invoice-api';
 import { ClientPaymentType } from '@/types/client-payment-type';
 import clientPaymentApi from '@/services/client-payment-api';
-import AddClientPaymentDialog from '@/components/AddClientPaymentDialog.vue';
 import router from '@/router';
 import { useTableFilters } from '@/composables/useTableFilters';
 import { useConfigs } from '@/composables/useConfigs';
+import AddClientPaymentInvoiceDialog from './AddClientPaymentInvoiceDialog.vue';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 const tableBody = ref<HTMLTableSectionElement | null>(null);

@@ -108,7 +108,11 @@
         </div>
 
         <div class="actions">
-          <button class="btn" :disabled="clientPaymentsTable.isEditing.value || apiStatus.isLoading" @click="add">
+          <button
+            class="btn"
+            :disabled="clientPaymentsTable.isEditing.value || apiStatus.isLoading"
+            @click="startAddingClientPayment()"
+          >
             <Plus :size="18" /> Adicionar Pagamento
           </button>
         </div>
@@ -121,6 +125,15 @@
       </div>
     </div>
   </div>
+
+  <!-- add payment -->
+  <AddClientPaymentDialog
+    v-model="showAddClientPaymentDialog"
+    :configs="configs"
+    :clients="clients"
+    :client-invoices="clientInvoices"
+    @save="saveClientPayment"
+  />
 
   <!-- delete dialog-->
   <ConfirmDialog
@@ -170,9 +183,9 @@ import { useTableFilters } from '@/composables/useTableFilters';
 import { useConfigs } from '@/composables/useConfigs';
 import { ClientPaymentInvoice } from '@/entities/client-payment-invoice';
 import { ClientPaymentInvoiceType } from '@/types/client-payment-invoice-type';
+import AddClientPaymentDialog from './AddClientPaymentDialog.vue';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
-const tableBody = ref<HTMLTableSectionElement | null>(null);
 
 const status = useConfigs().statusOptions;
 const clients = ref<ClientType[]>([]);
@@ -230,6 +243,7 @@ async function fetch() {
     clientPayments.value = gotClientPayments.map((clientPayment) => ({
       entity: {
         ...clientPayment,
+        _paidInvoiceRows: fetchClientPaymentInvoiceRows(clientPayment),
       },
       _key: clientPayment.code ?? nextKey(),
       _isNew: false,
@@ -249,9 +263,6 @@ function fetchClientPaymentInvoiceRows(payment: ClientPaymentType): ClientPaymen
       payment.paidInvoices ?? []
     ).map((paidInvoice, index) => {
       paidInvoice._client = payment.client;
-
-      const key = paidInvoice.id ?? `${payment.id}-${index}`;
-      console.log('_key = ' + key);
 
       return {
         entity: paidInvoice,
@@ -281,7 +292,7 @@ async function fetchClientInvoices() {
 
 /******************************************************************************************** ROW ACTIONS - MAIN ROWS */
 
-interface ClientPaymentRow extends TableRow<ClientPaymentType> {}
+interface ClientPaymentRow extends TableRow<ClientPaymentType & { _paidInvoiceRows: ClientPaymentInvoiceRow[] }> {}
 
 let _keyCounter = 0;
 function nextKey(): string {
@@ -355,31 +366,34 @@ function startEditingSubrow(row: ClientPaymentInvoiceRow) {
 
 /**************************************************************************************************************** ADD */
 
-async function add(): Promise<void> {
-  isEditing.value = true;
+const showAddClientPaymentDialog = ref(false);
 
-  clientPayments.value.push({
-    entity: {
-      paymentDate: new Date().toISOString().split('T')[0],
-      paidInvoices: [],
-      _paidInvoiceRows: [],
-    } as ClientPaymentType & { _paidInvoiceRows: ClientPaymentInvoiceRow[] },
-    _key: nextKey(),
-    _isNew: true,
-    _isEdited: false,
-    _expanded: true,
-  });
-
-  await nextTick();
-
-  const lastRow = tableBody.value?.querySelector('tr:last-child');
-  lastRow?.scrollIntoView({
-    behavior: 'smooth',
-    block: 'nearest',
-  });
-
-  (lastRow?.querySelector('input') as HTMLInputElement)?.focus();
+function startAddingClientPayment() {
+  showAddClientPaymentDialog.value = true;
 }
+
+async function saveClientPayment(payment: ClientPaymentType): Promise<void> {
+  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
+
+  try {
+    await clientPaymentApi.add(payment);
+    await fetch();
+
+    apiStatus.value = {
+      isLoading: false,
+      isSuccess: true,
+      isError: false,
+      message: 'Client payment saved successfully.',
+    };
+
+    showAddClientPaymentDialog.value = false;
+  } catch (error: unknown) {
+    await fetch();
+    apiStatus.value = apiError(error, 'Failed to save client payment.');
+  }
+}
+
+/********************************************************************************************************* ADD SUBROW */
 
 async function addSubrow(row: ClientPaymentRow): Promise<void> {
   isEditing.value = true;
@@ -428,6 +442,7 @@ async function save(row: ClientPaymentRow): Promise<void> {
     };
   } catch (error: unknown) {
     await fetch();
+    isEditing.value = false;
     apiStatus.value = apiError(error, 'Failed to save client payment.');
   }
 }

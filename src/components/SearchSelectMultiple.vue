@@ -195,6 +195,8 @@ onUnmounted(() => {
   transition: 0.2s;
 
   &:disabled {
+    background: var(--color-background-disabled);
+    color: var(--color-text-disabled);
     cursor: not-allowed;
   }
 }
