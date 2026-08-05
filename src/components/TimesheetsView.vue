@@ -336,15 +336,12 @@ import {
 import { WorkFilters, WorkType } from '@/types/work-type';
 import { formatCurrency, formatNumber } from '@/utils/validation';
 import SearchSelect from '@/components/SearchSelect.vue';
-import { WorkStatusEnum } from '@/types/work-status-enum';
 import { getDate, getWeekday, isToday, isHoliday, isWeekend, monthNames } from '@/utils/date';
-import { AttendanceCodeEnum } from '@/types/attendance-code-enum';
-import { WorkerContractTypeEnum } from '@/types/worker-contract-type-enum';
-import configsApi from '@/services/configs-api';
 import { apiError } from '@/services/api';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import wagesApi from '@/services/wages-api';
 import { useRouter } from 'vue-router';
+import { useConfigs } from '@/composables/useConfigs';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 
@@ -352,9 +349,9 @@ const today = new Date();
 const selectedYear = ref(today.getFullYear());
 const selectedMonth = ref(today.getMonth() + 1);
 
-const attendanceCode = ref<{ [k: string]: AttendanceCodeEnum }>({});
-const workStatus = ref<{ [k: string]: WorkStatusEnum }>({});
-const workerContractType = ref<{ [k: string]: WorkerContractTypeEnum }>({});
+const attendanceCode = useConfigs().attendecCodeOptions;
+const workStatus = useConfigs().workStatusOptions;
+const workerContractType = useConfigs().workerContractTypeOptions;
 
 const timesheet = ref<MonthlyTimesheetType>();
 const availableWorks = ref<WorkType[]>([]);
@@ -365,31 +362,11 @@ const daysInMonth = computed(() => new Date(selectedYear.value, selectedMonth.va
 /*************************************************************************************************************** LOAD */
 
 onMounted(async () => {
-  await loadConfigs();
   await fetchWorks();
   await fetchTimesheet();
 
   collapseAll();
 });
-
-async function loadConfigs() {
-  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
-
-  try {
-    const gotAttendanceCodeValues = await configsApi.getAttendanceCodeValues();
-    attendanceCode.value = Object.fromEntries(gotAttendanceCodeValues.map((e) => [e.code, e]));
-
-    const gotWorkStatusValues = await configsApi.getWorkStatusValues();
-    workStatus.value = Object.fromEntries(gotWorkStatusValues.map((e) => [e.code, e]));
-
-    const gotWorkerContractTypeValues = await configsApi.getWorkerContractTypeValues();
-    workerContractType.value = Object.fromEntries(gotWorkerContractTypeValues.map((e) => [e.code, e]));
-
-    apiStatus.value = { isLoading: false, isSuccess: true, isError: false };
-  } catch (error: unknown) {
-    apiStatus.value = apiError(error, 'Failed to load config values.');
-  }
-}
 
 async function fetchWorks() {
   const workFilters: WorkFilters = {
