@@ -56,6 +56,19 @@
               <div v-if="index === 0" class="main-cell">
                 <component v-if="hasChildren(row)" :is="row._expanded ? ChevronDown : ChevronRight" :size="18" />
 
+                <template v-if="config.type === ColumnType.SEARCH_SELECT">
+                  <div class="with-info-tooltip">
+                    <span>{{ config.displayValue(row.entity) }}</span>
+
+                    <InfoTooltip
+                      v-if="getFieldValue(row, fieldKey)"
+                      position="left"
+                      :title="config.searchSelectConfig?.tooltipTitle?.(getFieldValue(row, fieldKey) as TEntity)"
+                      :items="config.searchSelectConfig?.tooltipItems?.(getFieldValue(row, fieldKey) as TEntity)"
+                    />
+                  </div>
+                </template>
+
                 <template v-else>
                   {{ config.displayValue(row.entity) }}
                 </template>
