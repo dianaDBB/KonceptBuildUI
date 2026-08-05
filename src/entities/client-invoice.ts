@@ -1,4 +1,4 @@
-import { ColumnType, Configs, RangeFilterValueType, TableRow } from '@/types/entity-configs';
+import { ColumnType, Configs, RangeFilterValueType } from '@/types/entity-configs';
 import { TableFilterKind } from '@/types/table-filter';
 import { WorkType } from '@/types/work-type';
 import { ClientType } from '@/types/client-type';

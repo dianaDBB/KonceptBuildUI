@@ -91,7 +91,7 @@ export interface StyleConfig {
 
 export interface SearchSelectConfig<TEntity extends EntityType = EntityType> {
   selected: (option: TEntity) => string;
-  options: (entity: EntityType) => TEntity[];
+  options: (entity: TEntity, rows?: TEntity[]) => TEntity[];
   optionLines: (option: TEntity) => string[];
   filter?: (option: TEntity) => string;
   tooltipTitle?: (value: TEntity) => string;
