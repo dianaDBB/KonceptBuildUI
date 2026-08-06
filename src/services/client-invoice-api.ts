@@ -69,6 +69,28 @@ class ClientInvoiceApi {
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     });
   }
+
+  async updateCreditNote(invoiceId: UUID, clientCreditNote: ClientCreditNoteType): Promise<void> {
+    const payload: ClientCreditNotePayload = {
+      id: clientCreditNote.id!,
+      docNumber: clientCreditNote.docNumber!,
+      description: clientCreditNote.description!,
+      valueWithoutTax: clientCreditNote.valueWithoutTax!,
+      appliedTax: clientCreditNote.appliedTax!,
+      registrationDate: clientCreditNote.registrationDate!,
+      dueDate: clientCreditNote.dueDate!,
+    };
+
+    await axiosClient.put(`/client-invoice/${invoiceId}/credit-note`, payload, {
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    });
+  }
+
+  async deleteCreditNote(invoiceId: string, creditNoteId: UUID): Promise<void> {
+    await axiosClient.delete(`/client-invoice/${invoiceId}/credit-note/${creditNoteId}`, {
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    });
+  }
 }
 
 export default new ClientInvoiceApi();

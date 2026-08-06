@@ -1,5 +1,4 @@
 import { EntityType } from './entity-configs';
-import { ClientInvoiceType } from './client-invoice-type';
 
 export interface ClientCreditNoteType extends EntityType {
   docNumber?: string;
@@ -10,5 +9,4 @@ export interface ClientCreditNoteType extends EntityType {
   totalValue?: number;
   registrationDate?: string;
   dueDate?: string;
-  _invoice?: ClientInvoiceType;
 }

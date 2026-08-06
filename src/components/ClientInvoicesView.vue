@@ -94,7 +94,11 @@
                   </button>
                 </template>
                 <template v-else>
-                  <button title="Eliminar nota de crédito" :disabled="clientCreditNotesTable.isEditing.value" @click="">
+                  <button
+                    title="Eliminar nota de crédito"
+                    :disabled="clientCreditNotesTable.isEditing.value"
+                    @click="askDeleteSubrow(row)"
+                  >
                     <Trash2 :size="16" />
                   </button>
                   <button
@@ -131,11 +135,24 @@
     title="Eliminar fatura / nota crédito"
     :message="[
       `${clientInvoiceToDelete?.entity.docNumber}`,
-      'Tem a certeza que quer eliminar definitivamente esta fatura / nota de crédito?',
+      'Tem a certeza que quer eliminar definitivamente esta fatura?',
     ]"
     confirm-text="Apagar"
     cancel-text="Cancelar"
     @confirm="confirmDelete"
+  />
+
+  <!-- delete dialog subrow-->
+  <ConfirmDialog
+    v-model="showDeleteDialogSubrow"
+    title="Eliminar pagamento"
+    :message="[
+      `${creditNoteToDelete?.entity.docNumber}`,
+      'Tem a certeza que quer eliminar definitivamente esta nota de crédito?',
+    ]"
+    confirm-text="Apagar"
+    cancel-text="Cancelar"
+    @confirm="confirmDeleteSubrow"
   />
 
   <!-- add payment -->
@@ -260,8 +277,6 @@ function fetchCreditNoteRows(invoice: ClientInvoiceType): ClientCreditNoteTypeRo
     (invoice as ClientInvoiceType & { _creditNotesRows?: ClientCreditNoteTypeRow[] })._creditNotesRows = (
       invoice.creditNotes ?? []
     ).map((creditNote, index) => {
-      creditNote._invoice = invoice;
-
       return {
         entity: creditNote,
         _key: creditNote.id ?? `${invoice.id}-${index}`,
@@ -396,7 +411,6 @@ async function addSubrow(row: ClientInvoiceRow): Promise<void> {
 
   const entity: ClientCreditNoteType = {
     appliedTax: row.entity.appliedTax,
-    _invoice: row.entity,
   };
 
   row.entity.creditNotes ??= [];
@@ -455,7 +469,11 @@ async function saveSubrow(row: ClientCreditNoteTypeRow): Promise<void> {
       return;
     }
 
-    await clientInvoiceApi.createCreditNote(invoice.entity.id!, row.entity);
+    if (row._isNew) {
+      await clientInvoiceApi.createCreditNote(invoice.entity.id!, row.entity);
+    } else {
+      await clientInvoiceApi.updateCreditNote(invoice.entity.id!, row.entity);
+    }
 
     await fetch();
     isEditing.value = false;
@@ -506,6 +524,40 @@ async function confirmDelete(): Promise<void> {
   } catch (error: unknown) {
     await fetch();
     apiStatus.value = apiError(error, 'Failed to delete client invoice.');
+  }
+}
+
+const showDeleteDialogSubrow = ref(false);
+const creditNoteToDelete = ref<ClientCreditNoteTypeRow | null>(null);
+
+function askDeleteSubrow(row: ClientCreditNoteTypeRow) {
+  creditNoteToDelete.value = row;
+  showDeleteDialogSubrow.value = true;
+}
+
+async function confirmDeleteSubrow(): Promise<void> {
+  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
+
+  try {
+    if (!creditNoteToDelete.value?.entity.id) {
+      return;
+    }
+
+    await clientInvoiceApi.deleteCreditNote(creditNoteToDelete.value._parentId!, creditNoteToDelete.value.entity.id);
+    await fetch();
+
+    apiStatus.value = {
+      isLoading: false,
+      isSuccess: true,
+      isError: false,
+      message: 'Client invoice deleted successfully.',
+    };
+
+    showDeleteDialogSubrow.value = false;
+    creditNoteToDelete.value = null;
+  } catch (error: unknown) {
+    await fetch();
+    apiStatus.value = apiError(error, 'Failed to delete credit note.');
   }
 }
 
