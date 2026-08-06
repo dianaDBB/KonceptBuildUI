@@ -6,21 +6,21 @@
       <div class="form-group">
         <label>{{ configs.type.label }}</label>
         <SelectInput
-          :value="clientPayment.type!"
-          :is-invalid="configs.type.styleConfig.isInvalid(clientPayment)"
-          :is-disabled="configs.type.styleConfig.showDisabled(clientPayment)"
+          :value="payment.type!"
+          :is-invalid="configs.type.styleConfig.isInvalid(payment)"
+          :is-disabled="configs.type.styleConfig.showDisabled(payment)"
           :select-options="configs.type.selectConfig!.options"
-          @update:value="clientPayment.type = $event"
+          @update:value="payment.type = $event"
         />
       </div>
 
       <div class="form-group">
         <label>{{ configs.client.label }}</label>
         <SearchSelectInput
-          :value="clientPayment.client as any"
+          :value="payment.client as any"
           :search-select-options="clients"
           :config="clientConfig"
-          :is-invalid="configs.client.styleConfig.isInvalid(clientPayment)"
+          :is-invalid="configs.client.styleConfig.isInvalid(payment)"
           :is-disabled="false"
           @update:value="onClientChange($event as any)"
         />
@@ -29,31 +29,31 @@
       <div class="form-group">
         <label>{{ configs.paymentDate.label }}</label>
         <DateInput
-          :value="clientPayment.paymentDate!"
-          :is-invalid="configs.paymentDate.styleConfig.isInvalid(clientPayment)"
-          :is-disabled="configs.paymentDate.styleConfig.showDisabled(clientPayment)"
-          @update:value="clientPayment.paymentDate = $event"
+          :value="payment.paymentDate!"
+          :is-invalid="configs.paymentDate.styleConfig.isInvalid(payment)"
+          :is-disabled="configs.paymentDate.styleConfig.showDisabled(payment)"
+          @update:value="payment.paymentDate = $event"
         />
       </div>
 
       <div class="form-group">
         <label>{{ configs.paymentMethod.label }}</label>
         <SelectInput
-          :value="clientPayment.paymentMethod!"
-          :is-invalid="configs.paymentMethod.styleConfig.isInvalid(clientPayment)"
-          :is-disabled="configs.paymentMethod.styleConfig.showDisabled(clientPayment)"
+          :value="payment.paymentMethod!"
+          :is-invalid="configs.paymentMethod.styleConfig.isInvalid(payment)"
+          :is-disabled="configs.paymentMethod.styleConfig.showDisabled(payment)"
           :select-options="configs.paymentMethod.selectConfig!.options"
-          @update:value="clientPayment.paymentMethod = $event"
+          @update:value="payment.paymentMethod = $event"
         />
       </div>
 
       <div class="form-group">
         <label>{{ configs.notes.label }}</label>
         <TextInput
-          :value="clientPayment.notes!"
+          :value="payment.notes!"
           :is-invalid="false"
-          :is-disabled="configs.notes.styleConfig.showDisabled(clientPayment)"
-          @update:value="clientPayment.notes = $event"
+          :is-disabled="configs.notes.styleConfig.showDisabled(payment)"
+          @update:value="payment.notes = $event"
         />
       </div>
 
@@ -62,8 +62,8 @@
           <h4>{{ configs.paidInvoices.label }}</h4>
         </div>
 
-        <div v-if="clientPayment.paidInvoices?.length" class="invoices-list">
-          <div v-for="(invoice, index) in clientPayment.paidInvoices" :key="index" class="invoice-item">
+        <div v-if="payment.paidInvoices?.length" class="invoices-list">
+          <div v-for="(invoice, index) in payment.paidInvoices" :key="index" class="invoice-item">
             <div class="invoice-fields">
               <div class="form-group">
                 <label>Fatura *</label>
@@ -71,8 +71,8 @@
                   :value="invoice.invoice as any"
                   :search-select-options="getAvailableInvoices(invoice)"
                   :config="invoiceConfig"
-                  :is-invalid="clientPayment.client != undefined && !invoice.invoice"
-                  :is-disabled="isLoading || !clientPayment.client"
+                  :is-invalid="payment.client != undefined && !invoice.invoice"
+                  :is-disabled="isLoading || !payment.client"
                   @update:value="invoice.invoice = $event as any"
                 />
               </div>
@@ -83,8 +83,8 @@
                   :entity="invoice"
                   :value="invoice.paidValue"
                   field-key="paidValue"
-                  :is-invalid="clientPayment.client != undefined && !invoice.paidValue"
-                  :is-disabled="isLoading || !clientPayment.client"
+                  :is-invalid="payment.client != undefined && !invoice.paidValue"
+                  :is-disabled="isLoading || !payment.client"
                   @update:value="invoice.paidValue = $event"
                 />
               </div>
@@ -93,7 +93,7 @@
                 type="button"
                 title="Remover"
                 class="clear-table-controls"
-                :disabled="isLoading || !clientPayment.client"
+                :disabled="isLoading || !payment.client"
                 @click="removeInvoiceItem(index)"
               >
                 <Trash2 :size="16" />
@@ -105,7 +105,7 @@
         <div v-else class="empty-state">Adicione pelo menos uma fatura</div>
 
         <div class="actions">
-          <button type="button" class="btn" @click="addInvoiceItem" :disabled="isLoading || !clientPayment.client">
+          <button type="button" class="btn" @click="addInvoiceItem" :disabled="isLoading || !payment.client">
             <Plus :size="16" /> Adicionar Fatura
           </button>
         </div>
@@ -114,7 +114,7 @@
       <div class="form-group">
         <label>{{ configs.totalPaidValue.label }}</label>
         <MoneyInput
-          :entity="clientPayment"
+          :entity="payment"
           :value="totalPaidValue"
           field-key="totalPaidValue"
           :is-invalid="false"
@@ -158,7 +158,7 @@ const props = defineProps<{
   modelValue: boolean;
   configs: Configs<ClientPaymentSortField, ClientPaymentType>;
   clients: ClientType[];
-  clientInvoices: ClientInvoiceType[];
+  invoices: ClientInvoiceType[];
 }>();
 
 const invoiceConfig = {
@@ -199,7 +199,7 @@ watch(isOpen, (open) => {
   }
 });
 
-const clientPayment = ref<ClientPaymentType>({
+const payment = ref<ClientPaymentType>({
   type: 'PAYMENT',
   paymentDate: new Date().toISOString().split('T')[0],
   paidInvoices: [{}],
@@ -208,44 +208,44 @@ const clientPayment = ref<ClientPaymentType>({
 /******************************************************************************************************* CALCULATIONS */
 
 const isFormValid = computed(() => {
-  return clientPayment;
+  return payment;
 });
 
 const totalPaidValue = computed(() => {
-  return clientPayment.value.paidInvoices?.reduce((sum, inv) => sum + (inv.paidValue || 0), 0) || 0;
+  return payment.value.paidInvoices?.reduce((sum, inv) => sum + (inv.paidValue || 0), 0) || 0;
 });
 
 function onClientChange(client: ClientType) {
-  clientPayment.value.client = client;
-  clientPayment.value.paidInvoices = [{}];
+  payment.value.client = client;
+  payment.value.paidInvoices = [{}];
 }
 
 function getAvailableInvoices(currentInvoice?: ClientPaymentInvoiceType) {
-  if (!clientPayment.value.client?.id) {
+  if (!payment.value.client?.id) {
     return [];
   }
 
   const selectedInvoiceIds = new Set(
-    clientPayment.value.paidInvoices
+    payment.value.paidInvoices
       ?.filter((inv) => inv !== currentInvoice)
       .map((inv) => inv.invoice?.id)
       .filter(Boolean),
   );
 
-  return props.clientInvoices.filter(
-    (invoice) => invoice.client?.id === clientPayment.value.client?.id && !selectedInvoiceIds.has(invoice.id),
+  return props.invoices.filter(
+    (invoice) => invoice.client?.id === payment.value.client?.id && !selectedInvoiceIds.has(invoice.id),
   );
 }
 
 function addInvoiceItem() {
-  if (!clientPayment.value.paidInvoices) {
-    clientPayment.value.paidInvoices = [];
+  if (!payment.value.paidInvoices) {
+    payment.value.paidInvoices = [];
   }
-  clientPayment.value.paidInvoices.push({});
+  payment.value.paidInvoices.push({});
 }
 
 function removeInvoiceItem(index: number) {
-  clientPayment.value.paidInvoices?.splice(index, 1);
+  payment.value.paidInvoices?.splice(index, 1);
 }
 
 /*************************************************************************************************************** SAVE */
@@ -255,24 +255,22 @@ function handleSave() {
     return;
   }
 
-  const payment: ClientPaymentType = {
-    type: clientPayment.value.type!,
-    client: clientPayment.value.client!,
-    paymentDate: clientPayment.value.paymentDate,
-    paymentMethod: clientPayment.value.paymentMethod!,
-    notes: clientPayment.value.notes,
+  emit('save', {
+    type: payment.value.type!,
+    client: payment.value.client!,
+    paymentDate: payment.value.paymentDate,
+    paymentMethod: payment.value.paymentMethod!,
+    notes: payment.value.notes,
     totalPaidValue: totalPaidValue.value,
-    paidInvoices: clientPayment.value.paidInvoices,
-  };
-
-  emit('save', payment);
+    paidInvoices: payment.value.paidInvoices,
+  });
 
   resetForm();
   isOpen.value = false;
 }
 
 function resetForm() {
-  clientPayment.value = {
+  payment.value = {
     type: 'PAYMENT',
     paymentDate: new Date().toISOString().split('T')[0],
     paidInvoices: [{}],

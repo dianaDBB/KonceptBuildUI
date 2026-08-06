@@ -37,10 +37,10 @@
 
                     <TableColumnFilter
                       :config="config"
-                      :filters="clientPaymentsFilter"
-                      :sort-by="clientPaymentsFilter.sortBy"
-                      :sort-direction="clientPaymentsFilter.sortDirection"
-                      :disabled="clientPaymentsTable.isEditing.value"
+                      :filters="paymentsFilter"
+                      :sort-by="paymentsFilter.sortBy"
+                      :sort-direction="paymentsFilter.sortDirection"
+                      :disabled="paymentsTable.isEditing.value"
                       @sort="setSort"
                       @apply="applyFilterValues"
                       @clear="clearFilterValues"
@@ -51,7 +51,7 @@
                   <button
                     v-if="hasActiveTableControls"
                     class="clear-table-controls"
-                    :disabled="clientPaymentsTable.isEditing.value || apiStatus.isLoading"
+                    :disabled="paymentsTable.isEditing.value || apiStatus.isLoading"
                     title="Limpar todos os filtros e ordenação"
                     aria-label="Limpar todos os filtros e ordenação"
                     @click="clearAllTableControls"
@@ -61,26 +61,18 @@
                 </th>
               </tr>
             </thead>
-            <EntityTableBody :rows="clientPaymentsTable" :subrows="clientPaymentInvoicesTable">
+            <EntityTableBody :rows="paymentsTable" :subrows="paymentInvoicesTable">
               <template #row-actions="{ row, isSubrow }">
                 <template v-if="!isSubrow">
-                  <button
-                    title="Eliminar pagamento"
-                    :disabled="clientPaymentsTable.isEditing.value"
-                    @click="askDelete(row)"
-                  >
+                  <button title="Eliminar pagamento" :disabled="paymentsTable.isEditing.value" @click="askDelete(row)">
                     <Trash2 :size="16" />
                   </button>
-                  <button
-                    title="Editar pagamento"
-                    :disabled="clientPaymentsTable.isEditing.value"
-                    @click="startEditing(row)"
-                  >
+                  <button title="Editar pagamento" :disabled="paymentsTable.isEditing.value" @click="startEditing(row)">
                     <Pencil :size="16" />
                   </button>
                   <button
                     title="Adicionar pagamento de fatura"
-                    :disabled="clientPaymentsTable.isEditing.value"
+                    :disabled="paymentsTable.isEditing.value"
                     @click="addSubrow(row)"
                   >
                     <Plus :size="16" />
@@ -89,14 +81,14 @@
                 <template v-else>
                   <button
                     title="Eliminar pagamento de fatura"
-                    :disabled="clientPaymentsTable.isEditing.value"
+                    :disabled="paymentsTable.isEditing.value"
                     @click="askDeleteSubrow(row)"
                   >
                     <Trash2 :size="16" />
                   </button>
                   <button
                     title="Editar pagamento de fatura"
-                    :disabled="clientPaymentsTable.isEditing.value"
+                    :disabled="paymentsTable.isEditing.value"
                     @click="startEditingSubrow(row)"
                   >
                     <Pencil :size="16" />
@@ -110,7 +102,7 @@
         <div class="actions">
           <button
             class="btn"
-            :disabled="clientPaymentsTable.isEditing.value || apiStatus.isLoading"
+            :disabled="paymentsTable.isEditing.value || apiStatus.isLoading"
             @click="startAddingClientPayment()"
           >
             <Plus :size="18" /> Adicionar Pagamento / Reembolso
@@ -131,7 +123,7 @@
     v-model="showAddClientPaymentDialog"
     :configs="configs"
     :clients="clients"
-    :client-invoices="clientInvoices"
+    :invoices="invoices"
     @save="saveClientPayment"
   />
 
@@ -140,7 +132,7 @@
     v-model="showDeleteDialog"
     title="Eliminar pagamento"
     :message="[
-      `${clientPaymentToDelete?.entity.documentId}`,
+      `${paymentToDelete?.entity.documentId}`,
       'Tem a certeza que quer eliminar definitivamente este pagamento?',
     ]"
     confirm-text="Apagar"
@@ -153,7 +145,7 @@
     v-model="showDeleteDialogSubrow"
     title="Eliminar pagamento"
     :message="[
-      `${clientPaymentInvoiceToDelete?.entity.invoice?.docNumber}`,
+      `${paymentInvoiceToDelete?.entity.invoice?.docNumber}`,
       'Tem a certeza que quer eliminar definitivamente o pagamento desta fatura?',
     ]"
     confirm-text="Apagar"
@@ -189,16 +181,16 @@ const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, i
 
 const status = useConfigs().statusOptions;
 const clients = ref<ClientType[]>([]);
-const clientInvoices = ref<ClientInvoiceType[]>([]);
+const invoices = ref<ClientInvoiceType[]>([]);
 
-const clientPayments = ref<ClientPaymentRow[]>([]);
+const payments = ref<ClientPaymentRow[]>([]);
 const configs = computed(() => ClientPayment.getConfigs(clients.value));
-const paymentInvoiceConfigs = computed(() => ClientPaymentInvoice.getConfigs(clientInvoices.value));
+const paymentInvoiceConfigs = computed(() => ClientPaymentInvoice.getConfigs(invoices.value));
 
 const isEditing = ref(false);
 
-const clientPaymentsTable = computed<EntityTableBodyProps<ClientPaymentType, ClientPaymentSortField>>(() => ({
-  rows: clientPayments.value,
+const paymentsTable = computed<EntityTableBodyProps<ClientPaymentType, ClientPaymentSortField>>(() => ({
+  rows: payments.value,
   configs: configs.value,
   handlers: {
     edit: startEditing,
@@ -212,7 +204,7 @@ const clientPaymentsTable = computed<EntityTableBodyProps<ClientPaymentType, Cli
   isEditing: isEditing,
 }));
 
-const clientPaymentInvoicesTable = computed(() => ({
+const paymentInvoicesTable = computed(() => ({
   rows: fetchClientPaymentInvoiceRows,
   configs: paymentInvoiceConfigs.value,
   handlers: {
@@ -238,14 +230,14 @@ async function fetch() {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
 
   try {
-    const gotClientPayments = await clientPaymentApi.search(clientPaymentsFilter.value);
+    const gotPayments = await clientPaymentApi.search(paymentsFilter.value);
 
-    clientPayments.value = gotClientPayments.map((clientPayment) => ({
+    payments.value = gotPayments.map((payment) => ({
       entity: {
-        ...clientPayment,
-        _paidInvoiceRows: fetchClientPaymentInvoiceRows(clientPayment),
+        ...payment,
+        _paidInvoiceRows: fetchClientPaymentInvoiceRows(payment),
       },
-      _key: clientPayment.code ?? nextKey(),
+      _key: payment.code ?? nextKey(),
       _isNew: false,
       _isEdited: false,
       _expanded: false,
@@ -287,7 +279,7 @@ async function fetchClients() {
 }
 
 async function fetchClientInvoices() {
-  clientInvoices.value = await clientInvoiceApi.search();
+  invoices.value = await clientInvoiceApi.search();
 }
 
 /******************************************************************************************** ROW ACTIONS - MAIN ROWS */
@@ -301,7 +293,7 @@ function nextKey(): string {
 
 function discard(row: ClientPaymentRow) {
   if (row._isNew) {
-    clientPayments.value = clientPayments.value.filter((w) => w._key !== row._key);
+    payments.value = payments.value.filter((w) => w._key !== row._key);
   } else {
     row.entity = row._original!;
     row._isNew = false;
@@ -330,7 +322,7 @@ function nextKeySubRow(): string {
 
 function discardSubRow(row: ClientPaymentInvoiceRow) {
   if (row._isNew) {
-    const payment = clientPayments.value.find((clientPayment) => clientPayment.entity.id === row._parentId);
+    const payment = payments.value.find((payment) => payment.entity.id === row._parentId);
 
     if (!payment) {
       return;
@@ -451,7 +443,7 @@ async function saveSubrow(row: ClientPaymentInvoiceRow): Promise<void> {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
 
   try {
-    const payment = clientPayments.value.find((clientPayment) => clientPayment.entity.id === row._parentId);
+    const payment = payments.value.find((payment) => payment.entity.id === row._parentId);
 
     if (!payment) {
       apiStatus.value = apiError(null, 'Failed to save client payment - Payment not found.');
@@ -478,10 +470,10 @@ async function saveSubrow(row: ClientPaymentInvoiceRow): Promise<void> {
 /************************************************************************************************************* DELETE */
 
 const showDeleteDialog = ref(false);
-const clientPaymentToDelete = ref<ClientPaymentRow | null>(null);
+const paymentToDelete = ref<ClientPaymentRow | null>(null);
 
 function askDelete(row: ClientPaymentRow) {
-  clientPaymentToDelete.value = row;
+  paymentToDelete.value = row;
   showDeleteDialog.value = true;
 }
 
@@ -489,11 +481,11 @@ async function confirmDelete(): Promise<void> {
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
 
   try {
-    if (!clientPaymentToDelete.value?.entity.id) {
+    if (!paymentToDelete.value?.entity.id) {
       return;
     }
 
-    await clientPaymentApi.delete(clientPaymentToDelete.value.entity.id);
+    await clientPaymentApi.delete(paymentToDelete.value.entity.id);
     await fetch();
 
     apiStatus.value = {
@@ -504,7 +496,7 @@ async function confirmDelete(): Promise<void> {
     };
 
     showDeleteDialog.value = false;
-    clientPaymentToDelete.value = null;
+    paymentToDelete.value = null;
   } catch (error: unknown) {
     await fetch();
     apiStatus.value = apiError(error, 'Failed to delete client payment.');
@@ -512,23 +504,23 @@ async function confirmDelete(): Promise<void> {
 }
 
 const showDeleteDialogSubrow = ref(false);
-const clientPaymentInvoiceToDelete = ref<ClientPaymentInvoiceRow | null>(null);
+const paymentInvoiceToDelete = ref<ClientPaymentInvoiceRow | null>(null);
 
 function askDeleteSubrow(row: ClientPaymentInvoiceRow) {
-  clientPaymentInvoiceToDelete.value = row;
+  paymentInvoiceToDelete.value = row;
   showDeleteDialogSubrow.value = true;
 }
 
 async function confirmDeleteSubrow(): Promise<void> {
-  if (!clientPaymentInvoiceToDelete.value) {
+  if (!paymentInvoiceToDelete.value) {
     return;
   }
 
   apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
-  const row = clientPaymentInvoiceToDelete.value;
+  const row = paymentInvoiceToDelete.value;
 
   try {
-    const payment = clientPayments.value.find((clientPayment) => clientPayment.entity.id === row._parentId);
+    const payment = payments.value.find((payment) => payment.entity.id === row._parentId);
 
     if (!payment) {
       apiStatus.value = apiError(null, 'Failed to save client payment - Payment not found.');
@@ -553,7 +545,7 @@ async function confirmDeleteSubrow(): Promise<void> {
     };
 
     showDeleteDialogSubrow.value = false;
-    clientPaymentInvoiceToDelete.value = null;
+    paymentInvoiceToDelete.value = null;
   } catch (error: unknown) {
     await fetch();
     apiStatus.value = apiError(error, 'Failed to delete client payment invoice.');
@@ -563,7 +555,7 @@ async function confirmDeleteSubrow(): Promise<void> {
 /************************************************************************************************************ FILTERS */
 
 const {
-  filters: clientPaymentsFilter,
+  filters: paymentsFilter,
   hasActiveTableControls,
   setSort,
   applyFilterValues,

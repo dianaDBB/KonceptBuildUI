@@ -9,7 +9,7 @@ import { buildTooltipItems } from '@/utils/tooltipItems';
 
 export class ClientPayment {
   static getConfigs(clientOptions: ClientType[]): Configs<ClientPaymentSortField, ClientPaymentType> {
-    const clientPaymentTypeOptions = useConfigs().clientPaymentTypeOptions.value;
+    const paymentTypeOptions = useConfigs().clientPaymentTypeOptions.value;
     const paymentMethodOptions = useConfigs().paymentMethodOptions.value;
 
     const clientConfigs = Client.getConfigs();
@@ -33,17 +33,17 @@ export class ClientPayment {
           },
           dropdownAlign: 'start',
         },
-        displayValue: (clientPayment: ClientPaymentType) => clientPayment.documentId,
+        displayValue: (payment: ClientPaymentType) => payment.documentId,
       },
       type: {
         label: 'Tipo',
         type: ColumnType.SELECT,
         selectConfig: {
-          options: Object.values(clientPaymentTypeOptions),
+          options: Object.values(paymentTypeOptions),
         },
         styleConfig: {
           showDisabled: () => false,
-          isInvalid: (clientPayment: ClientPaymentType) => !clientPayment.type,
+          isInvalid: (payment: ClientPaymentType) => !payment.type,
           columnStyle: {
             width: '80px',
           },
@@ -56,8 +56,8 @@ export class ClientPayment {
           },
           dropdownAlign: 'start',
         },
-        displayValue: (clientPayment: ClientPaymentType) =>
-          clientPayment.type ? clientPaymentTypeOptions[clientPayment.type].label : undefined,
+        displayValue: (payment: ClientPaymentType) =>
+          payment.type ? paymentTypeOptions[payment.type].label : undefined,
       },
       client: {
         label: 'Cliente',
@@ -72,7 +72,7 @@ export class ClientPayment {
         },
         styleConfig: {
           showDisabled: () => true,
-          isInvalid: (clientPayment: ClientPaymentType) => !clientPayment.client,
+          isInvalid: (payment: ClientPaymentType) => !payment.client,
           columnStyle: {
             width: '200px',
           },
@@ -86,8 +86,8 @@ export class ClientPayment {
           },
           dropdownAlign: 'start',
         },
-        displayValue: (clientPayment: ClientPaymentType) =>
-          clientPayment.client ? `${clientPayment.client?.code} - ${clientPayment.client?.companyName}` : undefined,
+        displayValue: (payment: ClientPaymentType) =>
+          payment.client ? `${payment.client?.code} - ${payment.client?.companyName}` : undefined,
       },
       paidInvoices: {
         label: 'Documentos Relacionados',
@@ -100,8 +100,8 @@ export class ClientPayment {
           },
         },
         // TODO: add the filter
-        displayValue: (clientPayment: ClientPaymentType) =>
-          clientPayment.paidInvoices?.map((paidInvoice) => paidInvoice.invoice?.docNumber).join(', '),
+        displayValue: (payment: ClientPaymentType) =>
+          payment.paidInvoices?.map((paidInvoice) => paidInvoice.invoice?.docNumber).join(', '),
       },
       totalPaidValue: {
         label: 'Valor Pago (€)',
@@ -121,17 +121,17 @@ export class ClientPayment {
             valueKey: 'paidValue',
           },
         },
-        displayValue: (clientPayment: ClientPaymentType) =>
-          clientPayment.type == 'PAYMENT'
-            ? formatCurrency(clientPayment.totalPaidValue)
-            : formatCurrency(clientPayment.totalPaidValue ? clientPayment.totalPaidValue * -1 : undefined),
+        displayValue: (payment: ClientPaymentType) =>
+          payment.type == 'PAYMENT'
+            ? formatCurrency(payment.totalPaidValue)
+            : formatCurrency(payment.totalPaidValue ? payment.totalPaidValue * -1 : undefined),
       },
       paymentDate: {
         label: 'Data Transação',
         type: ColumnType.DATE,
         styleConfig: {
           showDisabled: () => false,
-          isInvalid: (clientPayment: ClientPaymentType) => !clientPayment.paymentDate,
+          isInvalid: (payment: ClientPaymentType) => !payment.paymentDate,
           columnStyle: {
             width: '130px',
           },
@@ -144,7 +144,7 @@ export class ClientPayment {
             valueKey: 'paymentDate',
           },
         },
-        displayValue: (clientPayment: ClientPaymentType) => clientPayment.paymentDate,
+        displayValue: (payment: ClientPaymentType) => payment.paymentDate,
       },
       paymentMethod: {
         label: 'Método Pagamento',
@@ -154,7 +154,7 @@ export class ClientPayment {
         },
         styleConfig: {
           showDisabled: () => false,
-          isInvalid: (clientPayment: ClientPaymentType) => !clientPayment.paymentMethod,
+          isInvalid: (payment: ClientPaymentType) => !payment.paymentMethod,
           columnStyle: {
             width: '100px',
           },
@@ -166,8 +166,8 @@ export class ClientPayment {
             valueKey: 'paymentMethod',
           },
         },
-        displayValue: (clientPayment: ClientPaymentType) =>
-          clientPayment.paymentMethod ? paymentMethodOptions[clientPayment.paymentMethod].label : undefined,
+        displayValue: (payment: ClientPaymentType) =>
+          payment.paymentMethod ? paymentMethodOptions[payment.paymentMethod].label : undefined,
       },
       notes: {
         label: 'Notas',
@@ -186,15 +186,12 @@ export class ClientPayment {
             valueKey: 'notes',
           },
         },
-        displayValue: (clientPayment: ClientPaymentType) => clientPayment.notes,
+        displayValue: (payment: ClientPaymentType) => payment.notes,
       },
     };
   }
 
-  static isValid(
-    clientPayment: ClientPaymentType,
-    configs: Configs<ClientPaymentSortField, ClientPaymentType>,
-  ): boolean {
-    return Object.values(configs).every((config) => !config.styleConfig.isInvalid(clientPayment));
+  static isValid(payment: ClientPaymentType, configs: Configs<ClientPaymentSortField, ClientPaymentType>): boolean {
+    return Object.values(configs).every((config) => !config.styleConfig.isInvalid(payment));
   }
 }

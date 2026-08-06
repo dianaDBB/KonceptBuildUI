@@ -25,7 +25,7 @@ export class ClientInvoice {
         type: ColumnType.TEXT,
         styleConfig: {
           showDisabled: () => false,
-          isInvalid: (clientInvoice: ClientInvoiceType) => !clientInvoice.docNumber,
+          isInvalid: (invoice: ClientInvoiceType) => !invoice.docNumber,
           isHighlight: true,
           columnStyle: {
             width: '140px',
@@ -39,7 +39,7 @@ export class ClientInvoice {
           },
           dropdownAlign: 'start',
         },
-        displayValue: (clientInvoice: ClientInvoiceType) => clientInvoice.docNumber,
+        displayValue: (invoice: ClientInvoiceType) => invoice.docNumber,
       },
       client: {
         label: 'Cliente',
@@ -54,7 +54,7 @@ export class ClientInvoice {
         },
         styleConfig: {
           showDisabled: () => false,
-          isInvalid: (clientInvoice: ClientInvoiceType) => !clientInvoice.client,
+          isInvalid: (invoice: ClientInvoiceType) => !invoice.client,
           columnStyle: {
             width: '200px',
           },
@@ -68,20 +68,20 @@ export class ClientInvoice {
           },
           dropdownAlign: 'start',
         },
-        displayValue: (clientInvoice: ClientInvoiceType) =>
-          clientInvoice.client ? `${clientInvoice.client?.code} - ${clientInvoice.client?.companyName}` : undefined,
+        displayValue: (invoice: ClientInvoiceType) =>
+          invoice.client ? `${invoice.client?.code} - ${invoice.client?.companyName}` : undefined,
       },
       work: {
         label: 'Obra',
         type: ColumnType.SEARCH_SELECT,
         searchSelectConfig: {
           selected: (work: WorkType) => `${work.code!}\n${work.name!}`,
-          options: (clientInvoice: ClientInvoiceType) => {
-            if (!clientInvoice.client?.id) {
+          options: (invoice: ClientInvoiceType) => {
+            if (!invoice.client?.id) {
               return workOptions;
             }
 
-            return workOptions.filter((work) => work.client?.code === clientInvoice.client?.code);
+            return workOptions.filter((work) => work.client?.code === invoice.client?.code);
           },
           optionLines: (work: WorkType) => [work.code!, work.name!],
           filter: (work: WorkType) => `${work.code} ${work.name}`,
@@ -89,8 +89,8 @@ export class ClientInvoice {
           tooltipItems: (work: WorkType) => buildTooltipItems(work, workConfigs),
         },
         styleConfig: {
-          showDisabled: (clientInvoice: ClientInvoiceType) => clientInvoice.client == undefined,
-          isInvalid: (clientInvoice: ClientInvoiceType) => !clientInvoice.work,
+          showDisabled: (invoice: ClientInvoiceType) => invoice.client == undefined,
+          isInvalid: (invoice: ClientInvoiceType) => !invoice.work,
           columnStyle: {
             width: '200px',
           },
@@ -103,15 +103,15 @@ export class ClientInvoice {
             valueKey: 'work',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) =>
-          clientInvoice.work ? `${clientInvoice.work?.code} - ${clientInvoice.work?.name}` : undefined,
+        displayValue: (invoice: ClientInvoiceType) =>
+          invoice.work ? `${invoice.work?.code} - ${invoice.work?.name}` : undefined,
       },
       description: {
         label: 'Descrição',
         type: ColumnType.TEXT,
         styleConfig: {
           showDisabled: () => false,
-          isInvalid: (clientInvoice: ClientInvoiceType) => !clientInvoice.description,
+          isInvalid: (invoice: ClientInvoiceType) => !invoice.description,
           columnStyle: {
             width: '250px',
           },
@@ -123,14 +123,14 @@ export class ClientInvoice {
             valueKey: 'description',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) => clientInvoice.description,
+        displayValue: (invoice: ClientInvoiceType) => invoice.description,
       },
       valueWithoutTax: {
         label: 'Valor s/IVA (€)',
         type: ColumnType.MONEY,
         styleConfig: {
           showDisabled: () => false,
-          isInvalid: (clientInvoice: ClientInvoiceType) => !clientInvoice.valueWithoutTax,
+          isInvalid: (invoice: ClientInvoiceType) => !invoice.valueWithoutTax,
           columnStyle: {
             width: '100px',
           },
@@ -143,15 +143,14 @@ export class ClientInvoice {
             valueKey: 'valueWithoutTax',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.valueWithoutTax),
+        displayValue: (invoice: ClientInvoiceType) => formatCurrency(invoice.valueWithoutTax),
       },
       appliedTax: {
         label: 'Taxa IVA (%)',
         type: ColumnType.PERCENTAGE,
         styleConfig: {
           showDisabled: () => false,
-          isInvalid: (clientInvoice: ClientInvoiceType) =>
-            clientInvoice.appliedTax == undefined || clientInvoice.appliedTax < 0,
+          isInvalid: (invoice: ClientInvoiceType) => invoice.appliedTax == undefined || invoice.appliedTax < 0,
           columnStyle: {
             width: '80px',
           },
@@ -164,7 +163,7 @@ export class ClientInvoice {
             valueKey: 'appliedTax',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) => formatPercentage(clientInvoice.appliedTax),
+        displayValue: (invoice: ClientInvoiceType) => formatPercentage(invoice.appliedTax),
       },
       taxValue: {
         label: 'IVA (€)',
@@ -184,7 +183,7 @@ export class ClientInvoice {
             valueKey: 'taxValue',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.taxValue),
+        displayValue: (invoice: ClientInvoiceType) => formatCurrency(invoice.taxValue),
       },
       totalValue: {
         label: 'Valor Total (€) (C/IVA)',
@@ -204,14 +203,14 @@ export class ClientInvoice {
             valueKey: 'totalValue',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.totalValue),
+        displayValue: (invoice: ClientInvoiceType) => formatCurrency(invoice.totalValue),
       },
       registrationDate: {
         label: 'Data Registo',
         type: ColumnType.DATE,
         styleConfig: {
           showDisabled: () => false,
-          isInvalid: (clientInvoice: ClientInvoiceType) => !clientInvoice.registrationDate,
+          isInvalid: (invoice: ClientInvoiceType) => !invoice.registrationDate,
           columnStyle: {
             width: '130px',
           },
@@ -224,14 +223,14 @@ export class ClientInvoice {
             valueKey: 'registrationDate',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) => clientInvoice.registrationDate,
+        displayValue: (invoice: ClientInvoiceType) => invoice.registrationDate,
       },
       dueDate: {
         label: 'Data Vencimento',
         type: ColumnType.DATE,
         styleConfig: {
           showDisabled: () => false,
-          isInvalid: (clientInvoice: ClientInvoiceType) => !clientInvoice.dueDate,
+          isInvalid: (invoice: ClientInvoiceType) => !invoice.dueDate,
           columnStyle: {
             width: '130px',
           },
@@ -244,7 +243,7 @@ export class ClientInvoice {
             valueKey: 'dueDate',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) => clientInvoice.dueDate,
+        displayValue: (invoice: ClientInvoiceType) => invoice.dueDate,
       },
       sumCreditNotesWithoutTax: {
         label: 'Valor NC Associada (S/IVA)',
@@ -264,7 +263,7 @@ export class ClientInvoice {
             valueKey: 'sumCreditNotesWithoutTax',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.sumCreditNotesWithoutTax),
+        displayValue: (invoice: ClientInvoiceType) => formatCurrency(invoice.sumCreditNotesWithoutTax),
       },
       sumCreditNotesWithTax: {
         label: 'Valor NC Associada (C/IVA)',
@@ -284,7 +283,7 @@ export class ClientInvoice {
             valueKey: 'sumCreditNotesWithTax',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.sumCreditNotesWithTax),
+        displayValue: (invoice: ClientInvoiceType) => formatCurrency(invoice.sumCreditNotesWithTax),
       },
       totalValueNet: {
         label: 'Valor Total Liquido (S/IVA)',
@@ -304,7 +303,7 @@ export class ClientInvoice {
             valueKey: 'totalValueNet',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.totalValueNet),
+        displayValue: (invoice: ClientInvoiceType) => formatCurrency(invoice.totalValueNet),
       },
       totalValueGross: {
         label: 'Valor Total ILíquido (C/IVA)',
@@ -324,7 +323,7 @@ export class ClientInvoice {
             valueKey: 'totalValueGross',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.totalValueGross),
+        displayValue: (invoice: ClientInvoiceType) => formatCurrency(invoice.totalValueGross),
       },
       amountReceivedWithoutTax: {
         label: 'Valor Recebido (€) (S/IVA)',
@@ -344,7 +343,7 @@ export class ClientInvoice {
             valueKey: 'amountReceivedWithoutTax',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.amountReceivedWithoutTax),
+        displayValue: (invoice: ClientInvoiceType) => formatCurrency(invoice.amountReceivedWithoutTax),
       },
       amountReceivedWithTax: {
         label: 'Valor Recebido (€) (C/IVA)',
@@ -364,7 +363,7 @@ export class ClientInvoice {
             valueKey: 'amountReceivedWithTax',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.amountReceivedWithTax),
+        displayValue: (invoice: ClientInvoiceType) => formatCurrency(invoice.amountReceivedWithTax),
       },
       amountDueWithoutTax: {
         label: 'Valor em Falta (€) (S/IVA)',
@@ -384,7 +383,7 @@ export class ClientInvoice {
             valueKey: 'amountDueWithoutTax',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.amountDueWithoutTax),
+        displayValue: (invoice: ClientInvoiceType) => formatCurrency(invoice.amountDueWithoutTax),
       },
       amountDueWithTax: {
         label: 'Valor em Falta (€) (C/IVA)',
@@ -404,7 +403,7 @@ export class ClientInvoice {
             valueKey: 'amountDueWithTax',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.amountDueWithTax),
+        displayValue: (invoice: ClientInvoiceType) => formatCurrency(invoice.amountDueWithTax),
       },
       paymentsCount: {
         label: 'Nº Pag. e Reembolsos',
@@ -424,7 +423,7 @@ export class ClientInvoice {
             valueKey: 'paymentsCount',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) => formatIntNumber(clientInvoice.paymentsCount),
+        displayValue: (invoice: ClientInvoiceType) => formatIntNumber(invoice.paymentsCount),
       },
       status: {
         label: 'Estado',
@@ -452,8 +451,8 @@ export class ClientInvoice {
             valueKey: 'status',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) =>
-          clientInvoice.status ? invoiceStatus[clientInvoice.status].label : undefined,
+        displayValue: (invoice: ClientInvoiceType) =>
+          invoice.status ? invoiceStatus[invoice.status].label : undefined,
       },
       daysPastDue: {
         label: 'Dias em Atraso',
@@ -473,7 +472,7 @@ export class ClientInvoice {
             valueKey: 'daysPastDue',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) => formatIntNumber(clientInvoice.daysPastDue),
+        displayValue: (invoice: ClientInvoiceType) => formatIntNumber(invoice.daysPastDue),
       },
       aging: {
         label: 'Aging',
@@ -504,8 +503,7 @@ export class ClientInvoice {
             valueKey: 'aging',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) =>
-          clientInvoice.aging ? aging[clientInvoice.aging].label : undefined,
+        displayValue: (invoice: ClientInvoiceType) => (invoice.aging ? aging[invoice.aging].label : undefined),
       },
       settlementDate: {
         label: 'Data Liquidação',
@@ -525,7 +523,7 @@ export class ClientInvoice {
             valueKey: 'settlementDate',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) => clientInvoice.settlementDate,
+        displayValue: (invoice: ClientInvoiceType) => invoice.settlementDate,
       },
       daysToPay: {
         label: 'Prazo recebimento',
@@ -545,12 +543,12 @@ export class ClientInvoice {
             valueKey: 'daysToPay',
           },
         },
-        displayValue: (clientInvoice: ClientInvoiceType) => formatIntNumber(clientInvoice.daysToPay),
+        displayValue: (invoice: ClientInvoiceType) => formatIntNumber(invoice.daysToPay),
       },
     };
   }
 
-  static isValid(clientInvoice: ClientInvoiceType, configs: Configs<ClientInvoiceSortField>): boolean {
-    return Object.values(configs).every((config) => !config.styleConfig.isInvalid(clientInvoice));
+  static isValid(invoice: ClientInvoiceType, configs: Configs<ClientInvoiceSortField>): boolean {
+    return Object.values(configs).every((config) => !config.styleConfig.isInvalid(invoice));
   }
 }

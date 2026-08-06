@@ -2,7 +2,6 @@ import axiosClient from './api';
 import { UUID } from 'crypto';
 import { ClientPaymentFilters, ClientPaymentType } from '@/types/client-payment-type';
 import { ClientPaymentPayload } from './payload/client-payment-payload';
-import { ClientCreditNoteType } from '@/types/client-credit-note-type';
 
 class ClientPaymentApi {
   async search(filters: ClientPaymentFilters = {}): Promise<ClientPaymentType[]> {
@@ -13,14 +12,14 @@ class ClientPaymentApi {
     return response.data;
   }
 
-  async add(clientPayment: ClientPaymentType): Promise<void> {
+  async add(payment: ClientPaymentType): Promise<void> {
     const payload: ClientPaymentPayload = {
-      type: clientPayment.type!,
-      clientId: clientPayment.client!.id!,
-      paymentDate: clientPayment.paymentDate!,
-      paymentMethod: clientPayment.paymentMethod!,
-      notes: clientPayment.notes,
-      paidInvoices: clientPayment.paidInvoices!.map((paidInvoice) => ({
+      type: payment.type!,
+      clientId: payment.client!.id!,
+      paymentDate: payment.paymentDate!,
+      paymentMethod: payment.paymentMethod!,
+      notes: payment.notes,
+      paidInvoices: payment.paidInvoices!.map((paidInvoice) => ({
         invoiceId: paidInvoice.invoice!.id!,
         paidValue: paidInvoice.paidValue!,
       })),
@@ -31,15 +30,15 @@ class ClientPaymentApi {
     });
   }
 
-  async edit(clientPayment: ClientPaymentType): Promise<void> {
+  async edit(payment: ClientPaymentType): Promise<void> {
     const payload: ClientPaymentPayload = {
-      id: clientPayment.id!,
-      type: clientPayment.type!,
-      clientId: clientPayment.client!.id!,
-      paymentDate: clientPayment.paymentDate!,
-      paymentMethod: clientPayment.paymentMethod!,
-      notes: clientPayment.notes,
-      paidInvoices: clientPayment.paidInvoices!.map((paidInvoice) => ({
+      id: payment.id!,
+      type: payment.type!,
+      clientId: payment.client!.id!,
+      paymentDate: payment.paymentDate!,
+      paymentMethod: payment.paymentMethod!,
+      notes: payment.notes,
+      paidInvoices: payment.paidInvoices!.map((paidInvoice) => ({
         invoiceId: paidInvoice.invoice!.id!,
         paidValue: paidInvoice.paidValue!,
       })),

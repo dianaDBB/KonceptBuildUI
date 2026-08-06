@@ -6,13 +6,15 @@ import { WorkerContractTypeEnum } from '@/types/worker-contract-type-enum';
 import { StatusEnum } from '@/types/status-enum';
 import { InvoiceStatusEnum } from '@/types/invoice-status-enum';
 import { AgingEnum } from '@/types/aging-enum';
+import { AttendanceCodeEnum } from '@/types/attendance-code-enum';
+import { ClientPaymentTypeEnum } from '@/types/client-payment-type-enum';
 
 const workerContractTypeOptions = ref<Record<string, WorkerContractTypeEnum>>({});
 const workStatusOptions = ref<Record<string, WorkStatusEnum>>({});
 const statusOptions = ref<Record<string, StatusEnum>>({});
 const paymentMethodOptions = ref<Record<string, PaymentMethodEnum>>({});
-const clientPaymentTypeOptions = ref<Record<string, WorkerContractTypeEnum>>({});
-const attendecCodeOptions = ref<Record<string, WorkerContractTypeEnum>>({});
+const clientPaymentTypeOptions = ref<Record<string, ClientPaymentTypeEnum>>({});
+const attendecCodeOptions = ref<Record<string, AttendanceCodeEnum>>({});
 const invoiceStatusOptions = ref<Record<string, InvoiceStatusEnum>>({});
 const agingOptions = ref<Record<string, AgingEnum>>({});
 

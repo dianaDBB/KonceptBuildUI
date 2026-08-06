@@ -9,56 +9,53 @@ import { ClientPayment } from './client-payment';
 
 export class ClientPaymentInvoice {
   static getConfigs(invoiceOptions: ClientInvoiceType[]): Configs<ClientPaymentSortField, ClientPaymentInvoiceType> {
-    const clientPaymentConfigs = ClientPayment.getConfigs([]);
+    const paymentConfigs = ClientPayment.getConfigs([]);
     const invoiceConfigs = ClientInvoice.getConfigs([], []);
 
     return {
       documentId: {
-        label: clientPaymentConfigs.documentId.label,
+        label: paymentConfigs.documentId.label,
         type: ColumnType.LABEL,
         styleConfig: {
           showDisabled: () => true,
           isInvalid: () => false,
           columnStyle: {
-            width: clientPaymentConfigs.documentId.styleConfig.columnStyle.width,
+            width: paymentConfigs.documentId.styleConfig.columnStyle.width,
           },
         },
         displayValue: () => '',
       },
       type: {
-        label: clientPaymentConfigs.type.label,
+        label: paymentConfigs.type.label,
         type: ColumnType.LABEL,
         styleConfig: {
           showDisabled: () => true,
           isInvalid: () => false,
           columnStyle: {
-            width: clientPaymentConfigs.type.styleConfig.columnStyle.width,
+            width: paymentConfigs.type.styleConfig.columnStyle.width,
           },
         },
         displayValue: () => '',
       },
       client: {
-        label: clientPaymentConfigs.client.label,
+        label: paymentConfigs.client.label,
         type: ColumnType.LABEL,
         styleConfig: {
           showDisabled: () => true,
           isInvalid: () => false,
           columnStyle: {
-            width: clientPaymentConfigs.client.styleConfig.columnStyle.width,
+            width: paymentConfigs.client.styleConfig.columnStyle.width,
           },
         },
         displayValue: () => '',
       },
       invoice: {
-        label: clientPaymentConfigs.paidInvoices.label,
+        label: paymentConfigs.paidInvoices.label,
         type: ColumnType.SEARCH_SELECT,
         searchSelectConfig: {
-          selected: (clientInvoice: ClientInvoiceType) => clientInvoice.docNumber!,
-          options: (
-            clientPaymentInvoice: ClientPaymentInvoiceType,
-            alreadyUsedOptions?: ClientPaymentInvoiceType[],
-          ) => {
-            const clientId = clientPaymentInvoice._client?.id;
+          selected: (invoice: ClientInvoiceType) => invoice.docNumber!,
+          options: (paymentInvoice: ClientPaymentInvoiceType, alreadyUsedOptions?: ClientPaymentInvoiceType[]) => {
+            const clientId = paymentInvoice._client?.id;
 
             if (!clientId) {
               return invoiceOptions;
@@ -66,74 +63,73 @@ export class ClientPaymentInvoice {
 
             const usedIds = new Set(
               alreadyUsedOptions
-                ?.filter((row) => row !== clientPaymentInvoice)
+                ?.filter((row) => row !== paymentInvoice)
                 .map((row) => row.invoice?.id)
                 .filter(Boolean),
             );
 
             return invoiceOptions.filter(
-              (invoice) => invoice.client?.id === clientPaymentInvoice._client?.id && !usedIds.has(invoice.id),
+              (invoice) => invoice.client?.id === paymentInvoice._client?.id && !usedIds.has(invoice.id),
             );
           },
-          optionLines: (clientInvoice: ClientInvoiceType) => [clientInvoice.docNumber!],
-          filter: (clientInvoice: ClientInvoiceType) => clientInvoice.docNumber!,
-          tooltipTitle: (clientInvoice: ClientInvoiceType) => clientInvoice.docNumber!,
-          tooltipItems: (clientInvoice: ClientInvoiceType) => buildTooltipItems(clientInvoice, invoiceConfigs),
+          optionLines: (invoice: ClientInvoiceType) => [invoice.docNumber!],
+          filter: (invoice: ClientInvoiceType) => invoice.docNumber!,
+          tooltipTitle: (invoice: ClientInvoiceType) => invoice.docNumber!,
+          tooltipItems: (invoice: ClientInvoiceType) => buildTooltipItems(invoice, invoiceConfigs),
         },
         styleConfig: {
           showDisabled: () => false,
-          isInvalid: (clientPaymentInvoice: ClientPaymentInvoiceType) => !clientPaymentInvoice.invoice,
+          isInvalid: (paymentInvoice: ClientPaymentInvoiceType) => !paymentInvoice.invoice,
           columnStyle: {
-            width: clientPaymentConfigs.paidInvoices.styleConfig.columnStyle.width,
+            width: paymentConfigs.paidInvoices.styleConfig.columnStyle.width,
           },
         },
-        displayValue: (clientPaymentInvoice: ClientPaymentInvoiceType) => clientPaymentInvoice.invoice?.docNumber,
+        displayValue: (paymentInvoice: ClientPaymentInvoiceType) => paymentInvoice.invoice?.docNumber,
       },
       paidValue: {
-        label: clientPaymentConfigs.totalPaidValue.label,
+        label: paymentConfigs.totalPaidValue.label,
         type: ColumnType.MONEY,
         styleConfig: {
           showDisabled: () => false,
-          isInvalid: (clientPaymentInvoice: ClientPaymentInvoiceType) => !clientPaymentInvoice.paidValue,
+          isInvalid: (paymentInvoice: ClientPaymentInvoiceType) => !paymentInvoice.paidValue,
           columnStyle: {
-            width: clientPaymentConfigs.totalPaidValue.styleConfig.columnStyle.width,
+            width: paymentConfigs.totalPaidValue.styleConfig.columnStyle.width,
           },
         },
-        displayValue: (clientPaymentInvoice: ClientPaymentInvoiceType) =>
-          formatCurrency(clientPaymentInvoice.paidValue),
+        displayValue: (paymentInvoice: ClientPaymentInvoiceType) => formatCurrency(paymentInvoice.paidValue),
       },
       paymentDate: {
-        label: clientPaymentConfigs.paymentDate.label,
+        label: paymentConfigs.paymentDate.label,
         type: ColumnType.LABEL,
         styleConfig: {
           showDisabled: () => true,
           isInvalid: () => false,
           columnStyle: {
-            width: clientPaymentConfigs.paymentDate.styleConfig.columnStyle.width,
+            width: paymentConfigs.paymentDate.styleConfig.columnStyle.width,
           },
         },
         displayValue: () => '',
       },
       paymentMethod: {
-        label: clientPaymentConfigs.paymentMethod.label,
+        label: paymentConfigs.paymentMethod.label,
         type: ColumnType.LABEL,
         styleConfig: {
           showDisabled: () => true,
           isInvalid: () => false,
           columnStyle: {
-            width: clientPaymentConfigs.paymentMethod.styleConfig.columnStyle.width,
+            width: paymentConfigs.paymentMethod.styleConfig.columnStyle.width,
           },
         },
         displayValue: () => '',
       },
       notes: {
-        label: clientPaymentConfigs.notes.label,
+        label: paymentConfigs.notes.label,
         type: ColumnType.LABEL,
         styleConfig: {
           showDisabled: () => true,
           isInvalid: () => false,
           columnStyle: {
-            width: clientPaymentConfigs.notes.styleConfig.columnStyle.width,
+            width: paymentConfigs.notes.styleConfig.columnStyle.width,
           },
         },
         displayValue: () => '',
@@ -142,9 +138,9 @@ export class ClientPaymentInvoice {
   }
 
   static isValid(
-    clientPaymentInvoice: ClientPaymentInvoiceType,
+    paymentInvoice: ClientPaymentInvoiceType,
     configs: Configs<ClientPaymentSortField, ClientPaymentInvoiceType>,
   ): boolean {
-    return Object.values(configs).every((config) => !config.styleConfig.isInvalid(clientPaymentInvoice));
+    return Object.values(configs).every((config) => !config.styleConfig.isInvalid(paymentInvoice));
   }
 }

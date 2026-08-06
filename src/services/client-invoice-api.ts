@@ -14,16 +14,16 @@ class ClientInvoiceApi {
     return response.data;
   }
 
-  async add(clientInvoice: ClientInvoiceType): Promise<void> {
+  async add(invoice: ClientInvoiceType): Promise<void> {
     const payload: ClientInvoicePayload = {
-      docNumber: clientInvoice.docNumber!,
-      clientId: clientInvoice.client!.id!,
-      workId: clientInvoice.work!.id!,
-      description: clientInvoice.description!,
-      valueWithoutTax: clientInvoice.valueWithoutTax!,
-      appliedTax: clientInvoice.appliedTax!,
-      registrationDate: clientInvoice.registrationDate!,
-      dueDate: clientInvoice.dueDate!,
+      docNumber: invoice.docNumber!,
+      clientId: invoice.client!.id!,
+      workId: invoice.work!.id!,
+      description: invoice.description!,
+      valueWithoutTax: invoice.valueWithoutTax!,
+      appliedTax: invoice.appliedTax!,
+      registrationDate: invoice.registrationDate!,
+      dueDate: invoice.dueDate!,
     };
 
     await axiosClient.post('/client-invoice/', payload, {
@@ -31,17 +31,17 @@ class ClientInvoiceApi {
     });
   }
 
-  async edit(clientInvoice: ClientInvoiceType): Promise<void> {
+  async edit(invoice: ClientInvoiceType): Promise<void> {
     const payload: ClientInvoicePayload = {
-      id: clientInvoice.id!,
-      docNumber: clientInvoice.docNumber!,
-      clientId: clientInvoice.client!.id!,
-      workId: clientInvoice.work!.id!,
-      description: clientInvoice.description!,
-      valueWithoutTax: clientInvoice.valueWithoutTax!,
-      appliedTax: clientInvoice.appliedTax!,
-      registrationDate: clientInvoice.registrationDate!,
-      dueDate: clientInvoice.dueDate!,
+      id: invoice.id!,
+      docNumber: invoice.docNumber!,
+      clientId: invoice.client!.id!,
+      workId: invoice.work!.id!,
+      description: invoice.description!,
+      valueWithoutTax: invoice.valueWithoutTax!,
+      appliedTax: invoice.appliedTax!,
+      registrationDate: invoice.registrationDate!,
+      dueDate: invoice.dueDate!,
     };
 
     await axiosClient.put('/client-invoice/', payload, {
