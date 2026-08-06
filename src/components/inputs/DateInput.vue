@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 interface Props {
-  value: string;
+  value: string | undefined;
   isInvalid: boolean;
   isDisabled: boolean;
 }

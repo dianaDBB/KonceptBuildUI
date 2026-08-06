@@ -27,7 +27,7 @@
                 :key="config.label"
                 :style="config.styleConfig.columnStyle"
               />
-              <col style="width: 80px" />
+              <col style="width: 120px" />
             </colgroup>
             <thead>
               <tr>
@@ -61,25 +61,50 @@
                 </th>
               </tr>
             </thead>
-            <EntityTableBody :rows="clientInvoicesTable">
-              <template #row-actions="{ row }">
-                <button title="Eliminar fatura" :disabled="clientInvoicesTable.isEditing.value" @click="askDelete(row)">
-                  <Trash2 :size="16" />
-                </button>
-                <button
-                  title="Editar fatura"
-                  :disabled="clientInvoicesTable.isEditing.value"
-                  @click="startEditing(row)"
-                >
-                  <Pencil :size="16" />
-                </button>
-                <button
-                  title="Efectuar pagamento"
-                  :disabled="clientInvoicesTable.isEditing.value"
-                  @click="startAddingClientPayment(row)"
-                >
-                  <FileInput :size="16" />
-                </button>
+            <EntityTableBody :rows="clientInvoicesTable" :subrows="clientCreditNotesTable">
+              <template #row-actions="{ row, isSubrow }">
+                <template v-if="!isSubrow">
+                  <button
+                    title="Eliminar fatura"
+                    :disabled="clientInvoicesTable.isEditing.value"
+                    @click="askDelete(row)"
+                  >
+                    <Trash2 :size="16" />
+                  </button>
+                  <button
+                    title="Editar fatura"
+                    :disabled="clientInvoicesTable.isEditing.value"
+                    @click="startEditing(row)"
+                  >
+                    <Pencil :size="16" />
+                  </button>
+                  <button
+                    title="Adicionar nota de crédito"
+                    :disabled="clientCreditNotesTable.isEditing.value"
+                    @click="addSubrow(row)"
+                  >
+                    <Plus :size="16" />
+                  </button>
+                  <button
+                    title="Efectuar pagamento"
+                    :disabled="clientInvoicesTable.isEditing.value"
+                    @click="startAddingClientPayment(row)"
+                  >
+                    <FileInput :size="16" />
+                  </button>
+                </template>
+                <template v-else>
+                  <button title="Eliminar nota de crédito" :disabled="clientCreditNotesTable.isEditing.value" @click="">
+                    <Trash2 :size="16" />
+                  </button>
+                  <button
+                    title="Editar nota de crédito"
+                    :disabled="clientCreditNotesTable.isEditing.value"
+                    @click="startEditingSubrow(row)"
+                  >
+                    <Pencil :size="16" />
+                  </button>
+                </template>
               </template>
             </EntityTableBody>
           </table>
@@ -154,6 +179,8 @@ import router from '@/router';
 import { useTableFilters } from '@/composables/useTableFilters';
 import { useConfigs } from '@/composables/useConfigs';
 import AddClientPaymentInvoiceDialog from './AddClientPaymentInvoiceDialog.vue';
+import { ClientCreditNote } from '@/entities/client-credit-note.ts';
+import { ClientCreditNoteType } from '@/types/client-credit-note-type.ts';
 
 const apiStatus = ref<ApiResponseStatus>({ isLoading: false, isSuccess: false, isError: false });
 const tableBody = ref<HTMLTableSectionElement | null>(null);
@@ -164,8 +191,10 @@ const works = ref<WorkType[]>([]);
 
 const clientInvoices = ref<ClientInvoiceRow[]>([]);
 const configs = computed(() => ClientInvoice.getConfigs(clients.value, works.value));
+const creditNotesConfigs = computed(() => ClientCreditNote.getConfigs());
 
 const isEditing = ref(false);
+
 const clientInvoicesTable = computed<EntityTableBodyProps<ClientPaymentType, ClientInvoiceSortField>>(() => ({
   rows: clientInvoices.value,
   configs: configs.value,
@@ -174,9 +203,24 @@ const clientInvoicesTable = computed<EntityTableBodyProps<ClientPaymentType, Cli
     delete: askDelete,
     save,
     discard,
+    toggle: toggleRow,
   },
   rowIsActive: () => true,
   isValid: (clientInvoice) => ClientInvoice.isValid(clientInvoice, configs.value),
+  isEditing: isEditing,
+}));
+
+const clientCreditNotesTable = computed(() => ({
+  rows: fetchCreditNoteRows,
+  configs: creditNotesConfigs.value,
+  handlers: {
+    edit: startEditingSubrow,
+    save: saveSubrow,
+    delete: () => {},
+    discard: discardSubRow,
+  },
+  rowIsActive: () => true,
+  isValid: (creditNote: ClientCreditNoteType) => ClientCreditNote.isValid(creditNote, creditNotesConfigs.value),
   isEditing: isEditing,
 }));
 
@@ -197,16 +241,38 @@ async function fetch() {
     clientInvoices.value = gotClientInvoices.map((clientInvoice) => ({
       entity: {
         ...clientInvoice,
+        _creditNotesRows: fetchCreditNoteRows(clientInvoice),
       },
       _key: clientInvoice.code ?? nextKey(),
       _isNew: false,
       _isEdited: false,
+      _expanded: false,
     }));
 
     apiStatus.value = { isLoading: false, isSuccess: true, isError: false };
   } catch (error: unknown) {
     apiStatus.value = apiError(error, 'Failed to load client invoices.');
   }
+}
+
+function fetchCreditNoteRows(invoice: ClientInvoiceType): ClientCreditNoteTypeRow[] {
+  if (!(invoice as ClientInvoiceType & { _creditNotesRows?: ClientCreditNoteTypeRow[] })._creditNotesRows) {
+    (invoice as ClientInvoiceType & { _creditNotesRows?: ClientCreditNoteTypeRow[] })._creditNotesRows = (
+      invoice.creditNotes ?? []
+    ).map((creditNote, index) => {
+      creditNote._invoice = invoice;
+
+      return {
+        entity: creditNote,
+        _key: creditNote.id ?? `${invoice.id}-${index}`,
+        _isNew: false,
+        _isEdited: false,
+        _parentId: invoice.id!,
+      };
+    });
+  }
+
+  return (invoice as ClientInvoiceType & { _creditNotesRows: ClientCreditNoteTypeRow[] })._creditNotesRows;
 }
 
 async function fetchClients() {
@@ -222,9 +288,9 @@ async function fetchWorks() {
   works.value = await workApi.searchWorks();
 }
 
-/******************************************************************************************************** ROW ACTIONS */
+/******************************************************************************************** ROW ACTIONS - MAIN ROWS */
 
-interface ClientInvoiceRow extends TableRow<ClientInvoiceType> {}
+interface ClientInvoiceRow extends TableRow<ClientInvoiceType & { _creditNotesRows: ClientCreditNoteTypeRow[] }> {}
 
 let _keyCounter = 0;
 function nextKey(): string {
@@ -243,9 +309,53 @@ function discard(row: ClientInvoiceRow) {
   isEditing.value = false;
 }
 
+function toggleRow(row: ClientInvoiceRow) {
+  if (row._isNew || row._isEdited) {
+    return;
+  }
+
+  row._expanded = !row._expanded;
+}
+
+/********************************************************************************************* ROW ACTIONS - SUB ROWS */
+
+interface ClientCreditNoteTypeRow extends TableRow<ClientCreditNoteType> {}
+
+let _keyCounterSubrow = 0;
+function nextKeySubRow(): string {
+  return `row-${++_keyCounterSubrow}`;
+}
+
+function discardSubRow(row: ClientCreditNoteTypeRow) {
+  if (row._isNew) {
+    const invoice = clientInvoices.value.find((clientInvoice) => clientInvoice.entity.id === row._parentId);
+
+    if (!invoice) {
+      return;
+    }
+
+    invoice.entity.creditNotes = (invoice.entity.creditNotes ?? []).filter((creditNote) => creditNote !== row.entity);
+
+    delete (invoice.entity as ClientInvoiceType & { _creditNotesRows?: ClientCreditNoteType[] })._creditNotesRows;
+  } else {
+    row.entity = row._original!;
+    row._isNew = false;
+    row._isEdited = false;
+  }
+
+  isEditing.value = false;
+}
+
 /*************************************************************************************************************** EDIT */
 
 function startEditing(row: ClientInvoiceRow) {
+  isEditing.value = true;
+
+  row._isEdited = true;
+  row._original = JSON.parse(JSON.stringify(row.entity));
+}
+
+function startEditingSubrow(row: ClientCreditNoteTypeRow) {
   isEditing.value = true;
 
   row._isEdited = true;
@@ -261,6 +371,7 @@ async function add(): Promise<void> {
     entity: {
       appliedTax: 23,
       registrationDate: new Date().toISOString().split('T')[0],
+      _creditNotesRows: [],
     },
     _key: nextKey(),
     _isNew: true,
@@ -276,6 +387,33 @@ async function add(): Promise<void> {
   });
 
   (lastRow?.querySelector('input') as HTMLInputElement)?.focus();
+}
+
+/********************************************************************************************************* ADD SUBROW */
+
+async function addSubrow(row: ClientInvoiceRow): Promise<void> {
+  isEditing.value = true;
+
+  const entity: ClientCreditNoteType = {
+    appliedTax: row.entity.appliedTax,
+    _invoice: row.entity,
+  };
+
+  row.entity.creditNotes ??= [];
+  row.entity.creditNotes.push(entity);
+
+  const subrows = fetchCreditNoteRows(row.entity);
+  subrows.push({
+    entity,
+    _key: nextKeySubRow(),
+    _parentId: row.entity.id!,
+    _isNew: true,
+    _isEdited: false,
+  });
+
+  row._expanded = true;
+
+  await nextTick();
 }
 
 /*************************************************************************************************************** SAVE */
@@ -301,7 +439,37 @@ async function save(row: ClientInvoiceRow): Promise<void> {
     };
   } catch (error: unknown) {
     await fetch();
+    isEditing.value = false;
     apiStatus.value = apiError(error, 'Failed to save client invoice.');
+  }
+}
+
+async function saveSubrow(row: ClientCreditNoteTypeRow): Promise<void> {
+  apiStatus.value = { isLoading: true, isSuccess: false, isError: false };
+
+  try {
+    const invoice = clientInvoices.value.find((clientInvoice) => clientInvoice.entity.id === row._parentId);
+
+    if (!invoice) {
+      apiStatus.value = apiError(null, 'Failed to save client credit note - Invoice not found.');
+      return;
+    }
+
+    await clientInvoiceApi.createCreditNote(invoice.entity.id!, row.entity);
+
+    await fetch();
+    isEditing.value = false;
+
+    apiStatus.value = {
+      isLoading: false,
+      isSuccess: true,
+      isError: false,
+      message: 'Client payment saved successfully.',
+    };
+  } catch (error) {
+    await fetch();
+    isEditing.value = false;
+    apiStatus.value = apiError(error, 'Failed to save client payment.');
   }
 }
 

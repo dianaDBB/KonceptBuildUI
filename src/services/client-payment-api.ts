@@ -2,6 +2,7 @@ import axiosClient from './api';
 import { UUID } from 'crypto';
 import { ClientPaymentFilters, ClientPaymentType } from '@/types/client-payment-type';
 import { ClientPaymentPayload } from './payload/client-payment-payload';
+import { ClientCreditNoteType } from '@/types/client-credit-note-type';
 
 class ClientPaymentApi {
   async search(filters: ClientPaymentFilters = {}): Promise<ClientPaymentType[]> {

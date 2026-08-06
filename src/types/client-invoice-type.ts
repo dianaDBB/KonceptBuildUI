@@ -2,6 +2,7 @@ import { SortDirection } from './sort-direction';
 import { ClientType } from './client-type';
 import { EntityType, RangeFilter } from './entity-configs';
 import { WorkType } from './work-type';
+import { ClientCreditNoteType } from './client-credit-note-type';
 
 export interface ClientInvoiceType extends EntityType {
   docNumber?: string;
@@ -14,6 +15,7 @@ export interface ClientInvoiceType extends EntityType {
   totalValue?: number;
   registrationDate?: string;
   dueDate?: string;
+  creditNotes?: ClientCreditNoteType[];
 }
 
 export enum ClientInvoiceSortField {
