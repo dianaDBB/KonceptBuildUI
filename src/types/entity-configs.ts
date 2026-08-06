@@ -87,6 +87,7 @@ export interface StyleConfig {
   isInvalid: (entity: EntityType) => boolean;
   isHighlight?: boolean;
   columnStyle: CSSProperties;
+  classes?: string | Record<string, boolean> | ((entity: EntityType) => string | Record<string, boolean> | undefined);
 }
 
 export interface SearchSelectConfig<TEntity extends EntityType = EntityType> {

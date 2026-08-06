@@ -215,4 +215,4 @@ const {
   clearAllTableControls,
 } = useTableFilters<WageFilters>(fetch);
 </script>
-<style scoped lang="scss"></style>
+<style lang="scss"></style>

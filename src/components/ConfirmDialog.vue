@@ -49,7 +49,7 @@ function confirm() {
 }
 </script>
 
-<style scoped>
+<style>
 .overlay {
   position: fixed;
   inset: 0;

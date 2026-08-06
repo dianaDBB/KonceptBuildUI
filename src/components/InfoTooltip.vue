@@ -98,7 +98,7 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped>
+<style>
 .tooltip {
   position: relative;
   display: inline-flex;

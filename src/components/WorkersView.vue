@@ -372,4 +372,4 @@ async function saveCompensation(worker: WorkerType) {
   }
 }
 </script>
-<style scoped lang="scss"></style>
+<style lang="scss"></style>

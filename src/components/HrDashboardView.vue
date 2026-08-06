@@ -151,7 +151,7 @@ function expandAllPeriod() {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

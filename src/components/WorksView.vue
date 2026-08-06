@@ -305,4 +305,4 @@ const {
   clearAllTableControls,
 } = useTableFilters<WorkFilters>(fetch);
 </script>
-<style scoped lang="scss"></style>
+<style lang="scss"></style>

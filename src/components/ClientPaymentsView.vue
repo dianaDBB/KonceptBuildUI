@@ -571,4 +571,4 @@ const {
   clearAllTableControls,
 } = useTableFilters<ClientPaymentFilters>(fetch);
 </script>
-<style scoped lang="scss"></style>
+<style lang="scss"></style>

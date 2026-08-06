@@ -49,7 +49,7 @@ function close() {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .toast {
   position: fixed;
   top: 24px;

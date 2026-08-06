@@ -5,6 +5,8 @@ import { WorkStatusEnum } from '@/types/work-status-enum';
 import { AttendanceCodeEnum } from '@/types/attendance-code-enum';
 import { PaymentMethodEnum } from '@/types/payment-method-enum';
 import { ClientPaymentTypeEnum } from '@/types/client-payment-type-enum';
+import { InvoiceStatusEnum } from '@/types/invoice-status-enum';
+import { AgingEnum } from '@/types/aging-enum';
 
 class ConfigsApi {
   async getStatusValues(): Promise<StatusEnum[]> {
@@ -49,6 +51,22 @@ class ConfigsApi {
 
   async getClientPaymentTypeValues(): Promise<ClientPaymentTypeEnum[]> {
     const response = await axiosClient.get('/configs/client-payment-type', {
+      headers: { Accept: 'application/json' },
+    });
+
+    return response.data;
+  }
+
+  async getInvoiceStatusValues(): Promise<InvoiceStatusEnum[]> {
+    const response = await axiosClient.get('/configs/invoice-status', {
+      headers: { Accept: 'application/json' },
+    });
+
+    return response.data;
+  }
+
+  async getAgingValues(): Promise<AgingEnum[]> {
+    const response = await axiosClient.get('/configs/aging', {
       headers: { Accept: 'application/json' },
     });
 

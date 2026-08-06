@@ -2,7 +2,11 @@
   <tbody ref="tableBody">
     <template v-for="row in props.rows.rows" :key="row._key">
       <tr
-        :class="{ disabled: !isRowActive(row), 'main-row': row._expanded != undefined }"
+        :class="{
+          disabled: !isRowActive(row),
+          'main-row': row._expanded != undefined,
+          'main-row-expanded': hasChildren(row),
+        }"
         @dblclick="!props.rows.isEditing.value && props.rows.handlers.edit?.(row)"
         @click="!props.rows.isEditing.value && hasChildren(row) && props.rows.handlers.toggle?.(row)"
       >
@@ -10,7 +14,7 @@
           v-for="(config, fieldKey, index) in props.rows.configs"
           :key="fieldKey"
           :style="config.styleConfig.columnStyle"
-          :class="getColumnClasses(fieldKey)"
+          :class="[getColumnClasses(fieldKey, row.entity), { editing: rowHasChanges(row) }]"
         >
           <template v-if="rowHasChanges(row)">
             <slot :name="`edit-${fieldKey}`" :row="row" :config="config" :field-key="fieldKey">
@@ -58,6 +62,7 @@
             <slot :name="`display-${fieldKey}`" :row="row" :config="config" :field-key="fieldKey">
               <div v-if="index === 0" class="main-cell">
                 <component v-if="hasChildren(row)" :is="row._expanded ? ChevronDown : ChevronRight" :size="18" />
+                <span v-else class="tree-placeholder" />
 
                 <template v-if="config.type === ColumnType.SEARCH_SELECT">
                   <div class="with-info-tooltip">
@@ -142,9 +147,9 @@
         </td>
       </tr>
 
-      <tr v-if="row._expanded && props.subrows" class="details-row">
-        <td :colspan="totalColumns" class="details-cell">
-          <table class="sub-table">
+      <tr v-if="row._expanded && props.subrows">
+        <td :colspan="totalColumns">
+          <table>
             <colgroup>
               <col
                 v-for="config in Object.values(props.subrows.configs)"
@@ -246,9 +251,15 @@ function isRowActive(row: TableRow<TEntity>): boolean {
   return props.rows.rowIsActive(row);
 }
 
-function getColumnClasses(fieldKey: string): Record<string, boolean> {
+function getColumnClasses(fieldKey: string, entity: TEntity): Record<string, boolean> {
+  const styleConfig = props.rows.configs[fieldKey].styleConfig;
+
+  const classes = typeof styleConfig.classes === 'function' ? styleConfig.classes(entity) : styleConfig.classes;
+
   return {
-    highlight: props.rows.configs[fieldKey].styleConfig.isHighlight ?? false,
+    highlight: styleConfig.isHighlight ?? false,
+    ...(typeof classes === 'object' ? classes : {}),
+    ...(typeof classes === 'string' ? { [classes]: true } : {}),
   };
 }
 
@@ -286,4 +297,4 @@ function updateFieldValue(row: TableRow<TEntity>, fieldKey: string, value: unkno
 }
 </script>
 
-<style scoped></style>
+<style></style>

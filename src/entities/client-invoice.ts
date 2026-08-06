@@ -5,8 +5,9 @@ import { ClientType } from '@/types/client-type';
 import { ClientInvoiceSortField, ClientInvoiceType } from '@/types/client-invoice-type';
 import { Client } from './client';
 import { Work } from './work';
-import { formatCurrency, formatPercentage } from '@/utils/validation';
+import { formatCurrency, formatIntNumber, formatPercentage } from '@/utils/validation';
 import { buildTooltipItems } from '@/utils/tooltipItems';
+import { useConfigs } from '@/composables/useConfigs';
 
 export class ClientInvoice {
   static getConfigs(
@@ -15,6 +16,8 @@ export class ClientInvoice {
   ): Configs<ClientInvoiceSortField, ClientInvoiceType> {
     const clientConfigs = Client.getConfigs();
     const workConfigs = Work.getConfigs(clientOptions);
+    const invoiceStatus = useConfigs().invoiceStatusOptions.value;
+    const aging = useConfigs().agingOptions.value;
 
     return {
       docNumber: {
@@ -23,8 +26,9 @@ export class ClientInvoice {
         styleConfig: {
           showDisabled: () => false,
           isInvalid: (clientInvoice: ClientInvoiceType) => !clientInvoice.docNumber,
+          isHighlight: true,
           columnStyle: {
-            width: '100px',
+            width: '140px',
           },
         },
         filterConfig: {
@@ -109,7 +113,7 @@ export class ClientInvoice {
           showDisabled: () => false,
           isInvalid: (clientInvoice: ClientInvoiceType) => !clientInvoice.description,
           columnStyle: {
-            width: '200px',
+            width: '250px',
           },
         },
         filterConfig: {
@@ -241,6 +245,307 @@ export class ClientInvoice {
           },
         },
         displayValue: (clientInvoice: ClientInvoiceType) => clientInvoice.dueDate,
+      },
+      sumCreditNotesWithoutTax: {
+        label: 'Valor NC Associada (S/IVA)',
+        type: ColumnType.MONEY,
+        styleConfig: {
+          showDisabled: () => true,
+          isInvalid: () => false,
+          columnStyle: {
+            width: '100px',
+          },
+        },
+        filterConfig: {
+          column: ClientInvoiceSortField.SUM_CREDIT_NOTES_WITHOUT_TAX,
+          kind: TableFilterKind.NUMBER_RANGE,
+          valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
+            valueKey: 'sumCreditNotesWithoutTax',
+          },
+        },
+        displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.sumCreditNotesWithoutTax),
+      },
+      sumCreditNotesWithTax: {
+        label: 'Valor NC Associada (C/IVA)',
+        type: ColumnType.MONEY,
+        styleConfig: {
+          showDisabled: () => true,
+          isInvalid: () => false,
+          columnStyle: {
+            width: '100px',
+          },
+        },
+        filterConfig: {
+          column: ClientInvoiceSortField.SUM_CREDIT_NOTES_WITH_TAX,
+          kind: TableFilterKind.NUMBER_RANGE,
+          valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
+            valueKey: 'sumCreditNotesWithTax',
+          },
+        },
+        displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.sumCreditNotesWithTax),
+      },
+      totalValueNet: {
+        label: 'Valor Total Liquido (S/IVA)',
+        type: ColumnType.MONEY,
+        styleConfig: {
+          showDisabled: () => true,
+          isInvalid: () => false,
+          columnStyle: {
+            width: '100px',
+          },
+        },
+        filterConfig: {
+          column: ClientInvoiceSortField.TOTAL_VALUE_NET,
+          kind: TableFilterKind.NUMBER_RANGE,
+          valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
+            valueKey: 'totalValueNet',
+          },
+        },
+        displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.totalValueNet),
+      },
+      totalValueGross: {
+        label: 'Valor Total ILíquido (C/IVA)',
+        type: ColumnType.MONEY,
+        styleConfig: {
+          showDisabled: () => true,
+          isInvalid: () => false,
+          columnStyle: {
+            width: '100px',
+          },
+        },
+        filterConfig: {
+          column: ClientInvoiceSortField.TOTAL_VALUE_GROSS,
+          kind: TableFilterKind.NUMBER_RANGE,
+          valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
+            valueKey: 'totalValueGross',
+          },
+        },
+        displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.totalValueGross),
+      },
+      amountReceivedWithoutTax: {
+        label: 'Valor Recebido (€) (S/IVA)',
+        type: ColumnType.MONEY,
+        styleConfig: {
+          showDisabled: () => true,
+          isInvalid: () => false,
+          columnStyle: {
+            width: '100px',
+          },
+        },
+        filterConfig: {
+          column: ClientInvoiceSortField.AMOUNT_RECEIVED_WITHOUT_TAX,
+          kind: TableFilterKind.NUMBER_RANGE,
+          valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
+            valueKey: 'amountReceivedWithoutTax',
+          },
+        },
+        displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.amountReceivedWithoutTax),
+      },
+      amountReceivedWithTax: {
+        label: 'Valor Recebido (€) (C/IVA)',
+        type: ColumnType.MONEY,
+        styleConfig: {
+          showDisabled: () => true,
+          isInvalid: () => false,
+          columnStyle: {
+            width: '100px',
+          },
+        },
+        filterConfig: {
+          column: ClientInvoiceSortField.AMOUNT_RECEIVED_WITH_TAX,
+          kind: TableFilterKind.NUMBER_RANGE,
+          valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
+            valueKey: 'amountReceivedWithTax',
+          },
+        },
+        displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.amountReceivedWithTax),
+      },
+      amountDueWithoutTax: {
+        label: 'Valor em Falta (€) (S/IVA)',
+        type: ColumnType.MONEY,
+        styleConfig: {
+          showDisabled: () => true,
+          isInvalid: () => false,
+          columnStyle: {
+            width: '100px',
+          },
+        },
+        filterConfig: {
+          column: ClientInvoiceSortField.AMOUNT_DUE_WITHOUT_TAX,
+          kind: TableFilterKind.NUMBER_RANGE,
+          valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
+            valueKey: 'amountDueWithoutTax',
+          },
+        },
+        displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.amountDueWithoutTax),
+      },
+      amountDueWithTax: {
+        label: 'Valor em Falta (€) (C/IVA)',
+        type: ColumnType.MONEY,
+        styleConfig: {
+          showDisabled: () => true,
+          isInvalid: () => false,
+          columnStyle: {
+            width: '100px',
+          },
+        },
+        filterConfig: {
+          column: ClientInvoiceSortField.AMOUNT_DUE_WITH_TAX,
+          kind: TableFilterKind.NUMBER_RANGE,
+          valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
+            valueKey: 'amountDueWithTax',
+          },
+        },
+        displayValue: (clientInvoice: ClientInvoiceType) => formatCurrency(clientInvoice.amountDueWithTax),
+      },
+      paymentsCount: {
+        label: 'Nº Pag. e Reembolsos',
+        type: ColumnType.NUMBER,
+        styleConfig: {
+          showDisabled: () => true,
+          isInvalid: () => false,
+          columnStyle: {
+            width: '100px',
+          },
+        },
+        filterConfig: {
+          column: ClientInvoiceSortField.PAYMENTS_COUNT,
+          kind: TableFilterKind.NUMBER_RANGE,
+          valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
+            valueKey: 'paymentsCount',
+          },
+        },
+        displayValue: (clientInvoice: ClientInvoiceType) => formatIntNumber(clientInvoice.paymentsCount),
+      },
+      status: {
+        label: 'Estado',
+        type: ColumnType.SELECT,
+        selectConfig: {
+          options: Object.values(invoiceStatus),
+        },
+        styleConfig: {
+          showDisabled: () => true,
+          isInvalid: () => false,
+          columnStyle: {
+            width: '100px',
+          },
+          classes: (invoice: ClientInvoiceType) => ({
+            'invoice-status-paid': invoice.status == 'PAID',
+            'invoice-status-partial': invoice.status == 'PARTIAL',
+            'invoice-status-delay': invoice.status == 'DELAY',
+            'invoice-status-pending': invoice.status == 'PENDING',
+          }),
+        },
+        filterConfig: {
+          column: ClientInvoiceSortField.STATUS,
+          kind: TableFilterKind.SELECT,
+          valueConfig: {
+            valueKey: 'status',
+          },
+        },
+        displayValue: (clientInvoice: ClientInvoiceType) =>
+          clientInvoice.status ? invoiceStatus[clientInvoice.status].label : undefined,
+      },
+      daysPastDue: {
+        label: 'Dias em Atraso',
+        type: ColumnType.NUMBER,
+        styleConfig: {
+          showDisabled: () => true,
+          isInvalid: () => false,
+          columnStyle: {
+            width: '100px',
+          },
+        },
+        filterConfig: {
+          column: ClientInvoiceSortField.DAYS_PAST_DUE,
+          kind: TableFilterKind.NUMBER_RANGE,
+          valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
+            valueKey: 'daysPastDue',
+          },
+        },
+        displayValue: (clientInvoice: ClientInvoiceType) => formatIntNumber(clientInvoice.daysPastDue),
+      },
+      aging: {
+        label: 'Aging',
+        type: ColumnType.SELECT,
+        selectConfig: {
+          options: Object.values(aging),
+        },
+        styleConfig: {
+          showDisabled: () => true,
+          isInvalid: () => false,
+          columnStyle: {
+            width: '100px',
+          },
+          classes: (invoice: ClientInvoiceType) => ({
+            'aging-zero-thirty': invoice.aging == 'ZERO_THIRTY',
+            'aging-thirty-sixty': invoice.aging == 'THIRTY_SIXTY',
+            'aging-sixty-ninty': invoice.aging == 'SIXTY_NINTY',
+            'aging-ninty-plus': invoice.aging == 'NINTY_PLUS',
+            'aging-not-yet-due': invoice.aging == 'NOT_YET_DUE',
+            'aging-paid': invoice.aging == 'PAID',
+            'aging-na': invoice.aging == 'NA',
+          }),
+        },
+        filterConfig: {
+          column: ClientInvoiceSortField.AGING,
+          kind: TableFilterKind.SELECT,
+          valueConfig: {
+            valueKey: 'aging',
+          },
+        },
+        displayValue: (clientInvoice: ClientInvoiceType) =>
+          clientInvoice.aging ? aging[clientInvoice.aging].label : undefined,
+      },
+      settlementDate: {
+        label: 'Data Liquidação',
+        type: ColumnType.DATE,
+        styleConfig: {
+          showDisabled: () => true,
+          isInvalid: () => false,
+          columnStyle: {
+            width: '130px',
+          },
+        },
+        filterConfig: {
+          column: ClientInvoiceSortField.SETTLEMENT_DATE,
+          kind: TableFilterKind.DATE_RANGE,
+          valueConfig: {
+            valueType: RangeFilterValueType.DATE,
+            valueKey: 'settlementDate',
+          },
+        },
+        displayValue: (clientInvoice: ClientInvoiceType) => clientInvoice.settlementDate,
+      },
+      daysToPay: {
+        label: 'Prazo recebimento',
+        type: ColumnType.DATE,
+        styleConfig: {
+          showDisabled: () => true,
+          isInvalid: () => false,
+          columnStyle: {
+            width: '130px',
+          },
+        },
+        filterConfig: {
+          column: ClientInvoiceSortField.DAYS_TO_PAY,
+          kind: TableFilterKind.NUMBER_RANGE,
+          valueConfig: {
+            valueType: RangeFilterValueType.NUMBER,
+            valueKey: 'daysToPay',
+          },
+        },
+        displayValue: (clientInvoice: ClientInvoiceType) => formatIntNumber(clientInvoice.daysToPay),
       },
     };
   }

@@ -286,7 +286,7 @@ function closeOnOutsideClick(event: MouseEvent) {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .table-column-filter {
   position: relative;
   display: inline-flex;

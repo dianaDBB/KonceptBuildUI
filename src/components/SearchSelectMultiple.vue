@@ -167,7 +167,7 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped>
+<style>
 .search-select {
   position: relative;
   width: 100%;

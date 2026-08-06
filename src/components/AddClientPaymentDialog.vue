@@ -287,7 +287,7 @@ function handleCancel() {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .invoices-list {
   display: flex;
   flex-direction: column;

@@ -20,8 +20,18 @@ const numberFormatter = new Intl.NumberFormat('pt-PT', {
   maximumFractionDigits: 2,
 });
 
+const intNumberFormatter = new Intl.NumberFormat('pt-PT', {
+  useGrouping: true,
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
+
 export function formatNumber(value?: number | null): string {
   return value == null ? '' : numberFormatter.format(value);
+}
+
+export function formatIntNumber(value?: number | null): string {
+  return value == null ? '' : intNumberFormatter.format(value);
 }
 
 export function formatCurrency(value?: number | null): string {

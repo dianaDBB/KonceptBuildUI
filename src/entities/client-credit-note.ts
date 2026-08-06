@@ -1,5 +1,4 @@
-import { ColumnType, Configs, RangeFilterValueType } from '@/types/entity-configs';
-import { TableFilterKind } from '@/types/table-filter';
+import { Configs } from '@/types/entity-configs';
 import { ClientInvoiceSortField } from '@/types/client-invoice-type';
 import { formatCurrency, formatPercentage } from '@/utils/validation';
 import { ClientCreditNoteType } from '@/types/client-credit-note-type';
@@ -9,191 +8,85 @@ export class ClientCreditNote {
   static getConfigs(): Configs<ClientInvoiceSortField, ClientCreditNoteType> {
     const invoiceConfigs = ClientInvoice.getConfigs([], []);
 
+    const creditNoteConfigs = Object.fromEntries(
+      Object.entries(invoiceConfigs).map(([key, config]) => [
+        key,
+        {
+          ...config,
+          styleConfig: {
+            ...config.styleConfig,
+            showDisabled: () => true,
+            isInvalid: () => false,
+          },
+          displayValue: () => '---',
+        },
+      ]),
+    ) as Configs<ClientInvoiceSortField, ClientCreditNoteType>;
+
     return {
+      ...creditNoteConfigs,
       docNumber: {
-        label: invoiceConfigs.docNumber.label,
-        type: ColumnType.TEXT,
+        ...creditNoteConfigs.docNumber,
         styleConfig: {
+          ...creditNoteConfigs.docNumber.styleConfig,
           showDisabled: () => false,
-          isInvalid: (clientCreditNoteType: ClientCreditNoteType) => !clientCreditNoteType.docNumber,
-          columnStyle: {
-            width: invoiceConfigs.docNumber.styleConfig.columnStyle.width,
-          },
+          isInvalid: (creditNoteType: ClientCreditNoteType) => !creditNoteType.docNumber,
         },
-        filterConfig: {
-          column: ClientInvoiceSortField.DOCUMENT_NUMBER,
-          kind: TableFilterKind.TEXT,
-          valueConfig: {
-            valueKey: 'docNumber',
-          },
-          dropdownAlign: 'start',
-        },
-        displayValue: (clientCreditNoteType: ClientCreditNoteType) => clientCreditNoteType.docNumber,
-      },
-      client: {
-        label: invoiceConfigs.client.label,
-        type: ColumnType.LABEL,
-        styleConfig: {
-          showDisabled: () => true,
-          isInvalid: () => false,
-          columnStyle: {
-            width: invoiceConfigs.client.styleConfig.columnStyle.width,
-          },
-        },
-        displayValue: () => '---',
-      },
-      work: {
-        label: invoiceConfigs.work.label,
-        type: ColumnType.LABEL,
-        styleConfig: {
-          showDisabled: () => true,
-          isInvalid: () => false,
-          columnStyle: {
-            width: invoiceConfigs.work.styleConfig.columnStyle.width,
-          },
-        },
-        displayValue: () => '---',
+        displayValue: (creditNoteType: ClientCreditNoteType) => creditNoteType.docNumber,
       },
       description: {
-        label: invoiceConfigs.description.label,
-        type: ColumnType.TEXT,
+        ...creditNoteConfigs.description,
         styleConfig: {
+          ...creditNoteConfigs.description.styleConfig,
           showDisabled: () => false,
-          isInvalid: (clientCreditNoteType: ClientCreditNoteType) => !clientCreditNoteType.description,
-          columnStyle: {
-            width: invoiceConfigs.description.styleConfig.columnStyle.width,
-          },
+          isInvalid: (creditNoteType: ClientCreditNoteType) => !creditNoteType.description,
         },
-        filterConfig: {
-          column: ClientInvoiceSortField.DESCRIPTION,
-          kind: TableFilterKind.TEXT,
-          valueConfig: {
-            valueKey: 'description',
-          },
-        },
-        displayValue: (clientCreditNoteType: ClientCreditNoteType) => clientCreditNoteType.description,
+        displayValue: (creditNoteType: ClientCreditNoteType) => creditNoteType.description,
       },
       valueWithoutTax: {
-        label: invoiceConfigs.valueWithoutTax.label,
-        type: ColumnType.MONEY,
+        ...creditNoteConfigs.valueWithoutTax,
         styleConfig: {
+          ...creditNoteConfigs.valueWithoutTax.styleConfig,
           showDisabled: () => false,
-          isInvalid: (clientCreditNoteType: ClientCreditNoteType) => !clientCreditNoteType.valueWithoutTax,
-          columnStyle: {
-            width: invoiceConfigs.valueWithoutTax.styleConfig.columnStyle.width,
-          },
+          isInvalid: (creditNoteType: ClientCreditNoteType) => !creditNoteType.valueWithoutTax,
         },
-        filterConfig: {
-          column: ClientInvoiceSortField.VALUE_WITHOUT_TAX,
-          kind: TableFilterKind.NUMBER_RANGE,
-          valueConfig: {
-            valueType: RangeFilterValueType.NUMBER,
-            valueKey: 'valueWithoutTax',
-          },
-        },
-        displayValue: (clientCreditNoteType: ClientCreditNoteType) =>
-          formatCurrency(clientCreditNoteType.valueWithoutTax),
+        displayValue: (creditNoteType: ClientCreditNoteType) => formatCurrency(creditNoteType.valueWithoutTax),
       },
       appliedTax: {
-        label: invoiceConfigs.appliedTax.label,
-        type: ColumnType.PERCENTAGE,
+        ...creditNoteConfigs.appliedTax,
         styleConfig: {
+          ...creditNoteConfigs.appliedTax.styleConfig,
           showDisabled: () => false,
-          isInvalid: (clientCreditNoteType: ClientCreditNoteType) =>
-            clientCreditNoteType.appliedTax == undefined || clientCreditNoteType.appliedTax < 0,
-          columnStyle: {
-            width: invoiceConfigs.appliedTax.styleConfig.columnStyle.width,
-          },
+          isInvalid: (creditNoteType: ClientCreditNoteType) =>
+            creditNoteType.appliedTax == undefined || creditNoteType.appliedTax < 0,
         },
-        filterConfig: {
-          column: ClientInvoiceSortField.APPLIED_TAX,
-          kind: TableFilterKind.NUMBER_RANGE,
-          valueConfig: {
-            valueType: RangeFilterValueType.NUMBER,
-            valueKey: 'appliedTax',
-          },
-        },
-        displayValue: (clientCreditNoteType: ClientCreditNoteType) => formatPercentage(clientCreditNoteType.appliedTax),
+        displayValue: (creditNoteType: ClientCreditNoteType) => formatPercentage(creditNoteType.appliedTax),
       },
       taxValue: {
-        label: invoiceConfigs.taxValue.label,
-        type: ColumnType.MONEY,
-        styleConfig: {
-          showDisabled: () => true,
-          isInvalid: () => false,
-          columnStyle: {
-            width: invoiceConfigs.taxValue.styleConfig.columnStyle.width,
-          },
-        },
-        filterConfig: {
-          column: ClientInvoiceSortField.TAX_VALUE,
-          kind: TableFilterKind.NUMBER_RANGE,
-          valueConfig: {
-            valueType: RangeFilterValueType.NUMBER,
-            valueKey: 'taxValue',
-          },
-        },
-        displayValue: (clientCreditNoteType: ClientCreditNoteType) => formatCurrency(clientCreditNoteType.taxValue),
+        ...creditNoteConfigs.taxValue,
+        displayValue: (creditNoteType: ClientCreditNoteType) => formatCurrency(creditNoteType.taxValue),
       },
       totalValue: {
-        label: invoiceConfigs.totalValue.label,
-        type: ColumnType.MONEY,
-        styleConfig: {
-          showDisabled: () => true,
-          isInvalid: () => false,
-          columnStyle: {
-            width: invoiceConfigs.totalValue.styleConfig.columnStyle.width,
-          },
-        },
-        filterConfig: {
-          column: ClientInvoiceSortField.TOTAL_VALUE,
-          kind: TableFilterKind.NUMBER_RANGE,
-          valueConfig: {
-            valueType: RangeFilterValueType.NUMBER,
-            valueKey: 'totalValue',
-          },
-        },
-        displayValue: (clientCreditNoteType: ClientCreditNoteType) => formatCurrency(clientCreditNoteType.totalValue),
+        ...creditNoteConfigs.totalValue,
+        displayValue: (creditNoteType: ClientCreditNoteType) => formatCurrency(creditNoteType.totalValue),
       },
       registrationDate: {
-        label: invoiceConfigs.registrationDate.label,
-        type: ColumnType.DATE,
+        ...creditNoteConfigs.registrationDate,
         styleConfig: {
+          ...creditNoteConfigs.registrationDate.styleConfig,
           showDisabled: () => false,
-          isInvalid: (clientCreditNoteType: ClientCreditNoteType) => !clientCreditNoteType.registrationDate,
-          columnStyle: {
-            width: invoiceConfigs.registrationDate.styleConfig.columnStyle.width,
-          },
+          isInvalid: (creditNoteType: ClientCreditNoteType) => !creditNoteType.registrationDate,
         },
-        filterConfig: {
-          column: ClientInvoiceSortField.REGISTRATION_DATE,
-          kind: TableFilterKind.DATE_RANGE,
-          valueConfig: {
-            valueType: RangeFilterValueType.DATE,
-            valueKey: 'registrationDate',
-          },
-        },
-        displayValue: (clientCreditNoteType: ClientCreditNoteType) => clientCreditNoteType.registrationDate,
+        displayValue: (creditNoteType: ClientCreditNoteType) => creditNoteType.registrationDate,
       },
       dueDate: {
-        label: invoiceConfigs.dueDate.label,
-        type: ColumnType.DATE,
+        ...creditNoteConfigs.dueDate,
         styleConfig: {
+          ...creditNoteConfigs.dueDate.styleConfig,
           showDisabled: () => false,
           isInvalid: () => false,
-          columnStyle: {
-            width: invoiceConfigs.dueDate.styleConfig.columnStyle.width,
-          },
         },
-        filterConfig: {
-          column: ClientInvoiceSortField.DUE_DATE,
-          kind: TableFilterKind.DATE_RANGE,
-          valueConfig: {
-            valueType: RangeFilterValueType.DATE,
-            valueKey: 'dueDate',
-          },
-        },
-        displayValue: (clientCreditNoteType: ClientCreditNoteType) => clientCreditNoteType.dueDate,
+        displayValue: (creditNoteType: ClientCreditNoteType) => creditNoteType.dueDate,
       },
     };
   }

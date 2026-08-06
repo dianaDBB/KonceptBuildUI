@@ -57,7 +57,7 @@ async function submit(): Promise<void> {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .login-page {
   display: grid;
   min-height: 100%;
