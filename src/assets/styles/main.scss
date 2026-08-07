@@ -620,6 +620,10 @@ select {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+
+  select {
+    min-width: 140px;
+  }
 }
 
 .dashboard-card {
@@ -639,10 +643,6 @@ select {
   align-items: center;
   gap: 0.5rem;
   margin-left: auto;
-}
-
-.dashboard-filters select {
-  min-width: 140px;
 }
 
 .main-cell-text {

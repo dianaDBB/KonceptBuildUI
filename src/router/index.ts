@@ -47,6 +47,12 @@ const routes = [
     component: () => import('@/components/ClientPaymentsView.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: RoutePaths.sales.clientReport,
+    name: RouteNames.salesClientReport,
+    component: () => import('@/components/SalesClientReportView.vue'),
+    meta: { requiresAuth: true },
+  },
   // HR
   {
     path: RoutePaths.hr.dashboard,

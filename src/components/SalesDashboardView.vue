@@ -115,10 +115,10 @@ const invoiceStatus = useConfigs().invoiceStatusOptions.value;
 const dashboard = ref<SalesDashboardType>({ clientsStatistics: [] });
 
 onMounted(async () => {
-  await loadTotals();
+  await loadSalesDashboard();
 });
 
-async function loadTotals() {
+async function loadSalesDashboard() {
   dashboard.value = await salesDashboardApi.getSalesDashboard();
 }
 </script>

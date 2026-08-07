@@ -8,6 +8,7 @@ export const RouteNames = {
   salesClients: 'clients',
   salesInvoices: 'clients-invoices',
   salesPayments: 'clients-payments',
+  salesClientReport: 'sales-client-report',
   // hr
   hrDashboard: 'hr-dashboard',
   hrWorkers: 'workers',
@@ -26,6 +27,7 @@ export const RoutePaths = {
     clients: '/sales/clients',
     invoices: '/sales/client-invoices',
     payments: '/sales/client-payments',
+    clientReport: '/sales/client-report',
   },
   hr: {
     dashboard: '/hr/dashboard',
