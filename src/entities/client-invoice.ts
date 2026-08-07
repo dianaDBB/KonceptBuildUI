@@ -8,6 +8,7 @@ import { Work } from './work';
 import { formatCurrency, formatIntNumber, formatPercentage } from '@/utils/validation';
 import { buildTooltipItems } from '@/utils/tooltipItems';
 import { useConfigs } from '@/composables/useConfigs';
+import { getAgingClass, getInvoiceStatusClass } from '@/utils/enums-css-class';
 
 export class ClientInvoice {
   static getConfigs(
@@ -437,12 +438,7 @@ export class ClientInvoice {
           columnStyle: {
             width: '100px',
           },
-          classes: (invoice: ClientInvoiceType) => ({
-            'invoice-status-paid': invoice.status == 'PAID',
-            'invoice-status-partial': invoice.status == 'PARTIAL',
-            'invoice-status-delay': invoice.status == 'DELAY',
-            'invoice-status-pending': invoice.status == 'PENDING',
-          }),
+          classes: (invoice: ClientInvoiceType) => getInvoiceStatusClass(invoice.status),
         },
         filterConfig: {
           column: ClientInvoiceSortField.STATUS,
@@ -486,15 +482,7 @@ export class ClientInvoice {
           columnStyle: {
             width: '100px',
           },
-          classes: (invoice: ClientInvoiceType) => ({
-            'aging-zero-thirty': invoice.aging == 'ZERO_THIRTY',
-            'aging-thirty-sixty': invoice.aging == 'THIRTY_SIXTY',
-            'aging-sixty-ninty': invoice.aging == 'SIXTY_NINTY',
-            'aging-ninty-plus': invoice.aging == 'NINTY_PLUS',
-            'aging-not-yet-due': invoice.aging == 'NOT_YET_DUE',
-            'aging-paid': invoice.aging == 'PAID',
-            'aging-na': invoice.aging == 'NA',
-          }),
+          classes: (invoice: ClientInvoiceType) => getAgingClass(invoice.aging),
         },
         filterConfig: {
           column: ClientInvoiceSortField.AGING,

@@ -90,8 +90,8 @@ const categories = [
     items: [
       {
         label: 'Dashboard',
-        description: 'Mock - Não faz nada ainda',
-        icon: Package,
+        description: 'Recebimentos, Margens e Rentabilidade por Cliente',
+        icon: LayoutDashboard,
         route: '/sales/dashboard',
       },
       {
