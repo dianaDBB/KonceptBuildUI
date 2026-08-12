@@ -371,8 +371,10 @@ onMounted(async () => {
 async function fetchWorks() {
   const workFilters: WorkFilters = {
     startDate: {
-      min: getDate(selectedYear.value, selectedMonth.value, 1),
       max: getDate(selectedYear.value, selectedMonth.value, daysInMonth.value),
+    },
+    estimatedEndDate: {
+      min: getDate(selectedYear.value, selectedMonth.value, daysInMonth.value),
     },
   };
   availableWorks.value = await workApi.searchWorks(workFilters);
@@ -443,6 +445,12 @@ async function save() {
   try {
     await timesheetApi.saveMonthlyTimesheet(timesheet.value!);
 
+    timesheet.value?.workersTimesheet.forEach((worker) => {
+      worker.worksTimesheet.forEach((line) => {
+        line._isNew = false;
+      });
+    });
+
     apiStatus.value = {
       isLoading: false,
       isSuccess: true,
@@ -472,24 +480,24 @@ function workFilter(work: WorkType): string {
 }
 
 function addWork(workerTimesheet: WorkerTimesheetType) {
-  const isFirstLine = workerTimesheet.worksTimesheet.length === 0;
+  const isFirstWorkLine = workerTimesheet.worksTimesheet.filter((timesheet) => timesheet.type === 'WORK').length === 0;
 
   workerTimesheet.worksTimesheet.push({
     type: 'WORK',
     work: undefined,
     attendanceCode: undefined,
-    days: createEmptyDays(isFirstLine ? workerTimesheet.worker.currentWorkerCompensation!.defaultHours! : null),
+    days: createEmptyDays(isFirstWorkLine ? workerTimesheet.worker.currentWorkerCompensation!.defaultHours! : null),
+    _isNew: true,
   });
 }
 
 function addAttendance(workerTimesheet: WorkerTimesheetType) {
-  const isFirstLine = workerTimesheet.worksTimesheet.length === 0;
-
   workerTimesheet.worksTimesheet.push({
     type: 'ATTENDANCE_CODE',
     attendanceCode: attendanceCode.value.VACATION.code,
     work: undefined,
-    days: createEmptyDays(isFirstLine ? workerTimesheet.worker.currentWorkerCompensation!.defaultHours! : null),
+    days: createEmptyDays(null),
+    _isNew: true,
   });
 }
 
@@ -534,7 +542,9 @@ async function deleteWorkLine() {
   showDeleteDialog.value = false;
   lineToDelete.value = null;
 
-  await save();
+  if (!lineToDelete.value!.line._isNew) {
+    await save();
+  }
 }
 
 /************************************************************************************************** COLLPASE / EXPAND */

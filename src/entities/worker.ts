@@ -210,7 +210,7 @@ export class Worker {
           options: Object.values(workerContractTypeOptions),
         },
         styleConfig: {
-          showDisabled: () => false,
+          showDisabled: (_worker: WorkerType, row) => (row?._isNew ? false : true),
           isInvalid: (worker: WorkerType) => !worker.workerContractType,
           columnStyle: {
             width: '100px',

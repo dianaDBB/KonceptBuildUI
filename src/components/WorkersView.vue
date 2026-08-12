@@ -274,7 +274,6 @@ async function save(row: WorkerRow): Promise<void> {
       message: 'Worker saved successfully.',
     };
   } catch (error: unknown) {
-    await fetch();
     apiStatus.value = apiError(error, 'Failed to save worker.');
   }
 }

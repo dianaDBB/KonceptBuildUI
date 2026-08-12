@@ -21,6 +21,7 @@
           :is-invalid="!worker.currentWorkerCompensation.defaultHours"
           :is-disabled="false"
           field-key="defaultHours"
+          @update:value="worker.currentWorkerCompensation.defaultHours = $event"
         />
       </div>
 
@@ -32,6 +33,7 @@
           :is-invalid="worker.workerContractType == 'CONTRACTOR' && !worker.currentWorkerCompensation.hourRate"
           :is-disabled="worker.workerContractType == 'INTERNAL'"
           field-key="hourRate"
+          @update:value="worker.currentWorkerCompensation.hourRate = $event"
         />
       </div>
 
@@ -43,6 +45,7 @@
           :is-invalid="worker.workerContractType == 'INTERNAL' && !worker.currentWorkerCompensation.monthlySalary"
           :is-disabled="worker.workerContractType == 'CONTRACTOR'"
           field-key="monthlySalary"
+          @update:value="worker.currentWorkerCompensation.monthlySalary = $event"
         />
       </div>
 
@@ -54,6 +57,7 @@
           :is-invalid="worker.workerContractType == 'INTERNAL' && !worker.currentWorkerCompensation.tsu"
           :is-disabled="worker.workerContractType == 'CONTRACTOR'"
           field-key="tsu"
+          @update:value="worker.currentWorkerCompensation.tsu = $event"
         />
       </div>
 
@@ -65,6 +69,7 @@
           :is-invalid="worker.workerContractType == 'INTERNAL' && !worker.currentWorkerCompensation.mealAllowance"
           :is-disabled="worker.workerContractType == 'CONTRACTOR'"
           field-key="mealAllowance"
+          @update:value="worker.currentWorkerCompensation.mealAllowance = $event"
         />
       </div>
 
@@ -76,6 +81,7 @@
           :is-invalid="worker.workerContractType == 'INTERNAL' && !worker.currentWorkerCompensation.accidentInsurance"
           :is-disabled="worker.workerContractType == 'CONTRACTOR'"
           field-key="accidentInsurance"
+          @update:value="worker.currentWorkerCompensation.accidentInsurance = $event"
         />
       </div>
     </div>
@@ -102,6 +108,7 @@ import { computed, reactive, watch } from 'vue';
 import DateInput from './inputs/DateInput.vue';
 import NumberInput from './inputs/NumberInput.vue';
 import PercentageInput from './inputs/PercentageInput.vue';
+import MoneyInput from './inputs/MoneyInput.vue';
 
 const props = defineProps<{
   modelValue: boolean;

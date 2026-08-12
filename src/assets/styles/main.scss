@@ -318,6 +318,22 @@ body {
   pointer-events: auto;
 }
 
+.actions-column {
+  position: sticky;
+  right: 0;
+  z-index: 8;
+  background: var(--color-background-muted);
+  box-shadow: -2px 0 4px rgba(0, 0, 0, 0.05);
+}
+
+.table tbody tr:hover > td.actions-column {
+  background: var(--color-main-background);
+}
+
+.table tbody tr:hover > td.actions-column .action-buttons.editing {
+  background: var(--color-main-background);
+}
+
 .clear-table-controls {
   display: inline-flex;
   align-items: center;

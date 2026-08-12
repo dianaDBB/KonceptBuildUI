@@ -146,6 +146,6 @@ export interface RangeFilterConfig {
 }
 
 export interface RangeFilter {
-  min: string | number | undefined;
-  max: string | number | undefined;
+  min?: string | number | undefined;
+  max?: string | number | undefined;
 }

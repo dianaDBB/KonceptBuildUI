@@ -25,6 +25,7 @@ export interface WorkTimesheetType {
   attendanceCode?: string;
 
   days: DayEntryType[];
+  _isNew?: boolean;
 }
 
 export interface DayEntryType {

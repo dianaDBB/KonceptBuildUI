@@ -21,13 +21,14 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const emit = defineEmits<{ 'update:value': [value: number] }>();
 
 function handleInput(event: Event) {
   const input = event.target as HTMLInputElement;
   const digits = input.value.replace(/\D/g, '');
   const numericValue = Number(digits) / 100;
 
-  (props.entity as Record<string, number | null | undefined>)[props.fieldKey] = numericValue;
+  emit('update:value', numericValue);
   input.value = formatNumber(numericValue);
 }
 </script>
